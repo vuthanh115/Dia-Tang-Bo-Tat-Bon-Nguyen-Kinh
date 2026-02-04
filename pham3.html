@@ -163,17 +163,29 @@
     <header class="bg-stone-900 shadow-md border-b border-stone-700 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold serif shadow-sm shadow-amber-900">Đ</div>
-                <div>
-                    <h1 class="text-lg md:text-xl font-bold text-stone-200 tracking-wide serif leading-tight">Kinh Địa Tạng</h1>
-                    <p class="text-xs text-stone-500 font-medium">Phẩm 3: Quán Chúng Sinh Nghiệp Duyên</p>
-                </div>
+                <!-- NÚT QUAY LẠI TRANG CHỦ -->
+                <a href="index.html" class="flex items-center gap-3 group decoration-0" title="Quay về Mục Lục">
+                    <div class="w-9 h-9 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold serif shadow-sm shadow-amber-900 group-hover:bg-amber-600 transition-colors">
+                        <span class="block group-hover:hidden">Đ</span>
+                        <span class="hidden group-hover:block">⬅</span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg md:text-xl font-bold text-stone-200 tracking-wide serif leading-tight group-hover:text-amber-500 transition-colors">Kinh Địa Tạng</h1>
+                        <p class="text-xs text-stone-500 font-medium">Phẩm 3: Quán Chúng Sinh Nghiệp Duyên</p>
+                    </div>
+                </a>
             </div>
+            
             <nav class="hidden md:flex gap-6 text-sm font-medium text-stone-400">
+                <!-- MENU MỤC LỤC -->
+                <a href="index.html" class="hover:text-amber-500 transition-colors flex items-center gap-1 text-amber-500/80">
+                    <span>📚</span> Mục Lục
+                </a>
                 <a href="#dashboard" class="hover:text-amber-500 transition-colors">Tổng Quan</a>
                 <a href="#hanzi-analysis" class="hover:text-amber-500 transition-colors">Phân Tích Hán Tự</a>
                 <a href="#transcript" class="hover:text-amber-500 transition-colors">Nội Dung</a>
             </nav>
+            
             <div class="flex gap-2">
                 <button id="tttToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-green-400 rounded-md text-sm font-medium transition-colors border border-stone-700" title="Tô màu chữ có trong Tam Thiên Tự">
                     🌿 Soi Tam Thiên Tự
@@ -323,7 +335,7 @@
                         <div class="flex flex-col items-center justify-center h-full text-stone-600 gap-2">
                             <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                             <span>Đang tải dữ liệu...</span>
                         </div>
@@ -415,7 +427,7 @@
 
         // --- CORE FUNCTIONS ---
 
-        // 1. Text-to-Speech Functionality (iOS Optimized & Retry Logic)
+        // 1. Text-to-Speech Functionality (iOS Optimized)
         
         // GLOBAL VARIABLE to prevent iOS Safari Garbage Collection (Critical Fix)
         window.currentUtterance = null; 
@@ -434,48 +446,27 @@
         }
 
         function speakText(text, btnId, retry = true) {
-            if (!text) return; // Prevent empty text errors
+            if (!text) return;
 
             if ('speechSynthesis' in window) {
-                // Cancel current speech if any to avoid queue backup
                 window.speechSynthesis.cancel();
-                
-                // Visual feedback
                 if(btnId) {
                     document.querySelectorAll('.speaking-active').forEach(el => el.classList.remove('speaking-active'));
                     const btn = document.getElementById(btnId);
                     if(btn) btn.classList.add('speaking-active');
                 }
 
-                // Create Utterance
                 const utterance = new SpeechSynthesisUtterance(text);
                 
-                // --- iOS FIX: EXPLICITLY FIND CHINESE VOICE ---
-                // iOS sometimes ignores 'lang' property if voice is not set explicitly
                 if (retry) {
-                    if (availableVoices.length === 0) {
-                        availableVoices = window.speechSynthesis.getVoices();
-                    }
-                    
-                    const zhVoice = availableVoices.find(v => v.lang === 'zh-CN') || 
-                                    availableVoices.find(v => v.lang.startsWith('zh'));
-                    
-                    if (zhVoice) {
-                        utterance.voice = zhVoice;
-                        utterance.lang = zhVoice.lang;
-                    } else {
-                        utterance.lang = 'zh-CN'; // Fallback
-                    }
+                    if (availableVoices.length === 0) availableVoices = window.speechSynthesis.getVoices();
+                    const zhVoice = availableVoices.find(v => v.lang === 'zh-CN') || availableVoices.find(v => v.lang.startsWith('zh'));
+                    if (zhVoice) { utterance.voice = zhVoice; utterance.lang = zhVoice.lang; } else { utterance.lang = 'zh-CN'; }
                 } else {
-                    // Retry with minimal configuration to avoid "isTrusted" errors
                     utterance.lang = 'zh-CN'; 
-                    // Do not set specific voice object on retry
                 }
                 
-                utterance.rate = 0.8; // Slower rate for learning
-                
-                // --- iOS FIX: PREVENT GARBAGE COLLECTION ---
-                // Assign to global variable so Safari doesn't kill it mid-speech
+                utterance.rate = 0.8; 
                 window.currentUtterance = utterance;
 
                 utterance.onend = function() {
@@ -483,27 +474,15 @@
                         const btn = document.getElementById(btnId);
                         if(btn) btn.classList.remove('speaking-active');
                     }
-                    window.currentUtterance = null; // Clean up
+                    window.currentUtterance = null; 
                 };
 
                 utterance.onerror = function(e) {
                     console.error("Speech Error:", e);
-                    
-                    // Smart Retry Logic for "isTrusted" errors
                     if (retry) {
-                        console.log("Retrying speech with simple configuration...");
-                        // Clear active state momentarily
-                        if(btnId) {
-                            const btn = document.getElementById(btnId);
-                            if(btn) btn.classList.remove('speaking-active');
-                        }
-                        
-                        setTimeout(() => {
-                            speakText(text, btnId, false); // Retry with retry=false
-                        }, 100);
+                        setTimeout(() => speakText(text, btnId, false), 100);
                         return;
                     }
-
                     if(btnId) {
                         const btn = document.getElementById(btnId);
                         if(btn) btn.classList.remove('speaking-active');
@@ -520,7 +499,6 @@
         function parseSubtitles(raw) {
             const lines = raw.trim().split('\n');
             const parsed = [];
-            // Regex captures: 1=HH, 2=MM, 3=SS, 4=Chinese, 5=Pinyin, 6=Viet (Han), 7=English, 8=Viet (Trans)
             const regex = /\[(\d{2}):(\d{2}):(\d{2})\]\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*)/;
 
             lines.forEach((line, index) => {
@@ -545,7 +523,6 @@
                         vietHan: vietHanText,
                         en: enText,
                         vietTrans: vietTransText,
-                        // Search text combined
                         searchText: (cnText + ' ' + pinyinText + ' ' + vietHanText + ' ' + enText + ' ' + vietTransText).toLowerCase()
                     });
                 }
@@ -553,7 +530,7 @@
             return parsed;
         }
 
-        // 3. Analyze Vocabulary (unchanged logic)
+        // 3. Analyze Vocabulary
         function analyzeVocabulary(items) {
             const allChars = new Set();
             items.forEach(item => {
@@ -591,8 +568,7 @@
             const ctx = document.getElementById('vocabChart').getContext('2d');
             if(vocabChartInstance) vocabChartInstance.destroy();
             
-            // Determine if dark mode is active (by checking body bg color)
-            const isDark = getComputedStyle(document.body).backgroundColor === 'rgb(28, 25, 23)'; // Stone 900
+            const isDark = getComputedStyle(document.body).backgroundColor === 'rgb(28, 25, 23)'; 
             const textColor = isDark ? '#e7e5e4' : '#44403c';
 
             vocabChartInstance = new Chart(ctx, {
@@ -633,7 +609,7 @@
             });
         }
 
-        // 4. Render List (Updated with Audio Button)
+        // 4. Render List
         function renderList(items) {
             const container = document.getElementById('transcriptContainer');
             container.innerHTML = '';
@@ -664,8 +640,6 @@
                     }).join('');
                 }
 
-                // Add Audio Button (Stop propagation to prevent jump when clicking audio)
-                // Note: We send Chinese text (item.cn) to the TTS engine because engines pronounce Hanzi correctly as Pinyin.
                 div.innerHTML = `
                     <div class="flex gap-4 items-start relative pr-8">
                         <span class="text-xs font-mono text-amber-500 bg-amber-900/30 px-2 py-1 rounded h-fit shrink-0 mt-2 border border-amber-800/50">${item.timeFormatted}</span>
@@ -728,7 +702,6 @@
                 }
             }
             
-            // Check if active item changed
             const currentActive = document.querySelector('.active-line');
             const newActiveId = activeItem ? `line-${activeItem.id}` : null;
             
@@ -740,7 +713,6 @@
                 const el = document.getElementById(newActiveId);
                 if (el) {
                     el.classList.add('active-line');
-                    // Auto Read Logic
                     if(isPlaying && document.getElementById('autoRead').checked) {
                         speakText(activeItem.cn, `audio-btn-${activeItem.id}`);
                     }
@@ -756,7 +728,7 @@
             const btnPause = document.getElementById('btnPause');
             if (isPlaying) {
                 clearInterval(simulationInterval);
-                window.speechSynthesis.cancel(); // Stop audio on pause
+                window.speechSynthesis.cancel(); 
                 isPlaying = false;
                 btnPlay.classList.remove('hidden'); btnPlay.classList.add('flex');
                 btnPause.classList.add('hidden');
@@ -765,13 +737,12 @@
                 btnPlay.classList.add('hidden');
                 btnPause.classList.remove('hidden'); btnPause.classList.add('flex');
                 
-                // Trigger immediate highlight check for audio start
                 highlightCurrentLine();
 
                 simulationInterval = setInterval(() => {
                     currentSimulationTime++;
                     updateTimeDisplay(currentSimulationTime);
-                    highlightCurrentLine(); // This triggers audio if needed
+                    highlightCurrentLine(); 
                     if(currentSimulationTime % 2 === 0) scrollToActive();
                     if (transcripts.length > 0 && currentSimulationTime > transcripts[transcripts.length-1].seconds + 20) togglePlay();
                 }, 1000 / simulationSpeed);
@@ -828,27 +799,23 @@
             });
 
             const modeBtn = document.getElementById('modeToggle');
-            let isLightMode = false; // Default is Dark now
+            let isLightMode = false; 
             modeBtn.addEventListener('click', () => {
                 isLightMode = !isLightMode;
                 const body = document.body;
                 
-                // Toggle Logic
                 if(isLightMode) {
-                    // Switch to LIGHT
                     body.style.backgroundColor = '#fdfbf7'; 
                     body.style.color = '#44403c';
                     modeBtn.textContent = "🌙 Chế độ Tối";
                     modeBtn.classList.remove('text-stone-300');
                     modeBtn.classList.add('text-stone-700', 'bg-stone-100');
 
-                    // Global elements styles for Light
                     document.querySelectorAll('.bg-stone-900').forEach(el => el.classList.replace('bg-stone-900', 'bg-white'));
                     document.querySelectorAll('.bg-stone-800').forEach(el => el.classList.replace('bg-stone-800', 'bg-white'));
                     document.querySelectorAll('.text-stone-200').forEach(el => el.classList.replace('text-stone-200', 'text-stone-800'));
                     document.querySelectorAll('.text-stone-400').forEach(el => el.classList.replace('text-stone-400', 'text-stone-500'));
                     
-                    // Specific Text Colors
                     const cnEls = document.querySelectorAll('.cn-text');
                     cnEls.forEach(el => el.style.color = '#292524');
                     const vietHanEls = document.querySelectorAll('.viet-han-text');
@@ -859,7 +826,6 @@
                     enEls.forEach(el => el.style.color = '#57534e');
                     
                 } else {
-                    // Switch to DARK (Default)
                     body.style.backgroundColor = '#1c1917'; 
                     body.style.color = '#e7e5e4';
                     modeBtn.textContent = "☀️ Chế độ Sáng";
