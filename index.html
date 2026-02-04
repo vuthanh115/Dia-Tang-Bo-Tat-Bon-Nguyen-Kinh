@@ -155,6 +155,15 @@
         ::placeholder {
             color: #78716c;
         }
+        
+        /* Card Hover Effect for Table of Contents */
+        .chapter-card {
+            transition: all 0.3s ease;
+        }
+        .chapter-card:hover {
+            transform: translateY(-4px);
+            border-color: #f59e0b; /* Amber 500 */
+        }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col">
@@ -171,8 +180,9 @@
             </div>
             <nav class="hidden md:flex gap-6 text-sm font-medium text-stone-400">
                 <a href="#dashboard" class="hover:text-amber-500 transition-colors">Tổng Quan</a>
-                <a href="#hanzi-analysis" class="hover:text-amber-500 transition-colors">Phân Tích Hán Tự</a>
                 <a href="#transcript" class="hover:text-amber-500 transition-colors">Nội Dung</a>
+                <!-- MỚI: Link tới mục lục cuối trang -->
+                <a href="#chapter-list" class="hover:text-amber-500 transition-colors text-amber-500/80">📚 Mục Lục</a>
             </nav>
             <div class="flex gap-2">
                 <button id="tttToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-green-400 rounded-md text-sm font-medium transition-colors border border-stone-700" title="Tô màu chữ có trong Tam Thiên Tự">
@@ -189,7 +199,7 @@
     <main class="flex-grow container mx-auto px-4 py-8 space-y-10 max-w-6xl">
 
         <!-- Hanzi Analysis Dashboard -->
-        <section id="hanzi-analysis" class="bg-stone-800 p-6 md:p-8 rounded-2xl shadow-lg border border-stone-700">
+        <section id="dashboard" class="bg-stone-800 p-6 md:p-8 rounded-2xl shadow-lg border border-stone-700">
             <div class="mb-6 pb-4 border-b border-stone-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h3 class="text-xl font-bold text-stone-200 flex items-center gap-2 serif">
@@ -332,6 +342,48 @@
             </div>
         </section>
 
+        <!-- CHAPTER LIST SECTION (Mới thêm) -->
+        <section id="chapter-list" class="max-w-4xl mx-auto w-full pt-8 pb-4">
+            <h3 class="text-2xl font-bold text-amber-500 serif mb-6 flex items-center gap-2 border-b border-stone-700 pb-2">
+                <span>📚</span> Danh Sách Các Phẩm
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Phẩm 1 (Đang xem) -->
+                <div class="bg-stone-800/50 p-5 rounded-xl border border-amber-900/50 ring-1 ring-amber-500/20">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1 block">Đang xem</span>
+                            <h4 class="text-lg font-bold text-stone-300 serif">Phẩm 1: Thần Thông Trên Cung Trời Đao Lợi</h4>
+                        </div>
+                        <span class="text-amber-500">📍</span>
+                    </div>
+                </div>
+
+                <!-- Phẩm 2 -->
+                <a href="pham2.html" class="block bg-stone-800 p-5 rounded-xl border border-stone-700 chapter-card group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1 block group-hover:text-amber-500">Tiếp theo</span>
+                            <h4 class="text-lg font-bold text-stone-200 serif group-hover:text-amber-400 transition-colors">Phẩm 2: Phân Thân Tập Hội</h4>
+                            <p class="text-sm text-stone-500 mt-2 line-clamp-2">Lúc đó phân thân Địa Tạng Bồ Tát ở các nơi có địa ngục trong trăm nghìn muôn ức...</p>
+                        </div>
+                        <span class="text-stone-600 group-hover:text-amber-500 text-xl transform group-hover:translate-x-1 transition-all">➔</span>
+                    </div>
+                </a>
+
+                <!-- Phẩm 3 (Placeholder) -->
+                <div class="block bg-stone-900/30 p-5 rounded-xl border border-stone-800 border-dashed opacity-60">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-bold text-stone-600 uppercase tracking-wider mb-1 block">Sắp ra mắt</span>
+                            <h4 class="text-lg font-bold text-stone-500 serif">Phẩm 3: Quán Chúng Sanh Nghiệp Duyên</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <footer class="bg-stone-950 text-stone-500 py-10 mt-12 border-t border-stone-800">
@@ -369,7 +421,7 @@
 [00:02:42] 复有他方国土。及娑婆世界。诸大鬼王。所谓恶目鬼王。啖血鬼王。啖精气鬼王。啖胎卵鬼王。行病鬼王。摄毒鬼王。慈心鬼王。福利鬼王。大爱敬鬼王。如是等鬼王。皆来集会。 | fù yǒu tā fāng guó tǔ 。 jí suō pó shì jiè 。 zhū dà guǐ wáng 。 suǒ wèi è mù guǐ wáng 。 dàn xuè guǐ wáng 。 dàn jīng qì guǐ wáng 。 dàn tāi luǎn guǐ wáng 。 xíng bìng guǐ wáng 。 shè dú guǐ wáng 。 cí xīn guǐ wáng 。 fú lì guǐ wáng 。 dà ài jìng guǐ wáng 。 rú shì děng guǐ wáng 。 jiē lái jí huì 。 | Phục hữu tha phương quốc độ. Cập Ta Bà thế giới. Chư đại quỷ vương. Sở vị Ác Mục Quỷ Vương. Đạm Huyết Quỷ Vương. Đạm Tinh Khí Quỷ Vương. Đạm Thai Noãn Quỷ Vương. Hành Bệnh Quỷ Vương. Nhiếp Độc Quỷ Vương. Từ Tâm Quỷ Vương. Phước Lợi Quỷ Vương. Đại Ái Kính Quỷ Vương. Như thị đẳng Quỷ Vương. Giai lai tập hội. | Moreover, there were great ghost kings from other lands and the Saha World: the Evil-Eyed Ghost King, the Blood-Eating Ghost King, the Essence-and-Energy-Eating Ghost King, the Fetus-and-Egg-Eating Ghost King, the Disease-Spreading Ghost King, the Poison-Gathering Ghost King, the Kindhearted Ghost King, the Blessings-and-Profit Ghost King, the Great Love-and-Respect Ghost King, and others. All such ghost kings gathered together. | Lại có những Đại Quỷ Vương ở cõi Ta bà cùng cõi nước phương khác, như: Ác Mục Quỷ Vương, Đạm Huyết Quỷ Vương, Đạm Tinh Khí Quỷ Vương, Đạm Thai Noãn Quỷ Vương, Hành Bệnh Quỷ Vương, Nhiếp Độc Quỷ Vương, Từ Tâm Quỷ Vương, Phước Lợi Quỷ Vương, Đại Ái Kính Quỷ Vương... Các Quỷ Vương như thế đều đến hội họp.
 [00:03:02] 尔时释迦牟尼佛。告文殊师利法王子菩萨摩诃萨。 | ěr shí shì jiā móu ní fó 。 gào wén shū shī lì fǎ wáng zǐ pú sà mó hē sà 。 | Nhĩ thời Thích Ca Mâu Ni Phật. Cáo Văn Thù Sư Lợi Pháp Vương Tử Bồ Tát Ma Ha Tát. | At that time, Shakyamuni Buddha said to the Dharma Prince Manjushri, Bodhisattva Mahasattva: | Bấy giờ đức Thích Ca Mâu Ni Phật bảo Ngài Văn Thù Sư Lợi Pháp Vương Tử Đại Bồ Tát rằng:
 [00:03:08] 汝观是一切诸佛菩萨。及天龙鬼神。此世界。他世界。此国土。他国土。 | rǔ guān shì yí qiè zhū fó pú sà 。 jí tiān lóng guǐ shén 。 cǐ shì jiè 。 tā shì jiè 。 cǐ guó tǔ 。 tā guó tǔ 。 | Như quan thị nhất thiết chư Phật Bồ Tát. Cập thiên long quỷ thần. Thử thế giới. Tha thế giới. Thử quốc độ. Tha quốc độ. | "Look at all these Buddhas, Bodhisattvas, and gods, dragons, ghosts, and spirits from this world and other worlds, this land and other lands." | "Ông xem coi tất cả chư Phật, Bồ tát và Trời, Rồng, Quỷ, Thần đó ở trong thế giới này cùng thế giới khác, ở trong quốc độ này cùng quốc độ khác..."
-[00:03:16] 如是今来集会到忉利天者。汝知数否。 | rú shì jīn lái jí huì dào dāo lì tiān zhě 。 rǔ zhī shù fǒu 。 | Như thị kim lai tập hội đáo Đao Lợi Thiên giả. Như tri số phủ. | "Who have now gathered here in the Trayastrimsa Heaven. Do you know their number?" | "...nay đều đến hội họp tại cung Trời Đao Lợi như thế, ông có biết số bao nhiêu chăng?"
+[00:03:16] 如是今来集会到忉利天者。汝知数否。 | rú shì jīn lái jí huì dào dāo lì tiān zhě 。 rǔ zhī shù fǒu 。 | Như thị kim lai tập hội đáo Đao Lợi Thiên giả. Như tri số phủ. | "Who have now gathered here in the Trayastrimsa Heaven. Do you know their number?" | "Who have now gathered here in the Trayastrimsa Heaven. Do you know their number?" | "...nay đều đến hội họp tại cung Trời Đao Lợi như thế, ông có biết số bao nhiêu chăng?"
 [00:03:20] 文殊师利白佛言。世尊。若以我神力千劫测度。不能得知。 | wén shū shī lì bái fó yán 。 shì zūn 。 ruò yǐ wǒ shén lì qiān jié cè dù 。 bù néng dé zhī 。 | Văn Thù Sư Lợi bạch Phật ngôn. Thế Tôn. Nhược dĩ ngã thần lực thiên kiếp trắc độ. Bất năng đắc tri. | Manjushri said to the Buddha, "World Honored One, even if I were to measure and calculate with my spiritual powers for a thousand aeons, I would not be able to know it." | Ngài Văn Thù Sư Lợi bạch Phật rằng: "Bạch Đức Thế Tôn! Nếu dùng thần lực của con để tính đếm trong nghìn kiếp cũng không biết là số bao nhiêu!"
 [00:03:27] 佛告文殊师利。吾以佛眼观故。犹不尽数。 | fó gào wén shū shī lì 。 wú yǐ fó yǎn guān gù 。 yóu bù jìn shù 。 | Phật cáo Văn Thù Sư Lợi. Ngô dĩ Phật nhãn quan cố. Do bất tận số. | The Buddha told Manjushri, "Even observing with my Buddha Eye, I cannot count them all." | Đức Phật bảo Ngài Văn Thù Sư Lợi rằng: "Đến Ta dùng Phật nhãn xem hãy còn không đếm xiết!"
 [00:03:32] 此皆是地藏菩萨久远劫来。已度。当度。未度。已成就。当成就。未成就。 | cǐ jiē shì dì zàng pú sà jiǔ yuǎn jié lái 。 yǐ dù 。 dāng dù 。 wèi dù 。 yǐ chéng jiù 。 dāng chéng jiù 。 wèi chéng jiù 。 | Thử giai thị Địa Tạng Bồ Tát cửu viễn kiếp lai. Dĩ độ. Đương độ. Vị độ. Dĩ thành tựu. Đương thành tựu. Vị thành tựu. | "These are all beings whom Earth Store Bodhisattva has crossed over, is crossing over, or will cross over; whom he has led to accomplishment, is leading to accomplishment, or will lead to accomplishment, throughout aeons long since past." | "Số Thánh, phàm này đều của Ngài Địa Tạng Bồ Tát từ thuở kiếp lâu xa đến nay, hoặc đã độ, đương độ, chưa độ, hoặc đã thành tựu, đương thành tựu, chưa thành tựu".
@@ -892,13 +944,5 @@
             });
         });
     </script>
-
-    <ul>
-    <li><a href="pham_2.html">Phẩm 2: Phân Thân Tập Hội</a></li>
-    <li><a href="pham_3.html">Phẩm 3: Quán Chúng Sanh Nghiệp Duyên</a></li>
-</ul>
 </body>
-
 </html>
-
-
