@@ -162,14 +162,23 @@
     <!-- Navigation / Header -->
     <header class="bg-stone-900 shadow-md border-b border-stone-700 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- CHỈNH SỬA: Thêm thẻ a href="index.html" để quay về mục lục -->
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold serif shadow-sm shadow-amber-900">Đ</div>
-                <div>
-                    <h1 class="text-lg md:text-xl font-bold text-stone-200 tracking-wide serif leading-tight">Kinh Địa Tạng</h1>
-                    <p class="text-xs text-stone-500 font-medium">Phẩm 2: Phân Thân Tập Hội</p>
-                </div>
+                <a href="index.html" class="group flex items-center gap-3 decoration-0" title="Quay về Mục lục">
+                    <div class="w-9 h-9 rounded-full bg-amber-700 group-hover:bg-amber-600 flex items-center justify-center text-white font-bold serif shadow-sm shadow-amber-900 transition-colors">
+                        <span class="group-hover:hidden">Đ</span>
+                        <span class="hidden group-hover:block">⬅</span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg md:text-xl font-bold text-stone-200 tracking-wide serif leading-tight group-hover:text-amber-500 transition-colors">Kinh Địa Tạng</h1>
+                        <p class="text-xs text-stone-500 font-medium">Phẩm 2: Phân Thân Tập Hội</p>
+                    </div>
+                </a>
             </div>
+            
             <nav class="hidden md:flex gap-6 text-sm font-medium text-stone-400">
+                <!-- CHỈNH SỬA: Thêm nút Mục Lục -->
+                <a href="index.html" class="hover:text-amber-500 transition-colors">⬅ Mục Lục</a>
                 <a href="#dashboard" class="hover:text-amber-500 transition-colors">Tổng Quan</a>
                 <a href="#hanzi-analysis" class="hover:text-amber-500 transition-colors">Phân Tích Hán Tự</a>
                 <a href="#transcript" class="hover:text-amber-500 transition-colors">Nội Dung</a>
@@ -830,9 +839,5 @@
             });
         });
     </script>
-    <hr>
-    <!-- Nút quay về trang chủ -->
-    <a href="index.html">⬅ Quay về Mục lục</a>
-    <a href="pham_2.html">Xem tiếp Phẩm 2 ➡</a>
 </body>
 </html>
