@@ -1,1 +1,891 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinh Địa Tạng - Phẩm 5 (Audio Pinyin)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#1c1917',      /* Stone 900 */
+                            card: '#292524',    /* Stone 800 */
+                            border: '#44403c',  /* Stone 700 */
+                            text: '#e7e5e4',    /* Stone 200 */
+                            muted: '#a8a29e'    /* Stone 400 */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Noto+Sans:wght@300;400;500;600&family=Be+Vietnam+Pro:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&display=swap'); /* Font for Chinese */
+        
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background-color: #1c1917; /* Stone 900 - Dark Mode Default */
+            color: #e7e5e4; /* Stone 200 */
+        }
+        
+        h1, h2, h3, .serif {
+            font-family: 'Noto Serif', serif;
+        }
 
+        .chart-container {
+            position: relative; 
+            width: 100%; 
+            max-width: 800px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 300px; 
+            max-height: 400px; 
+        }
+
+        /* Custom scrollbar - Dark version */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #292524;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: #57534e;
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background-color: #78716c;
+        }
+
+        /* Active line - Dark version */
+        .active-line {
+            background-color: #451a03; /* Amber 950/Darker */
+            border-left: 4px solid #f59e0b; /* Amber 500 */
+            padding-left: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .transcript-item {
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+            border-bottom: 1px solid #44403c; /* Stone 700 */
+            position: relative; /* For absolute positioning of audio button */
+        }
+        .transcript-item:hover {
+            background-color: #292524; /* Stone 800 */
+            border-left-color: #57534e;
+        }
+
+        /* Typography for multi-lingual display - DARK MODE COLORS */
+        .cn-text {
+            font-family: "Noto Serif SC", "SimSun", serif;
+            font-size: 1.6em;
+            color: #e7e5e4; /* Stone 200 - White-ish */
+            margin-bottom: 0.2rem;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+        .pinyin-text {
+            color: #a8a29e; /* Stone 400 - Light Gray */
+            font-size: 0.85em;
+            margin-bottom: 0.35rem;
+            font-family: 'Noto Sans', sans-serif;
+            font-style: italic;
+        }
+        .viet-han-text {
+            color: #fbbf24; /* Amber 400 - Bright Amber */
+            font-size: 1.05em;
+            font-weight: 700;
+            line-height: 1.5;
+            font-family: 'Noto Serif', serif;
+            margin-bottom: 0.2rem;
+        }
+        .viet-trans-text {
+            color: #86efac; /* Green 300 - Light Green */
+            font-size: 1.05em;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            line-height: 1.6;
+            margin-bottom: 0.2rem;
+            font-weight: 500;
+        }
+        .en-text {
+            color: #78716c; /* Stone 500 - Dim Gray */
+            font-size: 0.9em;
+            font-style: italic;
+            font-family: 'Noto Serif', serif;
+            line-height: 1.4;
+            opacity: 0.8;
+        }
+
+        /* Highlight classes for Tam Thien Tu analysis - Dark Mode Adapted */
+        .char-basic {
+            color: #14532d; /* Green 900 */
+            background-color: #86efac; /* Green 300 */
+            border-radius: 2px;
+            padding: 0 2px;
+            font-weight: bold;
+        }
+        .char-advanced {
+            color: #f59e0b; /* Amber 500 */
+            border-bottom: 1px dotted #f59e0b;
+        }
+        
+        .analysis-mode-active .cn-text {
+            line-height: 1.8;
+        }
+        
+        /* Audio Button Pulse Animation */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        .speaking-active .audio-btn {
+            color: #fbbf24;
+            animation: pulse-ring 2s infinite;
+        }
+
+        /* Utility for input placeholder in dark mode */
+        ::placeholder {
+            color: #78716c;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Navigation / Header -->
+    <header class="bg-stone-900 shadow-md border-b border-stone-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- NÚT QUAY LẠI TRANG CHỦ -->
+                <a href="index.html" class="flex items-center gap-3 group decoration-0" title="Quay về Mục Lục">
+                    <div class="w-9 h-9 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold serif shadow-sm shadow-amber-900 group-hover:bg-amber-600 transition-colors">
+                        <span class="block group-hover:hidden">Đ</span>
+                        <span class="hidden group-hover:block">⬅</span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg md:text-xl font-bold text-stone-200 tracking-wide serif leading-tight group-hover:text-amber-500 transition-colors">Kinh Địa Tạng</h1>
+                        <p class="text-xs text-stone-500 font-medium">Phẩm 5: Danh Hiệu Của Địa Ngục</p>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="hidden md:flex gap-6 text-sm font-medium text-stone-400">
+                <!-- MENU MỤC LỤC -->
+                <a href="index.html" class="hover:text-amber-500 transition-colors flex items-center gap-1 text-amber-500/80">
+                    <span>📚</span> Mục Lục
+                </a>
+                <a href="#dashboard" class="hover:text-amber-500 transition-colors">Tổng Quan</a>
+                <a href="#hanzi-analysis" class="hover:text-amber-500 transition-colors">Phân Tích Hán Tự</a>
+                <a href="#transcript" class="hover:text-amber-500 transition-colors">Nội Dung</a>
+            </nav>
+            
+            <div class="flex gap-2">
+                <button id="tttToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-green-400 rounded-md text-sm font-medium transition-colors border border-stone-700" title="Tô màu chữ có trong Tam Thiên Tự">
+                    🌿 Soi Tam Thiên Tự
+                </button>
+                <button id="modeToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-md text-sm font-medium transition-colors border border-stone-700">
+                    ☀️ Chế độ Sáng
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8 space-y-10 max-w-6xl">
+
+        <!-- Hanzi Analysis Dashboard -->
+        <section id="hanzi-analysis" class="bg-stone-800 p-6 md:p-8 rounded-2xl shadow-lg border border-stone-700">
+            <div class="mb-6 pb-4 border-b border-stone-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h3 class="text-xl font-bold text-stone-200 flex items-center gap-2 serif">
+                        <span class="text-green-500">📖</span> Phân Tích Từ Vựng (Tam Thiên Tự)
+                    </h3>
+                    <p class="text-sm text-stone-400 mt-1">
+                        Đối chiếu chữ Hán trong Phẩm 5 với danh sách 3.000 chữ căn bản.
+                    </p>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-stone-200" id="uniqueCharCount">0</div>
+                    <div class="text-xs text-stone-500">Tổng chữ Hán duy nhất (không lặp)</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Chart -->
+                <div class="col-span-1 h-64 chart-container flex items-center justify-center">
+                    <canvas id="vocabChart"></canvas>
+                </div>
+
+                <!-- Details -->
+                <div class="col-span-2 space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-green-900/20 rounded-lg border border-green-800/50">
+                            <div class="text-sm text-green-400 font-medium mb-1">Thuộc Tam Thiên Tự</div>
+                            <div class="text-3xl font-bold text-green-500" id="inTTTCount">0</div>
+                            <div class="text-xs text-green-400/70 mt-1" id="inTTTPerc">0%</div>
+                        </div>
+                        <div class="p-4 bg-amber-900/20 rounded-lg border border-amber-800/50">
+                            <div class="text-sm text-amber-400 font-medium mb-1">Ngoài Tam Thiên Tự</div>
+                            <div class="text-3xl font-bold text-amber-500" id="outTTTCount">0</div>
+                            <div class="text-xs text-amber-400/70 mt-1" id="outTTTPerc">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-stone-900/50 p-4 rounded-lg text-sm text-stone-400 border border-stone-700">
+                        <p class="mb-2 font-semibold text-stone-300">Nhận xét:</p>
+                        <p id="analysisComment">Đang phân tích dữ liệu...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transcript & Interactive Player -->
+        <section id="transcript" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Controls Column (Left) -->
+            <div class="lg:col-span-4 bg-stone-800 p-6 rounded-xl shadow-lg border border-stone-700 sticky top-24">
+                <h3 class="text-lg font-bold text-stone-200 mb-4 serif border-b pb-2 border-stone-700">Bảng Điều Khiển</h3>
+                
+                <div class="space-y-6">
+                    <!-- Simulation Controls -->
+                    <div class="p-4 bg-amber-900/20 rounded-lg border border-amber-800/30">
+                        <p class="text-sm text-amber-500 mb-3 font-semibold flex items-center gap-2">
+                            🎧 Mô phỏng tụng
+                        </p>
+                        <div class="flex gap-2">
+                            <button id="btnPlay" class="flex-1 bg-amber-700 hover:bg-amber-600 text-white py-2.5 px-4 rounded shadow-sm text-sm font-medium transition-colors flex justify-center items-center gap-2">
+                                <span>▶</span> Bắt đầu
+                            </button>
+                            <button id="btnPause" class="flex-1 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-amber-400 py-2.5 px-4 rounded shadow-sm text-sm font-medium transition-colors hidden">
+                                <span>⏸</span> Tạm dừng
+                            </button>
+                            <button id="btnReset" class="px-3 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-stone-300 rounded shadow-sm transition-colors" title="Quay lại từ đầu">
+                                ↺
+                            </button>
+                        </div>
+                        <div class="flex justify-between items-center mt-3 px-1">
+                            <span class="text-xs text-amber-500 font-mono" id="currentTimeDisplay">00:00</span>
+                            <span class="text-xs text-amber-500/50">Tự động cuộn</span>
+                        </div>
+                        <div class="mt-3 flex items-center gap-2">
+                            <input type="checkbox" id="autoRead" class="rounded border-stone-600 text-amber-600 focus:ring-amber-500 bg-stone-900">
+                            <label for="autoRead" class="text-xs text-stone-400 cursor-pointer select-none">Tự động đọc Pinyin khi chạy</label>
+                        </div>
+                    </div>
+
+                    <!-- Search/Filter -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-stone-500 mb-1.5 tracking-wide">Tìm kiếm</label>
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="Tìm kiếm (Việt, Anh, Hán)..." 
+                                   class="w-full pl-9 pr-3 py-2 bg-stone-900 border border-stone-700 text-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm shadow-sm placeholder-stone-600">
+                            <span class="absolute left-3 top-2.5 text-stone-500">🔍</span>
+                        </div>
+                    </div>
+
+                    <!-- Jump To -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-stone-500 mb-1.5 tracking-wide">Chuyển nhanh</label>
+                        <select id="jumpSelect" class="w-full px-3 py-2 border border-stone-700 rounded-lg bg-stone-900 text-stone-300 text-sm focus:ring-amber-500 focus:border-amber-500 shadow-sm cursor-pointer hover:bg-stone-950">
+                            <option value="0">00:00 - Khởi đầu</option>
+                            <!-- Options populated by JS -->
+                        </select>
+                    </div>
+
+                    <!-- Legend for Analysis -->
+                    <div id="analysisLegend" class="hidden p-4 bg-stone-900/50 rounded-lg border border-stone-700">
+                        <p class="text-xs font-bold text-stone-500 uppercase mb-2">Chú giải màu sắc</p>
+                        <div class="flex flex-col gap-2 text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="px-1 bg-green-300 text-green-900 rounded font-bold font-serif">天</span>
+                                <span class="text-stone-400">Có trong Tam Thiên Tự</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-1 text-amber-500 font-serif border-b border-dotted border-amber-500">忉</span>
+                                <span class="text-stone-400">Không có trong danh sách</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List Column (Right) -->
+            <div class="lg:col-span-8">
+                <div class="bg-stone-800 rounded-xl shadow-lg border border-stone-700 overflow-hidden flex flex-col h-[700px]">
+                    <div class="p-4 border-b border-stone-700 bg-stone-800/80 flex flex-wrap gap-2 justify-between items-center backdrop-blur-sm sticky top-0 z-10">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-stone-300 serif">Nội Dung Kinh Văn</span>
+                            <span class="px-2 py-0.5 text-xs bg-stone-700 text-stone-300 rounded border border-stone-600">Hán</span>
+                            <span class="px-2 py-0.5 text-xs bg-amber-900/40 text-amber-400 rounded border border-amber-800/50">Âm</span>
+                            <span class="px-2 py-0.5 text-xs bg-green-900/40 text-green-400 rounded border border-green-800/50">Nghĩa</span>
+                            <span class="px-2 py-0.5 text-xs bg-stone-700/50 text-stone-500 rounded border border-stone-700">Anh</span>
+                        </div>
+                        <span class="text-xs text-stone-400 bg-stone-700 px-2.5 py-1 rounded-full font-medium" id="visibleCount">0 câu</span>
+                    </div>
+                    
+                    <div id="transcriptContainer" class="flex-1 overflow-y-auto custom-scroll p-2 space-y-1 relative scroll-smooth bg-stone-900">
+                        <!-- Content populated by JS -->
+                        <div class="flex flex-col items-center justify-center h-full text-stone-600 gap-2">
+                            <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Đang tải dữ liệu...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-950 text-stone-500 py-10 mt-12 border-t border-stone-800">
+        <div class="container mx-auto px-4 text-center">
+            <div class="serif text-xl text-stone-400 mb-3">Nam Mô Đại Nguyện Địa Tạng Vương Bồ Tát</div>
+            <p class="text-sm opacity-60">Dữ liệu được trích xuất từ nguồn: A Di Đà Phật TV (YouTube)</p>
+            <p class="text-xs opacity-40 mt-2">Phân tích dựa trên danh sách Tam Thiên Tự (~3000 chữ căn bản)</p>
+        </div>
+    </footer>
+
+    <!-- RAW DATA STORAGE -->
+    <script>
+        // Updated Data for Chapter 5
+        const rawSubtitleData = `
+[00:00:00] 地藏菩萨本愿经 地狱名号品第五 | dì zàng pú sà běn yuàn jīng dì yù míng hào pǐn dì wǔ | Địa Tạng Bồ Tát Bổn Nguyện Kinh - Địa Ngục Danh Hiệu Phẩm Đệ Ngũ | Sutra of the Past Vows of Earth Store Bodhisattva - Chapter 5: The Names of the Hells | Kinh Địa Tạng Bồ Tát Bổn Nguyện - Phẩm thứ năm: Danh Hiệu Của Địa Ngục.
+[00:00:10] 尔时普贤菩萨摩诃萨白地藏菩萨言。 | ěr shí pǔ xián pú sà mó hē sà bái dì zàng pú sà yán 。 | Nhĩ thời Phổ Hiền Bồ Tát Ma Ha Tát bạch Địa Tạng Bồ Tát ngôn. | At that time, Universal Worthy Bodhisattva Mahasattva said to Earth Store Bodhisattva: | Lúc đó, Ngài Phổ Hiền Bồ Tát Ma Ha Tát thưa cùng Ngài Địa Tạng Bồ Tát rằng:
+[00:00:16] 仁者。愿为天龙四众。及未来现在一切众生。 | rén zhě 。 yuàn wèi tiān lóng sì zhòng 。 jí wèi lái xiàn zài yí qiè zhòng shēng 。 | Nhân giả. Nguyện vị thiên long tứ chúng. Cập vị lai hiện tại nhất thiết chúng sanh. | "Humane One, for the sake of the gods and dragons, the Four Assemblies, and all living beings of the present and future..." | "Thưa Nhân giả! Xin Ngài vì Trời, Rồng, Bát bộ và tất cả chúng sanh ở hiện tại cùng vị lai..."
+[00:00:24] 说娑婆世界。及阎浮提。罪苦众生。所受报处。地狱名号。 | shuō suō pó shì jiè 。 jí yán fú tí 。 zuì kǔ zhòng shēng 。 suǒ shòu bào chù 。 dì yù míng hào 。 | Thuyết Ta Bà thế giới. Cập Diêm Phù Đề. Tội khổ chúng sanh. Sở thọ báo xứ. Địa ngục danh hiệu. | "...please speak about the names of the hells and the places where suffering offenders in the Saha World and Jambudvipa undergo retribution." | "...mà nói danh hiệu của những địa ngục là chỗ thọ báo của các hạng chúng sanh bị tội khổ ở trong cõi Ta Bà cùng cõi Diêm Phù Đề này..."
+[00:00:34] 及恶报等事。使未来世末法众生。知是果报。 | jí è bào děng shì 。 shǐ wèi lái shì mò fǎ zhòng shēng 。 zhī shì guǒ bào 。 | Cập ác báo đẳng sự. Sử vị lai thế mạt pháp chúng sanh. Tri thị quả báo. | "And also about the retributions for evil, so that living beings in the future Dharma Ending Age will know what the retributions are." | "...và nói những sự về quả báo ác, để cho chúng sanh trong thời mạt pháp về sau biết rõ những quả báo đó."
+[00:00:41] 地藏答言。仁者。我今承佛威神。及大士之力。 | dì zàng dá yán 。 rén zhě 。 wǒ jīn chéng fó wēi shén 。 jí dà shì zhī lì 。 | Địa Tạng đáp ngôn. Nhân giả. Ngã kim thừa Phật oai thần. Cập Đại Sĩ chi lực. | Earth Store replied, "Humane One, receiving the Buddha's awesome spiritual power and the Great Knight's strength..." | Ngài Địa Tạng Bồ Tát đáp rằng: "Thưa Nhân giả! Nay tôi nương oai thần của Đức Phật cùng nhờ sức của Ngài..."
+[00:00:49] 略说地狱名号。及罪报恶报之事。 | lüè shuō dì yù míng hào 。 jí zuì bào è bào zhī shì 。 | Lược thuyết địa ngục danh hiệu. Cập tội báo ác báo chi sự. | "...I shall speak briefly about the names of the hells and about the retributions for offenses and evil." | "...mà lược nói danh hiệu của các địa ngục, cùng những sự về tội báo và ác báo."
+[00:00:54] 仁者。阎浮提东方有山。号曰铁围。其山黑邃。无日月光。 | rén zhě 。 yán fú tí dōng fāng yǒu shān 。 hào yuē tiě wéi 。 qí shān hēi suì 。 wú rì yuè guāng 。 | Nhân giả. Diêm Phù Đề đông phương hữu sơn. Hiệu viết Thiết Vi. Kỳ sơn hắc thúy. Vô nhật nguyệt quang. | "Humane One, to the east of Jambudvipa there is a mountain called Iron Ring. The mountain is pitch black and has no light of the sun or moon." | "Thưa Nhân giả! Phương Đông của cõi Diêm Phù Đề có dãy núi tên là Thiết Vi. Dãy núi đó tối thẳm, không có ánh sáng của mặt trời, mặt trăng."
+[00:01:04] 有大地狱。号极无间。又有地狱。名大阿鼻。 | yǒu dà dì yù 。 hào jí wú jiàn 。 yòu yǒu dì yù 。 míng dà ā bí 。 | Hữu đại địa ngục. Hiệu Cực Vô Gián. Hựu hữu địa ngục. Danh Đại A Tỳ. | "There is a great hell called Extremely Uninterrupted. There is another hell called Great Avici." | "Trong đó có địa ngục lớn tên là Cực Vô Gián. Lại có địa ngục tên là Đại A Tỳ."
+[00:01:12] 复有地狱。名曰四角。复有地狱。名曰飞刀。 | fù yǒu dì yù 。 míng yuē sì jiǎo 。 fù yǒu dì yù 。 míng yuē fēi dāo 。 | Phục hữu địa ngục. Danh viết Tứ Giác. Phục hữu địa ngục. Danh viết Phi Đao. | "There is a hell called Four Corners. There is a hell called Flying Knives." | "Lại có địa ngục tên là Tứ Giác. Lại có địa ngục tên là Phi Đao."
+[00:01:18] 复有地狱。名曰火箭。复有地狱。名曰夹山。 | fù yǒu dì yù 。 míng yuē huǒ jiàn 。 fù yǒu dì yù 。 míng yuē jiā shān 。 | Phục hữu địa ngục. Danh viết Hỏa Tiễn. Phục hữu địa ngục. Danh viết Giáp Sơn. | "There is a hell called Fiery Arrows. There is a hell called Squeezing Mountains." | "Lại có địa ngục tên là Hỏa Tiễn. Lại có địa ngục tên là Giáp Sơn."
+[00:01:24] 复有地狱。名曰通枪。复有地狱。名曰铁车。 | fù yǒu dì yù 。 míng yuē tōng qiāng 。 fù yǒu dì yù 。 míng yuē tiě chē 。 | Phục hữu địa ngục. Danh viết Thông Thương. Phục hữu địa ngục. Danh viết Thiết Xa. | "There is a hell called Piercing Spears. There is a hell called Iron Carts." | "Lại có địa ngục tên là Thông Thương. Lại có địa ngục tên là Thiết Xa."
+[00:01:30] 复有地狱。名曰铁床。复有地狱。名曰铁牛。 | fù yǒu dì yù 。 míng yuē tiě chuáng 。 fù yǒu dì yù 。 míng yuē tiě niú 。 | Phục hữu địa ngục. Danh viết Thiết Sàng. Phục hữu địa ngục. Danh viết Thiết Ngưu. | "There is a hell called Iron Beds. There is a hell called Iron Oxen." | "Lại có địa ngục tên là Thiết Sàng. Lại có địa ngục tên là Thiết Ngưu."
+[00:01:36] 复有地狱。名曰铁衣。复有地狱。名曰千刃。 | fù yǒu dì yù 。 míng yuē tiě yī 。 fù yǒu dì yù 。 míng yuē qiān rèn 。 | Phục hữu địa ngục. Danh viết Thiết Y. Phục hữu địa ngục. Danh viết Thiên Nhận. | "There is a hell called Iron Clothing. There is a hell called Thousand Blades." | "Lại có địa ngục tên là Thiết Y. Lại có địa ngục tên là Thiên Nhận."
+[00:01:42] 复有地狱。名曰铁驴。复有地狱。名曰烊铜。 | fù yǒu dì yù 。 míng yuē tiě lǘ 。 fù yǒu dì yù 。 míng yuē yáng tóng 。 | Phục hữu địa ngục. Danh viết Thiết Lư. Phục hữu địa ngục. Danh viết Dương Đồng. | "There is a hell called Iron Donkeys. There is a hell called Molten Copper." | "Lại có địa ngục tên là Thiết Lư. Lại có địa ngục tên là Dương Đồng."
+[00:01:48] 复有地狱。名曰抱柱。复有地狱。名曰流火。 | fù yǒu dì yù 。 míng yuē bào zhù 。 fù yǒu dì yù 。 míng yuē liú huǒ 。 | Phục hữu địa ngục. Danh viết Bão Trụ. Phục hữu địa ngục. Danh viết Lưu Hỏa. | "There is a hell called Embracing Pillars. There is a hell called Flowing Fire." | "Lại có địa ngục tên là Bão Trụ. Lại có địa ngục tên là Lưu Hỏa."
+[00:01:54] 复有地狱。名曰耕舌。复有地狱。名曰剉首。 | fù yǒu dì yù 。 míng yuē gēng shé 。 fù yǒu dì yù 。 míng yuē cuò shǒu 。 | Phục hữu địa ngục. Danh viết Canh Thiệt. Phục hữu địa ngục. Danh viết Tỏa Thủ. | "There is a hell called Plowing Tongues. There is a hell called Chopping Heads." | "Lại có địa ngục tên là Canh Thiệt. Lại có địa ngục tên là Tỏa Thủ."
+[00:02:00] 复有地狱。名曰烧脚。复有地狱。名曰啖眼。 | fù yǒu dì yù 。 míng yuē shāo jiǎo 。 fù yǒu dì yù 。 míng yuē dàn yǎn 。 | Phục hữu địa ngục. Danh viết Thiêu Cước. Phục hữu địa ngục. Danh viết Đạm Nhãn. | "There is a hell called Burning Feet. There is a hell called Pecking Eyes." | "Lại có địa ngục tên là Thiêu Cước. Lại có địa ngục tên là Đạm Nhãn."
+[00:02:06] 复有地狱。名曰铁丸。复有地狱。名曰诤论。 | fù yǒu dì yù 。 míng yuē tiě wán 。 fù yǒu dì yù 。 míng yuē zhēng lùn 。 | Phục hữu địa ngục. Danh viết Thiết Hoàn. Phục hữu địa ngục. Danh viết Tranh Luận. | "There is a hell called Iron Pellets. There is a hell called Quarreling." | "Lại có địa ngục tên là Thiết Hoàn. Lại có địa ngục tên là Tranh Luận."
+[00:02:11] 复有地狱。名曰铁鈇。复有地狱。名曰多嗔。 | fù yǒu dì yù 。 míng yuē tiě fū 。 fù yǒu dì yù 。 míng yuē duō chēn 。 | Phục hữu địa ngục. Danh viết Thiết Phu. Phục hữu địa ngục. Danh viết Đa Sân. | "There is a hell called Iron Axes. There is a hell called Much Anger." | "Lại có địa ngục tên là Thiết Phu. Lại có địa ngục tên là Đa Sân."
+[00:02:17] 地藏白言。仁者。铁围之内。有如是等地狱。其数无限。 | dì zàng bái yán 。 rén zhě 。 tiě wéi zhī nèi 。 yǒu rú shì děng dì yù 。 qí shù wú xiàn 。 | Địa Tạng bạch ngôn. Nhân giả. Thiết Vi chi nội. Hữu như thị đẳng địa ngục. Kỳ số vô hạn. | Earth Store said, "Humane One, within the Iron Ring are such hells as these. Their number is limitless." | Ngài Địa Tạng Bồ Tát thưa rằng: "Thưa Nhân giả! Trong núi Thiết Vi có những địa ngục như thế, số nhiều vô hạn."
+[00:02:26] 更有叫唤地狱。拔舌地狱。粪尿地狱。 | gèng yǒu jiào huàn dì yù 。 bá shé dì yù 。 fèn niào dì yù 。 | Cánh hữu Khiếu Hoán địa ngục. Bạt Thiệt địa ngục. Phẩn Niệu địa ngục. | "In addition, there are the Crying Out Hell, the Pulling Tongues Hell, the Feces and Urine Hell..." | "Lại có địa ngục Khiếu Hoán, địa ngục Bạt Thiệt, địa ngục Phẩn Niệu..."
+[00:02:32] 铜锁地狱。火象地狱。火狗地狱。 | tóng suǒ dì yù 。 huǒ xiàng dì yù 。 huǒ gǒu dì yù 。 | Đồng Tỏa địa ngục. Hỏa Tượng địa ngục. Hỏa Cẩu địa ngục. | "...the Copper Lock Hell, the Fire Elephant Hell, the Fire Dog Hell..." | "...địa ngục Đồng Tỏa, địa ngục Hỏa Tượng, địa ngục Hỏa Cẩu..."
+[00:02:38] 火马地狱。火牛地狱。火山地狱。 | huǒ mǎ dì yù 。 huǒ niú dì yù 。 huǒ shān dì yù 。 | Hỏa Mã địa ngục. Hỏa Ngưu địa ngục. Hỏa Sơn địa ngục. | "...the Fire Horse Hell, the Fire Ox Hell, the Fire Mountain Hell..." | "...địa ngục Hỏa Mã, địa ngục Hỏa Ngưu, địa ngục Hỏa Sơn..."
+[00:02:44] 火石地狱。火床地狱。火梁地狱。 | huǒ shí dì yù 。 huǒ chuáng dì yù 。 huǒ liáng dì yù 。 | Hỏa Thạch địa ngục. Hỏa Sàng địa ngục. Hỏa Lương địa ngục. | "...the Fire Stone Hell, the Fire Bed Hell, the Fire Beam Hell..." | "...địa ngục Hỏa Thạch, địa ngục Hỏa Sàng, địa ngục Hỏa Lương..."
+[00:02:50] 火鹰地狱。锯牙地狱。剥皮地狱。 | huǒ yīng dì yù 。 jù yá dì yù 。 bāo pí dì yù 。 | Hỏa Ưng địa ngục. Cứ Nha địa ngục. Bác Bì địa ngục. | "...the Fire Eagle Hell, the Sawing Teeth Hell, the Peeling Skin Hell..." | "...địa ngục Hỏa Ưng, địa ngục Cứ Nha, địa ngục Bác Bì..."
+[00:02:55] 饮血地狱。烧手地狱。烧脚地狱。 | yǐn xuè dì yù 。 shāo shǒu dì yù 。 shāo jiǎo dì yù 。 | Ẩm Huyết địa ngục. Thiêu Thủ địa ngục. Thiêu Cước địa ngục. | "...the Drinking Blood Hell, the Burning Hands Hell, the Burning Feet Hell..." | "...địa ngục Ẩm Huyết, địa ngục Thiêu Thủ, địa ngục Thiêu Cước..."
+[00:03:01] 倒刺地狱。火屋地狱。铁屋地狱。 | dào cì dì yù 。 huǒ wū dì yù 。 tiě wū dì yù 。 | Đảo Thích địa ngục. Hỏa Ốc địa ngục. Thiết Ốc địa ngục. | "...the Hanging Thorns Hell, the Fire House Hell, the Iron House Hell..." | "...địa ngục Đảo Thích, địa ngục Hỏa Ốc, địa ngục Thiết Ốc..."
+[00:03:07] 火狼地狱。如是等名。 | huǒ láng dì yù 。 rú shì děng míng 。 | Hỏa Lang địa ngục. Như thị đẳng danh. | "...the Fire Wolf Hell. There are hells with names such as these." | "...địa ngục Hỏa Lang. Những địa ngục như thế..."
+[00:03:11] 其中各各复有诸小地狱。或一或二。或三或四。乃至百千。 | qí zhōng gè gè fù yǒu zhū xiǎo dì yù 。 huò yī huò èr 。 huò sān huò sì 。 nǎi zhì bǎi qiān 。 | Kỳ trung các các phục hữu chư tiểu địa ngục. Hoặc nhất hoặc nhị. Hoặc tam hoặc tứ. Nãi chí bách thiên. | "Within each of these are smaller hells, numbering one, two, three, four, or even hundreds of thousands." | "...trong đó mỗi ngục lại có các ngục nhỏ, hoặc một, hoặc hai, hoặc ba, hoặc bốn, nhẫn đến trăm nghìn."
+[00:03:19] 其中名号。各各不同。 | qí zhōng míng hào 。 gè gè bù tóng 。 | Kỳ trung danh hiệu. Các các bất đồng. | "Each has its own different name." | "Danh hiệu của các ngục nhỏ đó đều khác nhau."
+[00:03:22] 地藏菩萨告普贤菩萨言。仁者。此者皆是。南阎浮提行恶众生。 | dì zàng pú sà gào pǔ xián pú sà yán 。 rén zhě 。 cǐ zhě jiē shì 。 nán yán fú tí xíng è zhòng shēng 。 | Địa Tạng Bồ Tát cáo Phổ Hiền Bồ Tát ngôn. Nhân giả. Thử giả giai thị. Nam Diêm Phù Đề hành ác chúng sanh. | Earth Store Bodhisattva told Universal Worthy Bodhisattva, "Humane One, these are all karmic retributions of living beings in South Jambudvipa who commit evil deeds." | Ngài Địa Tạng Bồ Tát nói với Ngài Phổ Hiền Bồ Tát rằng: "Thưa Nhân giả! Đó đều là do chúng sanh trong cõi Nam Diêm Phù Đề làm những điều ác..."
+[00:03:31] 业感如是。业力甚大。能敌须弥。能深巨海。能障圣道。 | yè gǎn rú shì 。 yè lì shèn dà 。 néng dí xū mí 。 néng shēn jù hǎi 。 néng zhàng shèng dào 。 | Nghiệp cảm như thị. Nghiệp lực thậm đại. Năng địch Tu Di. Năng thâm cự hải. Năng chướng Thánh đạo. | "The power of karma is extremely great. It can rival Mount Sumeru, it can be deeper than the great ocean, and it can obstruct the Sagely Way." | "...mà tùy nghiệp chiêu cảm ra những địa ngục như thế. Nghiệp lực rất lớn, có thể sánh với núi Tu Di, có thể sâu dường biển cả, có thể ngăn Thánh đạo."
+[00:03:41] 是故众生。莫轻小恶。以为无罪。 | shì gù zhòng shēng 。 mò qīng xiǎo è 。 yǐ wéi wú zuì 。 | Thị cố chúng sanh. Mạc khinh tiểu ác. Dĩ vi vô tội. | "Therefore, living beings should not slight small evils and consider them as no offense." | "Vì thế chúng sanh chớ khinh điều ác nhỏ mà cho là không tội."
+[00:03:46] 死后有报。纤毫受之。父子至亲。歧路各别。 | sǐ hòu yǒu bào 。 xiān háo shòu zhī 。 fù zǐ zhì qīn 。 qí lù gè bié 。 | Tử hậu hữu báo. Tiêm hào thọ chi. Phụ tử chí thân. Kỳ lộ các biệt. | "After death, there is retribution; even the smallest bit must be undergone. Father and son may be close, but their paths diverge." | "Sau khi chết đều có quả báo, dẫu đến mảy lông cũng phải chịu lấy. Cha con chí thân, nhưng đường ai nấy đi."
+[00:03:54] 纵然相逢。无肯代受。 | zòng rán xiāng féng 。 wú kěn dài shòu 。 | Tung nhiên tương phùng. Vô khẳng đại thọ. | "Even if they meet, neither will consent to undergo suffering in the other's place." | "Dầu có gặp nhau cũng chẳng chịu chịu khổ thay cho nhau."
+[00:03:59] 我今承佛威力。略说地狱罪报之事。唯愿仁者暂听是言。 | wǒ jīn chéng fó wēi lì 。 lüè shuō dì yù zuì bào zhī shì 。 wéi yuàn rén zhě zàn tīng shì yán 。 | Ngã kim thừa Phật oai lực. Lược thuyết địa ngục tội báo chi sự. Duy nguyện Nhân giả tạm thính thị ngôn. | "Now, receiving the Buddha's awesome power, I shall briefly speak of the retributions for offenses in the hells. I only pray, Humane One, that you will listen to these words." | "Nay tôi nương oai lực của Đức Phật mà lược nói những sự tội báo nơi địa ngục. Trông mong Nhân giả tạm nghe lời đó."
+[00:04:09] 普贤答言。吾已久知三恶道报。望仁者说。 | pǔ xián dá yán 。 wú yǐ jiǔ zhī sān è dào bào 。 wàng rén zhě shuō 。 | Phổ Hiền đáp ngôn. Ngô dĩ cửu tri tam ác đạo báo. Vọng Nhân giả thuyết. | Universal Worthy replied, "I have long known of the retributions of the Three Evil Paths. I hope the Humane One will speak of them..." | Ngài Phổ Hiền Bồ Tát đáp rằng: "Tôi đã từng biết rõ tội báo nơi ba đường ác rồi. Nay mong Nhân giả nói ra..."
+[00:04:16] 令后世末法。一切恶行众生。闻仁者说。使令归佛。 | lìng hòu shì mò fǎ 。 yí qiè è xíng zhòng shēng 。 wén rén zhě shuō 。 shǐ lìng guī fó 。 | Linh hậu thế mạt pháp. Nhất thiết ác hạnh chúng sanh. Văn Nhân giả thuyết. Sử linh quy Phật. | "...so that all evil-doing living beings in the future Dharma Ending Age, upon hearing the Humane One's words, will take refuge in the Buddha." | "...để làm cho tất cả chúng sanh có tâm hạnh ác trong đời mạt pháp về sau, nghe được lời dạy của Nhân giả mà biết hối cải quy y Phật."
+[00:04:25] 地藏白言。仁者。地狱罪报。其事如是。 | dì zàng bái yán 。 rén zhě 。 dì yù zuì bào 。 qí shì rú shì 。 | Địa Tạng bạch ngôn. Nhân giả. Địa ngục tội báo. Kỳ sự như thị. | Earth Store said, "Humane One, the retributions for offenses in the hells are as follows:" | Ngài Địa Tạng Bồ Tát thưa rằng: "Thưa Nhân giả! Những sự tội báo trong địa ngục là như thế này:"
+[00:04:31] 或有地狱。取罪人舌。使牛耕之。 | huò yǒu dì yù 。 qǔ zuì rén shé 。 shǐ niú gēng zhī 。 | Hoặc hữu địa ngục. Thủ tội nhân thiệt. Sử ngưu canh chi. | "There are hells in which the offenders' tongues are pulled out and plowed by oxen." | "Hoặc có địa ngục kéo lưỡi người tội ra cho trâu cày trên đó."
+[00:04:37] 或有地狱。取罪人心。夜叉食之。 | huò yǒu dì yù 。 qǔ zuì rén xīn 。 yè chā shí zhī 。 | Hoặc hữu địa ngục. Thủ tội nhân tâm. Dạ xoa thực chi. | "There are hells in which the offenders' hearts are pulled out and eaten by Yakshas." | "Hoặc có địa ngục moi tim người tội cho quỷ Dạ Xoa ăn."
+[00:04:42] 或有地狱。霍汤盛沸。煮罪人身。 | huò yǒu dì yù 。 huò tāng shèng fèi 。 zhǔ zuì rén shēn 。 | Hoặc hữu địa ngục. Hoắc thang thạnh phế. Chử tội nhân thân. | "There are hells in which the offenders' bodies are boiled in cauldrons of boiling liquid." | "Hoặc có địa ngục vạc dầu sôi sùng sục nấu thân người tội."
+[00:04:48] 或有地狱。赤烧铜柱。使罪人抱。 | huò yǒu dì yù 。 chì shāo tóng zhù 。 shǐ zuì rén bào 。 | Hoặc hữu địa ngục. Xích thiêu đồng trụ. Sử tội nhân bão. | "There are hells in which the offenders are forced to embrace red-hot copper pillars." | "Hoặc có địa ngục đốt cột đồng cháy đỏ bắt người tội ôm lấy."
+[00:04:53] 或有地狱。使诸火烧。趁及罪人。 | huò yǒu dì yù 。 shǐ zhū huǒ shāo 。 chèn jí zuì rén 。 | Hoặc hữu địa ngục. Sử chư hỏa thiêu. Sấn cập tội nhân. | "There are hells in which masses of fire burn the offenders." | "Hoặc có địa ngục lửa bay tủa vào người tội."
+[00:04:58] 或有地狱。一向寒冰。或有地狱。无限粪尿。 | huò yǒu dì yù 。 yī xiàng hán bīng 。 huò yǒu dì yù 。 wú xiàn fèn niào 。 | Hoặc hữu địa ngục. Nhất hướng hàn băng. Hoặc hữu địa ngục. Vô hạn phẩn niệu. | "There are hells of perpetual ice. There are hells of limitless feces and urine." | "Hoặc có địa ngục toàn là băng giá. Hoặc có địa ngục đầy những phân và nước tiểu."
+[00:05:05] 或有地狱。纯飞蒺藜。或有地狱。多攒火枪。 | huò yǒu dì yù 。 chún fēi jí lí 。 huò yǒu dì yù 。 duō cuán huǒ qiāng 。 | Hoặc hữu địa ngục. Thuần phi tật lê. Hoặc hữu địa ngục. Đa toàn hỏa thương. | "There are hells of flying caltrops. There are hells of many fiery spears." | "Hoặc có địa ngục toàn là chông gai bay đâm. Hoặc có địa ngục nhiều giáo lửa đâm."
+[00:05:12] 或有地狱。唯撞胸背。或有地狱。但烧手足。 | huò yǒu dì yù 。 wéi zhuàng xiōng bèi 。 huò yǒu dì yù 。 dàn shāo shǒu zú 。 | Hoặc hữu địa ngục. Duy trúng hung bối. Hoặc hữu địa ngục. Đãn thiêu thủ túc. | "There are hells where only the chests and backs are struck. There are hells where only the hands and feet are burned." | "Hoặc có địa ngục chỉ đâm vào ngực vào lưng. Hoặc có địa ngục chỉ đốt tay đốt chân."
+[00:05:18] 或有地狱。盘缴铁蛇。或有地狱。驱逐铁狗。 | huò yǒu dì yù 。 pán jiǎo tiě shé 。 huò yǒu dì yù 。 qū zhú tiě gǒu 。 | Hoặc hữu địa ngục. Bàn kiểu thiết xà. Hoặc hữu địa ngục. Khu trục thiết cẩu. | "There are hells where iron snakes wrap around the offenders. There are hells where iron dogs chase the offenders." | "Hoặc có địa ngục rắn sắt quấn lấy mình. Hoặc có địa ngục chó sắt đuổi bắt."
+[00:05:25] 或有地狱。尽驾铁尼。 | huò yǒu dì yù 。 jìn jià tiě ní 。 | Hoặc hữu địa ngục. Tận giá thiết ni. | "There are hells where offenders are yoked to iron donkeys." | "Hoặc có địa ngục đóng ách lừa sắt."
+[00:05:28] 仁者。如是等报。各各狱中。有百千种业道之器。 | rén zhě 。 rú shì děng bào 。 gè gè yù zhōng 。 yǒu bǎi qiān zhǒng yè dào zhī qì 。 | Nhân giả. Như thị đẳng báo. Các các ngục trung. Hữu bách thiên chủng nghiệp đạo chi khí. | "Humane One, such are the retributions. In each hell there are hundreds of thousands of instruments of karma." | "Thưa Nhân giả! Những quả báo như thế, trong mỗi ngục có trăm nghìn thứ khí cụ của nghiệp đạo..."
+[00:05:37] 无非是铜是铁。是石是火。此四种物。众业行感。 | wú fēi shì tóng shì tiě 。 shì shí shì huǒ 。 cǐ sì zhǒng wù 。 zhòng yè xíng gǎn 。 | Vô phi thị đồng thị thiết. Thị thạch thị hỏa. Thử tứ chủng vật. Chúng nghiệp hành cảm. | "They are all copper, iron, stone, or fire. These four materials are summoned by the heavy karma." | "...đều là bằng đồng, bằng sắt, bằng đá, bằng lửa. Bốn loại vật này do các ác nghiệp chiêu cảm lấy."
+[00:05:46] 若广说地狱罪报等事。一一狱中。更有百千种苦楚。 | ruò guǎng shuō dì yù zuì bào děng shì 。 yī yī yù zhōng 。 gèng yǒu bǎi qiān zhǒng kǔ chǔ 。 | Nhược quảng thuyết địa ngục tội báo đẳng sự. Nhất nhất ngục trung. Cánh hữu bách thiên chủng khổ sở. | "If I were to speak in detail about the retributions for offenses in the hells, in each hell there are hundreds of thousands of kinds of suffering." | "Nếu nói rộng ra về những sự tội báo ở địa ngục, thời trong mỗi một ngục lại có thêm trăm nghìn thứ khổ sở."
+[00:05:55] 何况多狱。我今承佛威神及仁者问。略说如是。 | hé kuàng duō yù 。 wǒ jīn chéng fó wēi shén jí rén zhě wèn 。 lüè shuō rú shì 。 | Hà huống đa ngục. Ngã kim thừa Phật oai thần cập Nhân giả vấn. Lược thuyết như thị. | "How much more so in the many hells! Now, receiving the Buddha's awesome spiritual power and the Humane One's question, I have spoken briefly." | "Huống chi là nhiều ngục! Nay tôi nương sức oai thần của Đức Phật và vì Nhân giả hỏi mà lược nói như thế."
+[00:06:03] 若广解说。穷劫不尽。 | ruò guǎng jiě shuō 。 qióng jié bù jìn 。 | Nhược quảng giải thuyết. Cùng kiếp bất tận. | "If I were to explain in detail, I could not finish in endless aeons." | "Nếu nói cho rõ cả, thời dầu đến cùng kiếp cũng không hết được."
+`;
+
+        // --- TAM THIEN TU DATA (Sample ~3000 Common Characters) ---
+        const tamThienTuStr = "天地举存子孙六三家国前后牛马距牙无有犬羊归走拜跪去来女男带冠足多爱憎识知木根易难旨甘柱梁床席欠余锄鞠烛灯升降田宅老童雀鸡我他伯姨铅锡役功翰翼圣贤仙佛潦潮鸢凤丈寻盘盏茧丝梅李滓清胸臆墨朱娇熟慎廉私慕至回乡市妇夫内中门屋英蒂菲葱苍白苦酸驺驾石金音信听闻鸟兽羽毛皮角甲鳞行飞潜泳龙虎龟麟卵胎化湿形体面神颐目口唇舌齿耳鼻喉颜鬓眉发头首脑额顶颐颔项颈肩背膂胁腋腕肱臂手掌指甲脚腿膝胫踝踵趾身躯骨肉髓脑血脉筋皮肠胃心肝脾肺肾胆胞胎精气神魂魄志意念想思虑忧愁喜怒哀乐恐惊悲欢聪明智慧愚痴暗钝才艺技能工巧百工士农工商君臣父子夫妇兄弟朋友宾主师生主仆奴婢官吏兵卒将帅军旅甲胄弓矢刀剑矛盾旌旗鼓钲车船舟楫帆樯橹棹桥梁道路街巷城郭宫室殿堂亭台楼阁园林池沼陂塘井灶釜甑碗碟杯盘匙箸壶觞尊爵几案箱箧囊橐衣裳冠冕鞋袜簪珥環钏锦绣罗绮布帛丝麻棉絮裁缝纺织耕稼种植收获仓廪府库钱财货贿贸易买卖秤尺斗斛斤两钱分铢寸丈寻常毫厘圭撮数算加减乘除年月日时春夏秋冬寒暑冷热风云雨雪雷电霜露霞雾虹霓星辰日月阴阳乾坤宇宙世界山川江河湖海陵陆高原平原草木花果竹苇松柏桑麻稻粱麦豆黍稷禽兽虫鱼飞走潜伏动植矿物金银铜铁铅锡珠玉宝石琉璃珊瑚玛瑙琥珀珍珠象牙犀角麝香牛黄虎骨鹿茸熊胆龟板鳖甲蝉蜕蛇皮蜂房蚕砂红黄蓝白黑紫绿青赤橙灰褐方圆长短高低大小厚薄广狭深浅远近轻重急缓快慢好坏善恶美丑是非真假虚实有无得失成败兴亡盛衰治乱安危吉凶祸福寿夭贫富贵贱尊卑上下左右内外中间东西南北四方八面古今往来宇宙洪荒玄黄日月盈昃辰宿列张寒来暑往秋收冬藏闰余成岁律吕调阳云腾致雨露结为霜金生丽水玉出昆冈剑号巨阙珠称夜光果珍李柰菜重芥姜海咸河淡鳞潜羽翔龙师火帝鸟官人皇始制文字乃服衣裳推位让国有虞陶唐吊民伐罪周发殷汤坐朝问道垂拱平章爱育黎首臣伏戎羌遐迩一体率宾归王鸣凤在竹白驹食场化被草木赖及万方盖此身发四大五常恭惟鞠养岂敢毁伤女慕贞洁男效才良知过必改得能莫忘罔谈彼短靡恃己长信使可覆器欲难量墨悲丝染诗赞羔羊景行维贤克念作圣德建名立形端表正空谷传声虚堂习听祸因恶积福缘善庆尺璧非宝寸阴是竞资父事君曰严与敬孝当竭力忠则尽命临深履薄夙兴温清似兰斯馨如松之盛川流不息渊澄取映容止若思言辞安定笃初诚美慎终宜令荣业所基籍甚无竟学优登仕摄职从政存以甘棠去而益咏乐殊贵贱礼别尊卑上和下睦夫唱妇随外受傅训入奉母仪诸姑伯叔犹子比儿孔怀兄弟同气连枝交友投分切磨箴规仁慈隐恻造次弗离节义廉退颠沛匪亏性静情逸心动神疲守真志满逐物意移坚持雅操好爵自縻都邑华夏东西二京背邙面洛浮渭据泾宫殿盘郁楼观飞惊图写禽兽画彩仙灵丙舍傍启甲帐对楹肆筵设席鼓瑟吹笙升阶纳陛弁转疑星右通广内左达承明既集坟典亦聚群英杜稿钟隶漆书壁经府罗将相路侠槐卿户封八县家给千兵高冠陪辇驱毂振缨世禄侈富车驾肥轻策功茂实勒碑刻铭磻溪伊尹佐时阿衡奄宅曲阜微旦孰营桓公匡合济弱扶倾绮回汉惠说感武丁俊乂密勿多士寔宁晋楚更霸赵魏困横假途灭域践土会盟何遵约法韩弊烦刑起翦颇牧用军最精宣威沙漠驰誉丹青九州禹迹百郡秦并岳宗泰岱禅主云亭雁门紫塞鸡田赤城昆池碣石巨野洞庭旷远绵邈岩岫杳冥治本于农务兹稼穑俶载南亩我艺黍稷税熟贡新劝赏黜陟孟轲敦素史鱼秉直庶几中庸劳谦谨敕聆音察理鉴貌辨色贻厥嘉猷勉其祗植省躬讥诫宠增抗极殆辱近耻林皋幸即两疏见机解组谁逼索居闲处沉默寂寥求古寻论散虑逍遥欣奏累遣戚谢欢招渠荷的历园莽抽条枇杷晚翠梧桐早凋陈根委翳落叶飘摇游鹍独运凌摩绛霄";
+        
+        const tamThienTuSet = new Set(tamThienTuStr);
+
+        // --- APP STATE ---
+        let transcripts = [];
+        let simulationInterval = null;
+        let isPlaying = false;
+        let currentSimulationTime = 0; 
+        const simulationSpeed = 1; 
+        let analysisMode = false;
+        let vocabChartInstance = null;
+
+        // --- CORE FUNCTIONS ---
+
+        // 1. Text-to-Speech Functionality (iOS Optimized & Retry Logic)
+        
+        // GLOBAL VARIABLE to prevent iOS Safari Garbage Collection (Critical Fix)
+        window.currentUtterance = null; 
+        let availableVoices = [];
+
+        function loadVoices() {
+            if ('speechSynthesis' in window) {
+                availableVoices = window.speechSynthesis.getVoices();
+            }
+        }
+        
+        // Initialize voices (Chrome loads immediately, iOS waits for event)
+        if ('speechSynthesis' in window) {
+            loadVoices();
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        function speakText(text, btnId, retry = true) {
+            if (!text) return; // Prevent empty text errors
+
+            if ('speechSynthesis' in window) {
+                // Cancel current speech if any to avoid queue backup
+                window.speechSynthesis.cancel();
+                
+                // Visual feedback
+                if(btnId) {
+                    document.querySelectorAll('.speaking-active').forEach(el => el.classList.remove('speaking-active'));
+                    const btn = document.getElementById(btnId);
+                    if(btn) btn.classList.add('speaking-active');
+                }
+
+                // Create Utterance
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // --- iOS FIX: EXPLICITLY FIND CHINESE VOICE ---
+                // iOS sometimes ignores 'lang' property if voice is not set explicitly
+                if (retry) {
+                    if (availableVoices.length === 0) {
+                        availableVoices = window.speechSynthesis.getVoices();
+                    }
+                    
+                    const zhVoice = availableVoices.find(v => v.lang === 'zh-CN') || 
+                                    availableVoices.find(v => v.lang.startsWith('zh'));
+                    
+                    if (zhVoice) {
+                        utterance.voice = zhVoice;
+                        utterance.lang = zhVoice.lang;
+                    } else {
+                        utterance.lang = 'zh-CN'; // Fallback
+                    }
+                } else {
+                    // Retry with minimal configuration to avoid "isTrusted" errors
+                    utterance.lang = 'zh-CN'; 
+                    // Do not set specific voice object on retry
+                }
+                
+                utterance.rate = 0.8; // Slower rate for learning
+                
+                // --- iOS FIX: PREVENT GARBAGE COLLECTION ---
+                // Assign to global variable so Safari doesn't kill it mid-speech
+                window.currentUtterance = utterance;
+
+                utterance.onend = function() {
+                    if(btnId) {
+                        const btn = document.getElementById(btnId);
+                        if(btn) btn.classList.remove('speaking-active');
+                    }
+                    window.currentUtterance = null; // Clean up
+                };
+
+                utterance.onerror = function(e) {
+                    console.error("Speech Error:", e);
+                    
+                    // Smart Retry Logic for "isTrusted" errors
+                    if (retry) {
+                        console.log("Retrying speech with simple configuration...");
+                        // Clear active state momentarily
+                        if(btnId) {
+                            const btn = document.getElementById(btnId);
+                            if(btn) btn.classList.remove('speaking-active');
+                        }
+                        
+                        setTimeout(() => {
+                            speakText(text, btnId, false); // Retry with retry=false
+                        }, 100);
+                        return;
+                    }
+
+                    if(btnId) {
+                        const btn = document.getElementById(btnId);
+                        if(btn) btn.classList.remove('speaking-active');
+                    }
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.warn("Trình duyệt không hỗ trợ Text-to-Speech");
+            }
+        }
+
+        // 2. Parse Data
+        function parseSubtitles(raw) {
+            const lines = raw.trim().split('\n');
+            const parsed = [];
+            // Regex captures: 1=HH, 2=MM, 3=SS, 4=Chinese, 5=Pinyin, 6=Viet (Han), 7=English, 8=Viet (Trans)
+            const regex = /\[(\d{2}):(\d{2}):(\d{2})\]\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*)/;
+
+            lines.forEach((line, index) => {
+                const match = line.match(regex);
+                if (match) {
+                    const hours = parseInt(match[1]);
+                    const minutes = parseInt(match[2]);
+                    const seconds = parseInt(match[3]);
+                    const cnText = match[4].trim();
+                    const pinyinText = match[5].trim();
+                    const vietHanText = match[6].trim();
+                    const enText = match[7].trim();
+                    const vietTransText = match[8].trim();
+                    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                    
+                    parsed.push({
+                        id: index,
+                        timeFormatted: `${hours > 0 ? match[1] + ':' : ''}${match[2]}:${match[3]}`,
+                        seconds: totalSeconds,
+                        cn: cnText,
+                        pinyin: pinyinText,
+                        vietHan: vietHanText,
+                        en: enText,
+                        vietTrans: vietTransText,
+                        // Search text combined
+                        searchText: (cnText + ' ' + pinyinText + ' ' + vietHanText + ' ' + enText + ' ' + vietTransText).toLowerCase()
+                    });
+                }
+            });
+            return parsed;
+        }
+
+        // 3. Analyze Vocabulary (unchanged logic)
+        function analyzeVocabulary(items) {
+            const allChars = new Set();
+            items.forEach(item => {
+                const chars = item.cn.match(/[\u4e00-\u9fa5]/g);
+                if (chars) chars.forEach(c => allChars.add(c));
+            });
+
+            let inCount = 0;
+            let outCount = 0;
+            const total = allChars.size;
+
+            allChars.forEach(char => {
+                if (tamThienTuSet.has(char)) inCount++;
+                else outCount++;
+            });
+
+            const inPerc = total > 0 ? Math.round((inCount / total) * 100) : 0;
+            const outPerc = total > 0 ? 100 - inPerc : 0;
+
+            document.getElementById('uniqueCharCount').textContent = total;
+            document.getElementById('inTTTCount').textContent = inCount;
+            document.getElementById('inTTTPerc').textContent = `${inPerc}%`;
+            document.getElementById('outTTTCount').textContent = outCount;
+            document.getElementById('outTTTPerc').textContent = `${outPerc}%`;
+
+            const commentEl = document.getElementById('analysisComment');
+            if (inPerc > 80) commentEl.textContent = `Văn bản sử dụng phần lớn là các chữ căn bản (${inPerc}%), cho thấy ngôn ngữ kinh điển khá gần gũi và dễ tiếp cận với người có vốn Hán ngữ cơ sở.`;
+            else if (inPerc > 50) commentEl.textContent = `Văn bản có sự kết hợp cân bằng giữa từ vựng căn bản và thuật ngữ chuyên sâu.`;
+            else commentEl.textContent = `Văn bản chứa nhiều thuật ngữ chuyên môn hoặc chữ hiếm gặp, cần tra cứu kỹ.`;
+
+            renderVocabChart(inCount, outCount);
+        }
+
+        function renderVocabChart(inCount, outCount) {
+            const ctx = document.getElementById('vocabChart').getContext('2d');
+            if(vocabChartInstance) vocabChartInstance.destroy();
+            
+            // Determine if dark mode is active (by checking body bg color)
+            const isDark = getComputedStyle(document.body).backgroundColor === 'rgb(28, 25, 23)'; // Stone 900
+            const textColor = isDark ? '#e7e5e4' : '#44403c';
+
+            vocabChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Trong Tam Thiên Tự', 'Ngoài danh sách'],
+                    datasets: [{
+                        data: [inCount, outCount],
+                        backgroundColor: ['#22c55e', '#f59e0b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { 
+                                usePointStyle: true, 
+                                font: { family: "'Noto Sans', sans-serif" },
+                                color: textColor
+                            } 
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw;
+                                    const total = context.chart._metasets[context.datasetIndex].total;
+                                    const perc = Math.round((val/total)*100) + '%';
+                                    return ` ${context.label}: ${val} (${perc})`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // 4. Render List (Updated with Audio Button)
+        function renderList(items) {
+            const container = document.getElementById('transcriptContainer');
+            container.innerHTML = '';
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="p-8 text-center text-stone-500 flex flex-col items-center gap-2"><span class="text-2xl">📭</span><span>Không tìm thấy nội dung phù hợp.</span></div>';
+                document.getElementById('visibleCount').textContent = '0 câu';
+                return;
+            }
+
+            items.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.id = `line-${item.id}`;
+                div.className = 'transcript-item p-4 rounded-lg cursor-pointer mb-2';
+                div.onclick = () => jumpToTime(item.seconds);
+                
+                let processedCn = item.cn;
+                if (analysisMode) {
+                    processedCn = item.cn.split('').map(char => {
+                        if (/[\u4e00-\u9fa5]/.test(char)) {
+                            if (tamThienTuSet.has(char)) {
+                                return `<span class="char-basic" title="Có trong Tam Thiên Tự">${char}</span>`;
+                            } else {
+                                return `<span class="char-advanced" title="Không có trong danh sách">${char}</span>`;
+                            }
+                        }
+                        return char;
+                    }).join('');
+                }
+
+                // Add Audio Button (Stop propagation to prevent jump when clicking audio)
+                // Note: We send Chinese text (item.cn) to the TTS engine because engines pronounce Hanzi correctly as Pinyin.
+                div.innerHTML = `
+                    <div class="flex gap-4 items-start relative pr-8">
+                        <span class="text-xs font-mono text-amber-500 bg-amber-900/30 px-2 py-1 rounded h-fit shrink-0 mt-2 border border-amber-800/50">${item.timeFormatted}</span>
+                        <div class="flex-1 space-y-1">
+                            <div class="cn-text text-xl">${processedCn}</div>
+                            <div class="pinyin-text">${item.pinyin}</div>
+                            <div class="viet-han-text">${item.vietHan}</div>
+                            <div class="viet-trans-text">${item.vietTrans}</div>
+                            <div class="en-text">${item.en}</div>
+                        </div>
+                        <button id="audio-btn-${item.id}" 
+                                onclick="event.stopPropagation(); speakText('${item.cn.replace(/'/g, "\\'")}', 'audio-btn-${item.id}')" 
+                                class="absolute right-0 top-2 text-stone-600 hover:text-amber-500 transition-all p-2 rounded-full hover:bg-stone-700/50 audio-btn" 
+                                title="Nghe đọc Pinyin">
+                            🔊
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            
+            document.getElementById('visibleCount').textContent = `${items.length} câu`;
+        }
+
+        // 5. Initialize Stats & Jump
+        function initJumpSelect(data) {
+            const select = document.getElementById('jumpSelect');
+            if(data.length === 0) return;
+            const totalMinutes = Math.ceil(data[data.length - 1].seconds / 60);
+            select.innerHTML = '<option value="0">00:00 - Khởi đầu</option>';
+            for(let i = 1; i <= totalMinutes; i++) {
+                const option = document.createElement('option');
+                option.value = i * 60;
+                option.textContent = `${i < 10 ? '0'+i : i}:00`;
+                select.appendChild(option);
+            }
+            select.addEventListener('change', (e) => jumpToTime(parseInt(e.target.value)));
+        }
+
+        // 6. Simulation Logic
+        function jumpToTime(seconds) {
+            currentSimulationTime = seconds;
+            updateTimeDisplay(currentSimulationTime);
+            highlightCurrentLine();
+            scrollToActive();
+        }
+        function updateTimeDisplay(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            const formatted = `${h > 0 ? h + ':' : ''}${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+            document.getElementById('currentTimeDisplay').textContent = formatted;
+        }
+        function highlightCurrentLine() {
+            let activeItem = null;
+            for (let i = transcripts.length - 1; i >= 0; i--) {
+                if (transcripts[i].seconds <= currentSimulationTime) {
+                    activeItem = transcripts[i];
+                    break;
+                }
+            }
+            
+            // Check if active item changed
+            const currentActive = document.querySelector('.active-line');
+            const newActiveId = activeItem ? `line-${activeItem.id}` : null;
+            
+            if (currentActive && currentActive.id !== newActiveId) {
+                currentActive.classList.remove('active-line');
+            }
+
+            if (activeItem && (!currentActive || currentActive.id !== newActiveId)) {
+                const el = document.getElementById(newActiveId);
+                if (el) {
+                    el.classList.add('active-line');
+                    // Auto Read Logic
+                    if(isPlaying && document.getElementById('autoRead').checked) {
+                        speakText(activeItem.cn, `audio-btn-${activeItem.id}`);
+                    }
+                }
+            }
+        }
+        function scrollToActive() {
+            const active = document.querySelector('.active-line');
+            if (active) active.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        function togglePlay() {
+            const btnPlay = document.getElementById('btnPlay');
+            const btnPause = document.getElementById('btnPause');
+            if (isPlaying) {
+                clearInterval(simulationInterval);
+                window.speechSynthesis.cancel(); // Stop audio on pause
+                isPlaying = false;
+                btnPlay.classList.remove('hidden'); btnPlay.classList.add('flex');
+                btnPause.classList.add('hidden');
+            } else {
+                isPlaying = true;
+                btnPlay.classList.add('hidden');
+                btnPause.classList.remove('hidden'); btnPause.classList.add('flex');
+                
+                // Trigger immediate highlight check for audio start
+                highlightCurrentLine();
+
+                simulationInterval = setInterval(() => {
+                    currentSimulationTime++;
+                    updateTimeDisplay(currentSimulationTime);
+                    highlightCurrentLine(); // This triggers audio if needed
+                    if(currentSimulationTime % 2 === 0) scrollToActive();
+                    if (transcripts.length > 0 && currentSimulationTime > transcripts[transcripts.length-1].seconds + 20) togglePlay();
+                }, 1000 / simulationSpeed);
+            }
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            transcripts = parseSubtitles(rawSubtitleData);
+            analyzeVocabulary(transcripts);
+            renderList(transcripts);
+            initJumpSelect(transcripts);
+            
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = transcripts.filter(t => 
+                    t.searchText.includes(term) || t.timeFormatted.includes(term)
+                );
+                renderList(filtered);
+            });
+
+            document.getElementById('btnPlay').addEventListener('click', togglePlay);
+            document.getElementById('btnPause').addEventListener('click', togglePlay);
+            document.getElementById('btnReset').addEventListener('click', () => {
+                if(isPlaying) togglePlay();
+                jumpToTime(0);
+            });
+
+            const tttBtn = document.getElementById('tttToggle');
+            tttBtn.addEventListener('click', () => {
+                analysisMode = !analysisMode;
+                if (analysisMode) {
+                    tttBtn.classList.add('bg-green-900', 'border-green-700', 'ring-2', 'ring-green-500', 'ring-offset-1', 'ring-offset-stone-900');
+                    tttBtn.classList.remove('bg-stone-800');
+                    document.getElementById('transcriptContainer').classList.add('analysis-mode-active');
+                    document.getElementById('analysisLegend').classList.remove('hidden');
+                    
+                    const term = document.getElementById('searchInput').value.toLowerCase();
+                    const currentItems = transcripts.filter(t => t.searchText.includes(term));
+                    renderList(currentItems);
+                    highlightCurrentLine();
+                    scrollToActive();
+                    document.getElementById('analysisLegend').scrollIntoView({behavior: 'smooth', block: 'center'});
+                } else {
+                    tttBtn.classList.remove('bg-green-900', 'border-green-700', 'ring-2', 'ring-green-500', 'ring-offset-1', 'ring-offset-stone-900');
+                    tttBtn.classList.add('bg-stone-800');
+                    document.getElementById('transcriptContainer').classList.remove('analysis-mode-active');
+                    document.getElementById('analysisLegend').classList.add('hidden');
+                    
+                    const term = document.getElementById('searchInput').value.toLowerCase();
+                    renderList(transcripts.filter(t => t.searchText.includes(term)));
+                    highlightCurrentLine();
+                }
+            });
+
+            const modeBtn = document.getElementById('modeToggle');
+            let isLightMode = false; // Default is Dark now
+            modeBtn.addEventListener('click', () => {
+                isLightMode = !isLightMode;
+                const body = document.body;
+                
+                // Toggle Logic
+                if(isLightMode) {
+                    // Switch to LIGHT
+                    body.style.backgroundColor = '#fdfbf7'; 
+                    body.style.color = '#44403c';
+                    modeBtn.textContent = "🌙 Chế độ Tối";
+                    modeBtn.classList.remove('text-stone-300');
+                    modeBtn.classList.add('text-stone-700', 'bg-stone-100');
+
+                    // Global elements styles for Light
+                    document.querySelectorAll('.bg-stone-900').forEach(el => el.classList.replace('bg-stone-900', 'bg-white'));
+                    document.querySelectorAll('.bg-stone-800').forEach(el => el.classList.replace('bg-stone-800', 'bg-white'));
+                    document.querySelectorAll('.text-stone-200').forEach(el => el.classList.replace('text-stone-200', 'text-stone-800'));
+                    document.querySelectorAll('.text-stone-400').forEach(el => el.classList.replace('text-stone-400', 'text-stone-500'));
+                    
+                    // Specific Text Colors
+                    const cnEls = document.querySelectorAll('.cn-text');
+                    cnEls.forEach(el => el.style.color = '#292524');
+                    const vietHanEls = document.querySelectorAll('.viet-han-text');
+                    vietHanEls.forEach(el => el.style.color = '#b45309');
+                    const vietTransEls = document.querySelectorAll('.viet-trans-text');
+                    vietTransEls.forEach(el => el.style.color = '#15803d');
+                    const enEls = document.querySelectorAll('.en-text');
+                    enEls.forEach(el => el.style.color = '#57534e');
+                    
+                } else {
+                    // Switch to DARK (Default)
+                    body.style.backgroundColor = '#1c1917'; 
+                    body.style.color = '#e7e5e4';
+                    modeBtn.textContent = "☀️ Chế độ Sáng";
+                    modeBtn.classList.add('text-stone-300');
+                    modeBtn.classList.remove('text-stone-700', 'bg-stone-100');
+                    
+                    location.reload(); 
+                }
+            });
+        });
+    </script>
+</body>
+</html>
