@@ -1,1 +1,980 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinh Địa Tạng - Phẩm 12 (Audio Pinyin)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#1c1917',      /* Stone 900 */
+                            card: '#292524',    /* Stone 800 */
+                            border: '#44403c',  /* Stone 700 */
+                            text: '#e7e5e4',    /* Stone 200 */
+                            muted: '#a8a29e'    /* Stone 400 */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Noto+Sans:wght@300;400;500;600&family=Be+Vietnam+Pro:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&display=swap'); /* Font for Chinese */
+        
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background-color: #1c1917; /* Stone 900 - Dark Mode Default */
+            color: #e7e5e4; /* Stone 200 */
+        }
+        
+        h1, h2, h3, .serif {
+            font-family: 'Noto Serif', serif;
+        }
 
+        .chart-container {
+            position: relative; 
+            width: 100%; 
+            max-width: 800px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 300px; 
+            max-height: 400px; 
+        }
+
+        /* Custom scrollbar - Dark version */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #292524;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: #57534e;
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background-color: #78716c;
+        }
+
+        /* Active line - Dark version */
+        .active-line {
+            background-color: #451a03; /* Amber 950/Darker */
+            border-left: 4px solid #f59e0b; /* Amber 500 */
+            padding-left: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .transcript-item {
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+            border-bottom: 1px solid #44403c; /* Stone 700 */
+            position: relative; /* For absolute positioning of audio button */
+        }
+        .transcript-item:hover {
+            background-color: #292524; /* Stone 800 */
+            border-left-color: #57534e;
+        }
+
+        /* Typography for multi-lingual display - DARK MODE COLORS */
+        .cn-text {
+            font-family: "Noto Serif SC", "SimSun", serif;
+            font-size: 1.6em;
+            color: #e7e5e4; /* Stone 200 - White-ish */
+            margin-bottom: 0.2rem;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+        .pinyin-text {
+            color: #a8a29e; /* Stone 400 - Light Gray */
+            font-size: 0.85em;
+            margin-bottom: 0.35rem;
+            font-family: 'Noto Sans', sans-serif;
+            font-style: italic;
+        }
+        .viet-han-text {
+            color: #fbbf24; /* Amber 400 - Bright Amber */
+            font-size: 1.05em;
+            font-weight: 700;
+            line-height: 1.5;
+            font-family: 'Noto Serif', serif;
+            margin-bottom: 0.2rem;
+        }
+        .viet-trans-text {
+            color: #86efac; /* Green 300 - Light Green */
+            font-size: 1.05em;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            line-height: 1.6;
+            margin-bottom: 0.2rem;
+            font-weight: 500;
+        }
+        .en-text {
+            color: #78716c; /* Stone 500 - Dim Gray */
+            font-size: 0.9em;
+            font-style: italic;
+            font-family: 'Noto Serif', serif;
+            line-height: 1.4;
+            opacity: 0.8;
+        }
+
+        /* Highlight classes for Tam Thien Tu analysis - Dark Mode Adapted */
+        .char-basic {
+            color: #14532d; /* Green 900 */
+            background-color: #86efac; /* Green 300 */
+            border-radius: 2px;
+            padding: 0 2px;
+            font-weight: bold;
+        }
+        .char-advanced {
+            color: #f59e0b; /* Amber 500 */
+            border-bottom: 1px dotted #f59e0b;
+        }
+        
+        .analysis-mode-active .cn-text {
+            line-height: 1.8;
+        }
+        
+        /* Audio Button Pulse Animation */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        .speaking-active .audio-btn {
+            color: #fbbf24;
+            animation: pulse-ring 2s infinite;
+        }
+
+        /* Utility for input placeholder in dark mode */
+        ::placeholder {
+            color: #78716c;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Navigation / Header -->
+    <header class="bg-stone-900 shadow-md border-b border-stone-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- NÚT QUAY LẠI TRANG CHỦ -->
+                <a href="index.html" class="flex items-center gap-3 group decoration-0" title="Quay về Mục Lục">
+                    <div class="w-9 h-9 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold serif shadow-sm shadow-amber-900 group-hover:bg-amber-600 transition-colors">
+                        <span class="block group-hover:hidden">Đ</span>
+                        <span class="hidden group-hover:block">⬅</span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg md:text-xl font-bold text-stone-200 tracking-wide serif leading-tight group-hover:text-amber-500 transition-colors">Kinh Địa Tạng</h1>
+                        <p class="text-xs text-stone-500 font-medium">Phẩm 12: Thấy Nghe Được Lợi Ích</p>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="hidden md:flex gap-6 text-sm font-medium text-stone-400">
+                <!-- MENU MỤC LỤC -->
+                <a href="index.html" class="hover:text-amber-500 transition-colors flex items-center gap-1 text-amber-500/80">
+                    <span>📚</span> Mục Lục
+                </a>
+                <a href="#dashboard" class="hover:text-amber-500 transition-colors">Tổng Quan</a>
+                <a href="#hanzi-analysis" class="hover:text-amber-500 transition-colors">Phân Tích Hán Tự</a>
+                <a href="#transcript" class="hover:text-amber-500 transition-colors">Nội Dung</a>
+            </nav>
+            
+            <div class="flex gap-2">
+                <button id="tttToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-green-400 rounded-md text-sm font-medium transition-colors border border-stone-700" title="Tô màu chữ có trong Tam Thiên Tự">
+                    🌿 Soi Tam Thiên Tự
+                </button>
+                <button id="modeToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-md text-sm font-medium transition-colors border border-stone-700">
+                    ☀️ Chế độ Sáng
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8 space-y-10 max-w-6xl">
+
+        <!-- Hanzi Analysis Dashboard -->
+        <section id="hanzi-analysis" class="bg-stone-800 p-6 md:p-8 rounded-2xl shadow-lg border border-stone-700">
+            <div class="mb-6 pb-4 border-b border-stone-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h3 class="text-xl font-bold text-stone-200 flex items-center gap-2 serif">
+                        <span class="text-green-500">📖</span> Phân Tích Từ Vựng (Tam Thiên Tự)
+                    </h3>
+                    <p class="text-sm text-stone-400 mt-1">
+                        Đối chiếu chữ Hán trong Phẩm 12 với danh sách 3.000 chữ căn bản.
+                    </p>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-stone-200" id="uniqueCharCount">0</div>
+                    <div class="text-xs text-stone-500">Tổng chữ Hán duy nhất (không lặp)</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Chart -->
+                <div class="col-span-1 h-64 chart-container flex items-center justify-center">
+                    <canvas id="vocabChart"></canvas>
+                </div>
+
+                <!-- Details -->
+                <div class="col-span-2 space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-green-900/20 rounded-lg border border-green-800/50">
+                            <div class="text-sm text-green-400 font-medium mb-1">Thuộc Tam Thiên Tự</div>
+                            <div class="text-3xl font-bold text-green-500" id="inTTTCount">0</div>
+                            <div class="text-xs text-green-400/70 mt-1" id="inTTTPerc">0%</div>
+                        </div>
+                        <div class="p-4 bg-amber-900/20 rounded-lg border border-amber-800/50">
+                            <div class="text-sm text-amber-400 font-medium mb-1">Ngoài Tam Thiên Tự</div>
+                            <div class="text-3xl font-bold text-amber-500" id="outTTTCount">0</div>
+                            <div class="text-xs text-amber-400/70 mt-1" id="outTTTPerc">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-stone-900/50 p-4 rounded-lg text-sm text-stone-400 border border-stone-700">
+                        <p class="mb-2 font-semibold text-stone-300">Nhận xét:</p>
+                        <p id="analysisComment">Đang phân tích dữ liệu...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transcript & Interactive Player -->
+        <section id="transcript" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Controls Column (Left) -->
+            <div class="lg:col-span-4 bg-stone-800 p-6 rounded-xl shadow-lg border border-stone-700 sticky top-24">
+                <h3 class="text-lg font-bold text-stone-200 mb-4 serif border-b pb-2 border-stone-700">Bảng Điều Khiển</h3>
+                
+                <div class="space-y-6">
+                    <!-- Simulation Controls -->
+                    <div class="p-4 bg-amber-900/20 rounded-lg border border-amber-800/30">
+                        <p class="text-sm text-amber-500 mb-3 font-semibold flex items-center gap-2">
+                            🎧 Mô phỏng tụng
+                        </p>
+                        <div class="flex gap-2">
+                            <button id="btnPlay" class="flex-1 bg-amber-700 hover:bg-amber-600 text-white py-2.5 px-4 rounded shadow-sm text-sm font-medium transition-colors flex justify-center items-center gap-2">
+                                <span>▶</span> Bắt đầu
+                            </button>
+                            <button id="btnPause" class="flex-1 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-amber-400 py-2.5 px-4 rounded shadow-sm text-sm font-medium transition-colors hidden">
+                                <span>⏸</span> Tạm dừng
+                            </button>
+                            <button id="btnReset" class="px-3 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-stone-300 rounded shadow-sm transition-colors" title="Quay lại từ đầu">
+                                ↺
+                            </button>
+                        </div>
+                        <div class="flex justify-between items-center mt-3 px-1">
+                            <span class="text-xs text-amber-500 font-mono" id="currentTimeDisplay">00:00</span>
+                            <span class="text-xs text-amber-500/50">Tự động cuộn</span>
+                        </div>
+                        <div class="mt-3 flex items-center gap-2">
+                            <input type="checkbox" id="autoRead" class="rounded border-stone-600 text-amber-600 focus:ring-amber-500 bg-stone-900">
+                            <label for="autoRead" class="text-xs text-stone-400 cursor-pointer select-none">Tự động đọc Pinyin khi chạy</label>
+                        </div>
+                    </div>
+
+                    <!-- Search/Filter -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-stone-500 mb-1.5 tracking-wide">Tìm kiếm</label>
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="Tìm kiếm (Việt, Anh, Hán)..." 
+                                   class="w-full pl-9 pr-3 py-2 bg-stone-900 border border-stone-700 text-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm shadow-sm placeholder-stone-600">
+                            <span class="absolute left-3 top-2.5 text-stone-500">🔍</span>
+                        </div>
+                    </div>
+
+                    <!-- Jump To -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-stone-500 mb-1.5 tracking-wide">Chuyển nhanh</label>
+                        <select id="jumpSelect" class="w-full px-3 py-2 border border-stone-700 rounded-lg bg-stone-900 text-stone-300 text-sm focus:ring-amber-500 focus:border-amber-500 shadow-sm cursor-pointer hover:bg-stone-950">
+                            <option value="0">00:00 - Khởi đầu</option>
+                            <!-- Options populated by JS -->
+                        </select>
+                    </div>
+
+                    <!-- Legend for Analysis -->
+                    <div id="analysisLegend" class="hidden p-4 bg-stone-900/50 rounded-lg border border-stone-700">
+                        <p class="text-xs font-bold text-stone-500 uppercase mb-2">Chú giải màu sắc</p>
+                        <div class="flex flex-col gap-2 text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="px-1 bg-green-300 text-green-900 rounded font-bold font-serif">天</span>
+                                <span class="text-stone-400">Có trong Tam Thiên Tự</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-1 text-amber-500 font-serif border-b border-dotted border-amber-500">忉</span>
+                                <span class="text-stone-400">Không có trong danh sách</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List Column (Right) -->
+            <div class="lg:col-span-8">
+                <div class="bg-stone-800 rounded-xl shadow-lg border border-stone-700 overflow-hidden flex flex-col h-[700px]">
+                    <div class="p-4 border-b border-stone-700 bg-stone-800/80 flex flex-wrap gap-2 justify-between items-center backdrop-blur-sm sticky top-0 z-10">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-stone-300 serif">Nội Dung Kinh Văn</span>
+                            <span class="px-2 py-0.5 text-xs bg-stone-700 text-stone-300 rounded border border-stone-600">Hán</span>
+                            <span class="px-2 py-0.5 text-xs bg-amber-900/40 text-amber-400 rounded border border-amber-800/50">Âm</span>
+                            <span class="px-2 py-0.5 text-xs bg-green-900/40 text-green-400 rounded border border-green-800/50">Nghĩa</span>
+                            <span class="px-2 py-0.5 text-xs bg-stone-700/50 text-stone-500 rounded border border-stone-700">Anh</span>
+                        </div>
+                        <span class="text-xs text-stone-400 bg-stone-700 px-2.5 py-1 rounded-full font-medium" id="visibleCount">0 câu</span>
+                    </div>
+                    
+                    <div id="transcriptContainer" class="flex-1 overflow-y-auto custom-scroll p-2 space-y-1 relative scroll-smooth bg-stone-900">
+                        <!-- Content populated by JS -->
+                        <div class="flex flex-col items-center justify-center h-full text-stone-600 gap-2">
+                            <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Đang tải dữ liệu...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-950 text-stone-500 py-10 mt-12 border-t border-stone-800">
+        <div class="container mx-auto px-4 text-center">
+            <div class="serif text-xl text-stone-400 mb-3">Nam Mô Đại Nguyện Địa Tạng Vương Bồ Tát</div>
+            <p class="text-sm opacity-60">Dữ liệu được trích xuất từ nguồn: A Di Đà Phật TV (YouTube)</p>
+            <p class="text-xs opacity-40 mt-2">Phân tích dựa trên danh sách Tam Thiên Tự (~3000 chữ căn bản)</p>
+        </div>
+    </footer>
+
+    <!-- RAW DATA STORAGE -->
+    <script>
+        // Updated Data for Chapter 12
+        const rawSubtitleData = `
+[00:00:00] 地藏菩萨本愿经 见闻利益品第十二 | dì zàng pú sà běn yuàn jīng jiàn wén lì yì pǐn dì shí èr | Địa Tạng Bồ Tát Bổn Nguyện Kinh - Kiến Văn Lợi Ích Phẩm Đệ Thập Nhị | Sutra of the Past Vows of Earth Store Bodhisattva - Chapter 12: Benefits from Seeing and Hearing | Kinh Địa Tạng Bồ Tát Bổn Nguyện - Phẩm thứ mười hai: Thấy Nghe Được Lợi Ích.
+[00:00:10] 尔时世尊从顶门上。放百千万亿大毫相光。 | ěr shí shì zūn cóng dǐng mén shàng 。 fàng bǎi qiān wàn yì dà háo xiàng guāng 。 | Nhĩ thời Thế Tôn tùng đảnh môn thượng. Phóng bách thiên vạn ức đại hào tướng quang. | At that time the World Honored One emitted hundreds of thousands of millions of great mark of the hair-curls lights from the door of his crown. | Lúc đó, từ nơi đảnh môn, đức Thế Tôn phóng ra trăm nghìn muôn ức tia sáng hào quang lớn.
+[00:00:19] 所谓白毫相光。大白毫相光。瑞毫相光。大瑞毫相光。 | suǒ wèi bái háo xiàng guāng 。 dà bái háo xiàng guāng 。 ruì háo xiàng guāng 。 dà ruì háo xiàng guāng 。 | Sở vị Bạch hào tướng quang. Đại Bạch hào tướng quang. Thụy hào tướng quang. Đại Thụy hào tướng quang. | Specifically: The White Hair-Curl Light, the Great White Hair-Curl Light, the Auspicious Hair-Curl Light, the Great Auspicious Hair-Curl Light. | Như là: tia sáng bạch hào, tia sáng đại bạch hào, tia sáng thụy hào, tia sáng đại thụy hào.
+[00:00:27] 玉毫相光。大玉毫相光。紫毫相光。大紫毫相光。 | yù háo xiàng guāng 。 dà yù háo xiàng guāng 。 zǐ háo xiàng guāng 。 dà zǐ háo xiàng guāng 。 | Ngọc hào tướng quang. Đại Ngọc hào tướng quang. Tử hào tướng quang. Đại Tử hào tướng quang. | The Jade Hair-Curl Light, the Great Jade Hair-Curl Light, the Purple Hair-Curl Light, the Great Purple Hair-Curl Light. | Tia sáng ngọc hào, tia sáng đại ngọc hào, tia sáng tử hào, tia sáng đại tử hào.
+[00:00:35] 青毫相光。大青毫相光。碧毫相光。大碧毫相光。 | qīng háo xiàng guāng 。 dà qīng háo xiàng guāng 。 bì háo xiàng guāng 。 dà bì háo xiàng guāng 。 | Thanh hào tướng quang. Đại Thanh hào tướng quang. Bích hào tướng quang. Đại Bích hào tướng quang. | The Blue Hair-Curl Light, the Great Blue Hair-Curl Light, the Azure Hair-Curl Light, the Great Azure Hair-Curl Light. | Tia sáng thanh hào, tia sáng đại thanh hào, tia sáng bích hào, tia sáng đại bích hào.
+[00:00:43] 红毫相光。大红毫相光。绿毫相光。大绿毫相光。 | hóng háo xiàng guāng 。 dà hóng háo xiàng guāng 。 lǜ háo xiàng guāng 。 dà lǜ háo xiàng guāng 。 | Hồng hào tướng quang. Đại Hồng hào tướng quang. Lục hào tướng quang. Đại Lục hào tướng quang. | The Red Hair-Curl Light, the Great Red Hair-Curl Light, the Green Hair-Curl Light, the Great Green Hair-Curl Light. | Tia sáng hồng hào, tia sáng đại hồng hào, tia sáng lục hào, tia sáng đại lục hào.
+[00:00:51] 金毫相光。大金毫相光。庆云毫相光。大庆云毫相光。 | jīn háo xiàng guāng 。 dà jīn háo xiàng guāng 。 qìng yún háo xiàng guāng 。 dà qìng yún háo xiàng guāng 。 | Kim hào tướng quang. Đại Kim hào tướng quang. Khánh vân hào tướng quang. Đại Khánh vân hào tướng quang. | The Golden Hair-Curl Light, the Great Golden Hair-Curl Light, the Celebration Cloud Hair-Curl Light, the Great Celebration Cloud Hair-Curl Light. | Tia sáng kim hào, tia sáng đại kim hào, tia sáng khánh vân hào, tia sáng đại khánh vân hào.
+[00:00:59] 千轮毫光。大千轮毫光。宝轮毫光。大宝轮毫光。 | qiān lún háo guāng 。 dà qiān lún háo guāng 。 bǎo lún háo guāng 。 dà bǎo lún háo guāng 。 | Thiên luân hào quang. Đại Thiên luân hào quang. Bảo luân hào quang. Đại Bảo luân hào quang. | The Thousand-Wheeled Hair-Curl Light, the Great Thousand-Wheeled Hair-Curl Light, the Jeweled Wheel Hair-Curl Light, the Great Jeweled Wheel Hair-Curl Light. | Tia sáng thiên luân hào, tia sáng đại thiên luân hào, tia sáng bảo luân hào, tia sáng đại bảo luân hào.
+[00:01:07] 日轮毫光。大日轮毫光。月轮毫光。大月轮毫光。 | rì lún háo guāng 。 dà rì lún háo guāng 。 yuè lún háo guāng 。 dà yuè lún háo guāng 。 | Nhật luân hào quang. Đại Nhật luân hào quang. Nguyệt luân hào quang. Đại Nguyệt luân hào quang. | The Sun Wheel Hair-Curl Light, the Great Sun Wheel Hair-Curl Light, the Moon Wheel Hair-Curl Light, the Great Moon Wheel Hair-Curl Light. | Tia sáng nhật luân hào, tia sáng đại nhật luân hào, tia sáng nguyệt luân hào, tia sáng đại nguyệt luân hào.
+[00:01:15] 宫殿毫光。大宫殿毫光。海云毫光。大海云毫光。 | gōng diàn háo guāng 。 dà gōng diàn háo guāng 。 hǎi yún háo guāng 。 dà hǎi yún háo guāng 。 | Cung điện hào quang. Đại Cung điện hào quang. Hải vân hào quang. Đại Hải vân hào quang. | The Palace Hair-Curl Light, the Great Palace Hair-Curl Light, the Sea Cloud Hair-Curl Light, the Great Sea Cloud Hair-Curl Light. | Tia sáng cung điện hào, tia sáng đại cung điện hào, tia sáng hải vân hào, tia sáng đại hải vân hào.
+[00:01:23] 于顶门上放如是等毫相光已。出微妙音。告诸大众。 | yú dǐng mén shàng fàng rú shì děng háo xiàng guāng yǐ 。 chū wēi miào yīn 。 gào zhū dà zhòng 。 | Ư đảnh môn thượng phóng như thị đẳng hào tướng quang dĩ. Xuất vi diệu âm. Cáo chư đại chúng. | After emitting such mark of the hair-curls lights from the door of his crown, he spoke in a subtle, wonderful voice to the great assembly... | Từ nơi đảnh môn phóng ra những luồng hào quang như thế xong, lại nói ra tiếng vi diệu bảo đại chúng rằng:
+[00:01:31] 天龙八部。人非人等。听吾今日于忉利天宫。 | tiān lóng bā bù 。 rén fēi rén děng 。 tīng wú jīn rì yú dāo lì tiān gōng 。 | Thiên Long Bát Bộ. Nhân phi nhân đẳng. Thính ngô kim nhật ư Đao Lợi Thiên cung. | "...gods, dragons, and the rest of the Eightfold Division, humans, non-humans, and others: Listen as I today in the Palace of the Trayastrimsa Heaven..." | "Này trời, rồng, bát bộ, nhân, phi nhân v.v... lóng nghe hôm nay Ta ở tại cung trời Đao Lợi..."
+[00:01:38] 称扬赞叹地藏菩萨。于人天中。 | chēng yáng zàn tàn dì zàng pú sà 。 yú rén tiān zhōng 。 | Xưng dương tán thán Địa Tạng Bồ Tát. Ư nhân thiên trung. | "...praise and extol Earth Store Bodhisattva for his beneficial deeds among humans and gods..." | "...khen ngợi ngài Địa Tạng Bồ Tát, hay làm những việc lợi ích cho hàng Trời Người..."
+[00:01:43] 利益等事。不思议事。超圣因事。 | lì yì děng shì 。 bù sī yì shì 。 chāo shèng yīn shì 。 | Lợi ích đẳng sự. Bất tư nghị sự. Siêu Thánh nhân sự. | "...inconceivable deeds, deeds transcending the sagely causes..." | "...những sự không thể nghĩ bàn, những sự về nhân hạnh siêu Thánh..."
+[00:01:48] 证十地事。毕竟不退阿耨多罗三藐三菩提事。 | zhèng shí dì shì 。 bì jìng bù tuì ā nòu duō luó sān miǎo sān pú tí shì 。 | Chứng Thập Địa sự. Tất cánh bất thối A Nậu Đa La Tam Miệu Tam Bồ Đề sự. | "...deeds of certifying to the Tenth Ground, and deeds of ultimately not retreating from Anuttarasamyaksambodhi." | "...những sự chứng quả Thập Địa, những sự rốt ráo không lui sụt đạo Vô Thượng Chánh Đẳng Chánh Giác."
+[00:01:55] 说是语时。会中有一菩萨摩诃萨。名观世音。 | shuō shì yǔ shí 。 huì zhōng yǒu yī pú sà mó hē sà 。 míng guān shì yīn 。 | Thuyết thị ngữ thời. Hội trung hữu nhất Bồ Tát Ma Ha Tát. Danh Quan Thế Âm. | When he had spoken these words, a Bodhisattva Mahasattva named Avalokitesvara (Guanyin) in the assembly... | Nói lời ấy xong, trong pháp hội có một vị Bồ Tát Ma Ha Tát tên là Quan Thế Âm...
+[00:02:02] 从座而起。胡跪合掌白佛言。世尊。 | cóng zuò ér qǐ 。 hú guì hé zhǎng bái fó yán 。 shì zūn 。 | Tùng tòa nhi khởi. Hồ quỳ hợp chưởng bạch Phật ngôn. Thế Tôn. | ...rose from his seat, knelt, placed his palms together, and said to the Buddha: "World Honored One..." | ...từ chỗ ngồi đứng dậy, quỳ gối chắp tay bạch cùng đức Phật rằng: "Bạch Thế Tôn!..."
+[00:02:07] 是地藏菩萨摩诃萨。具大慈悲。怜愍罪苦众生。 | shì dì zàng pú sà mó hē sà 。 jù dà cí bēi 。 lián mǐn zuì kǔ zhòng shēng 。 | Thị Địa Tạng Bồ Tát Ma Ha Tát. Cụ đại từ bi. Lân mẫn tội khổ chúng sanh. | "...this Earth Store Bodhisattva Mahasattva has great compassion and pities suffering living beings." | "...Ngài Địa Tạng Bồ Tát đầy đủ lòng đại từ bi, thương xót chúng sanh mắc tội khổ..."
+[00:02:14] 于千万亿世界。化千万亿身。所有功德及不思议威神之力。 | yú qiān wàn yì shì jiè 。 huà qiān wàn yì shēn 。 suǒ yǒu gōng dé jí bù sī yì wēi shén zhī lì 。 | Ư thiên vạn ức thế giới. Hóa thiên vạn ức thân. Sở hữu công đức cập bất tư nghị oai thần chi lực. | "In thousands of millions of worlds, he manifests thousands of millions of bodies. His merit and inconceivable awesome spiritual power..." | "...ở trong nghìn muôn ức thế giới hóa hiện nghìn muôn ức thân. Bao nhiêu công đức và sức oai thần chẳng thể nghĩ bàn của Ngài..."
+[00:02:24] 我闻世尊。与十方无量诸佛。异口同音。赞叹地藏菩萨。 | wǒ wén shì zūn 。 yǔ shí fāng wú liàng zhū fó 。 yì kǒu tóng yīn 。 zàn tàn dì zàng pú sà 。 | Ngã văn Thế Tôn. Dữ thập phương vô lượng chư Phật. Dị khẩu đồng âm. Tán thán Địa Tạng Bồ Tát. | "...I have heard the World Honored One and the immeasurable Buddhas of the ten directions all praise Earth Store Bodhisattva in unison." | "...con đã nghe đức Thế Tôn cùng vô lượng chư Phật trong mười phương, khác miệng đồng lời ngợi khen Ngài Địa Tạng Bồ Tát."
+[00:02:34] 云使过去现在未来诸佛说其功德。犹不能尽。 | yún shǐ guò qù xiàn zài wèi lái zhū fó shuō qí gōng dé 。 yóu bù néng jìn 。 | Vân sử quá khứ hiện tại vị lai chư Phật thuyết kỳ công đức. Do bất năng tận. | "Even if all the Buddhas of the past, present, and future were to speak of his merit, they still could not finish." | "Dẫu cho các đức Phật trong đời quá khứ, hiện tại, vị lai nói công đức của Ngài Địa Tạng Bồ Tát vẫn chẳng thể hết."
+[00:02:42] 向者又蒙世尊。普告大众。欲称扬地藏利益等事。 | xiàng zhě yòu méng shì zūn 。 pǔ gào dà zhòng 。 yù chēng yáng dì zàng lì yì děng shì 。 | Hướng giả hựu mông Thế Tôn. Phổ cáo đại chúng. Dục xưng dương Địa Tạng lợi ích đẳng sự. | "Just now, the World Honored One has again told the great assembly that he wishes to praise Earth Store's beneficial deeds." | "Vừa rồi lại được đức Thế Tôn bảo khắp trong đại chúng rằng muốn tuyên nói các sự lợi ích của Ngài Địa Tạng Bồ Tát."
+[00:02:50] 唯愿世尊。为现在未来一切众生。称扬地藏不思议事。 | wéi yuàn shì zūn 。 wèi xiàn zài wèi lái yí qiè zhòng shēng 。 chēng yáng dì zàng bù sī yì shì 。 | Duy nguyện Thế Tôn. Vị hiện tại vị lai nhất thiết chúng sanh. Xưng dương Địa Tạng bất tư nghị sự. | "I only pray the World Honored One will, for the sake of all living beings of the present and future, praise Earth Store's inconceivable deeds..." | "Cúi mong đức Thế Tôn vì tất cả chúng sanh ở hiện tại và vị lai, mà tuyên nói những sự chẳng thể nghĩ bàn của Ngài Địa Tạng..."
+[00:02:59] 令天龙八部。瞻礼获福。 | lìng tiān lóng bā bù 。 zhān lǐ huò fú 。 | Linh Thiên Long Bát Bộ. Chiêm lễ hoạch phước. | "...so that the gods, dragons, and the rest of the Eightfold Division may gaze at and worship him and obtain blessings." | "...làm cho hàng Trời, Rồng, Bát Bộ chiêm ngưỡng lễ bái đặng phước."
+[00:03:04] 佛告观世音菩萨。汝于娑婆世界有大因缘。 | fó gào guān shì yīn pú sà 。 rǔ yú suō pó shì jiè yǒu dà yīn yuán 。 | Phật cáo Quan Thế Âm Bồ Tát. Nhữ ư Ta Bà thế giới hữu đại nhân duyên. | The Buddha told Avalokitesvara Bodhisattva, "You have great causes and conditions with the Saha World." | Đức Phật bảo Ngài Quan Thế Âm Bồ Tát: "Ông có nhân duyên rất lớn với cõi Ta Bà."
+[00:03:10] 若天若龙。若男若女。若神若鬼。乃至六道罪苦众生。 | ruò tiān ruò lóng 。 ruò nán ruò nǚ 。 ruò shén ruò guǐ 。 nǎi zhì liù dào zuì kǔ zhòng shēng 。 | Nhược Thiên nhược Long. Nhược nam nhược nữ. Nhược Thần nhược Quỷ. Nãi chí lục đạo tội khổ chúng sanh. | "Whether gods, dragons, men, women, spirits, ghosts, or even suffering beings in the Six Paths..." | "Những hàng Trời, Rồng, hoặc nam, hoặc nữ, hoặc Thần, hoặc Quỷ, cho đến chúng sanh mắc tội khổ trong sáu đường..."
+[00:03:18] 闻汝名者。见汝形者。恋慕汝者。赞叹汝者。 | wén rǔ míng zhě 。 jiàn rǔ xíng zhě 。 liàn mù rǔ zhě 。 zàn tàn rǔ zhě 。 | Văn nhữ danh giả. Kiến nhữ hình giả. Luyến mộ nhữ giả. Tán thán nhữ giả. | "...whoever hears your name, sees your form, admires you, or praises you..." | "...nghe danh hiệu của ông, thấy hình tượng của ông, luyến mộ ông, khen ngợi ông..."
+[00:03:25] 是诸众生。于无上道。必不退转。常生人天。具受妙乐。 | shì zhū zhòng shēng 。 yú wú shàng dào 。 bì bù tuì zhuǎn 。 cháng shēng rén tiān 。 jù shòu miào lè 。 | Thị chư chúng sanh. Ư Vô Thượng Đạo. Tất bất thối chuyển. Thường sanh nhân thiên. Cụ thọ diệu lạc. | "...those living beings will certainly not retreat from the Unsurpassed Way. They will always be born among humans and gods and receive wonderful bliss." | "...những chúng sanh ấy ở nơi Vô Thượng Đạo quyết chẳng còn thối chuyển, thường sanh vào cõi người, cõi Trời, hưởng đủ sự vui vi diệu."
+[00:03:34] 因果将熟。遇佛授记。 | yīn guǒ jiāng shú 。 yù fó shòu jì 。 | Nhân quả tương thục. Ngộ Phật thọ ký. | "When their causes and results are ripe, they will encounter Buddhas and receive predictions." | "Khi nhân quả đã thành thục, sẽ được Phật thọ ký cho."
+[00:03:38] 汝今具大慈悲。怜愍众生。及天龙八部。 | rǔ jīn jù dà cí bēi 。 lián mǐn zhòng shēng 。 jí tiān lóng bā bù 。 | Nhữ kim cụ đại từ bi. Lân mẫn chúng sanh. Cập Thiên Long Bát Bộ. | "You now have great compassion and pity for living beings, and for the gods, dragons, and the rest of the Eightfold Division." | "Nay ông sẵn lòng đại từ bi thương xót chúng sanh và hàng Trời, Rồng, Bát Bộ..."
+[00:03:44] 听吾宣说地藏菩萨不思议利益之事。汝当谛听。善思念之。 | tīng wú xuān shuō dì zàng pú sà bù sī yì lì yì zhī shì 。 rǔ dāng dì tīng 。 shàn sī niàn zhī 。 | Thính ngô tuyên thuyết Địa Tạng Bồ Tát bất tư nghị lợi ích chi sự. Nhữ đương đế thính. Thiện tư niệm chi. | "Listen as I proclaim the inconceivable benefits of Earth Store Bodhisattva. You should listen attentively and reflect well on this." | "...hãy nghe Ta tuyên thuyết những sự lợi ích không thể nghĩ bàn của Ngài Địa Tạng Bồ Tát. Ông nên lóng nghe, phải khéo suy xét đó."
+[00:03:54] 观世音言。唯然世尊。愿乐欲闻。 | guān shì yīn yán 。 wéi rán shì zūn 。 yuàn lè yù wén 。 | Quan Thế Âm ngôn. Duy nhiên Thế Tôn. Nguyện nhạo dục văn. | Avalokitesvara said, "Yes, World Honored One, I enjoy wishing to hear." | Ngài Quan Thế Âm bạch rằng: "Vâng! Bạch đức Thế Tôn, con xin ưa muốn nghe."
+[00:03:59] 佛告观世音菩萨。未来现在诸世界中。有天人受天福尽。 | fó gào guān shì yīn pú sà 。 wèi lái xiàn zài zhū shì jiè zhōng 。 yǒu tiān rén shòu tiān fú jìn 。 | Phật cáo Quan Thế Âm Bồ Tát. Vị lai hiện tại chư thế giới trung. Hữu thiên nhân thọ thiên phước tận. | The Buddha told Avalokitesvara Bodhisattva, "In the worlds of the future and present, there are gods whose heavenly blessings are exhausted." | Đức Phật bảo Ngài Quan Thế Âm Bồ Tát: "Trong các thế giới về thuở hiện tại nay và vị lai sau, có vị trời nào hưởng phước trời đã mãn..."
+[00:04:09] 有五衰相现。或有堕于恶道之者。 | yǒu wǔ shuāi xiàng xiàn 。 huò yǒu duò yú è dào zhī zhě 。 | Hữu ngũ suy tướng hiện. Hoặc hữu đọa ư ác đạo chi giả. | "The five signs of decay manifest, and they may fall into the Evil Paths." | "...năm tướng suy hao hiện ra, hoặc có kẻ phải đọa nơi ác đạo."
+[00:04:14] 如是天人。若男若女。当现相时。 | rú shì tiān rén 。 ruò nán ruò nǚ 。 dāng xiàn xiàng shí 。 | Như thị thiên nhân. Nhược nam nhược nữ. Đương hiện tướng thời. | "When such gods, whether male or female, manifest these signs..." | "Các vị trời đó, hoặc nam hoặc nữ, đương lúc tướng suy hiện..."
+[00:04:18] 或见地藏菩萨形像。或闻地藏菩萨名。 | huò jiàn dì zàng pú sà xíng xiàng 。 huò wén dì zàng pú sà míng 。 | Hoặc kiến Địa Tạng Bồ Tát hình tượng. Hoặc văn Địa Tạng Bồ Tát danh. | "...if they see Earth Store Bodhisattva's image or hear Earth Store Bodhisattva's name..." | "...hoặc thấy hình tượng của Ngài Địa Tạng Bồ Tát, hoặc nghe tên Ngài Địa Tạng Bồ Tát..."
+[00:04:24] 一瞻一礼。是诸天人。转增天福。受大快乐。永不堕三恶道报。 | yī zhān yī lǐ 。 shì zhū tiān rén 。 zhuǎn zēng tiān fú 。 shòu dà kuài lè 。 yǒng bù duò sān è dào bào 。 | Nhất chiêm nhất lễ. Thị chư thiên nhân. Chuyển tăng thiên phước. Thọ đại khoái lạc. Vĩnh bất đọa tam ác đạo báo. | "...and gaze at and bow to him once, these gods will increase their heavenly blessings, enjoy great happiness, and never fall into the retributions of the Three Evil Paths." | "...rồi chiêm ngưỡng lễ bái một lần, thời các vị trời đó phước trời tăng thêm, hưởng sự vui sướng lớn, vĩnh viễn không đọa vào ba ác đạo."
+[00:04:35] 何况见闻菩萨。以诸香华。衣服饮食。宝贝璎珞。布施供养。所获功德福利。无量无边。 | hé kuàng jiàn wén pú sà 。 yǐ zhū xiāng huā 。 yī fú yǐn shí 。 bǎo bèi yīng luò 。 bù shī gòng yàng 。 suǒ huò gōng dé fú lì 。 wú liàng wú biān 。 | Hà huống kiến văn Bồ Tát. Dĩ chư hương hoa. Y phục ẩm thực. Bảo bối anh lạc. Bố thí cúng dường. Sở hoạch công đức phước lợi. Vô lượng vô biên. | "How much more so if they see and hear the Bodhisattva and make offerings of incense, flowers, clothing, food, drink, jewels, and necklaces. The merit and benefits they obtain will be limitless and boundless." | "Huống chi là đem những hương, hoa, y phục, đồ ăn thức uống, ngọc báu, chuỗi anh lạc... mà bố thí cúng dường, thời được vô lượng vô biên công đức phước lợi."
+[00:04:49] 复次观世音。若未来现在诸世界中。六道众生临命终时。得闻地藏菩萨名。 | fù cì guān shì yīn 。 ruò wèi lái xiàn zài zhū shì jiè zhōng 。 liù dào zhòng shēng lín mìng zhōng shí 。 dé wén dì zàng pú sà míng 。 | Phục thứ Quan Thế Âm. Nhược vị lai hiện tại chư thế giới trung. Lục đạo chúng sanh lâm mạng chung thời. Đắc văn Địa Tạng Bồ Tát danh. | "Moreover, Avalokitesvara, in the worlds of the future and present, if living beings in the Six Paths, on the verge of death, hear Earth Store Bodhisattva's name..." | "Lại nữa, này Quan Thế Âm! Trong các thế giới về thuở hiện tại nay và vị lai sau, những chúng sanh trong lục đạo, lúc sắp mạng chung mà được nghe danh hiệu của Ngài Địa Tạng Bồ Tát..."
+[00:05:01] 一声历耳根者。是诸众生。永不历三恶道苦。 | yī shēng lì ěr gēn zhě 。 shì zhū zhòng shēng 。 yǒng bù lì sān è dào kǔ 。 | Nhất thanh lịch nhĩ căn giả. Thị chư chúng sanh. Vĩnh bất lịch tam ác đạo khổ. | "...and the sound passes through their ears, those living beings will never undergo the suffering of the Three Evil Paths." | "...thoáng qua lỗ tai, thời các chúng sanh đó vĩnh viễn không còn phải trải qua nỗi khổ nơi ba ác đạo."
+[00:05:08] 何况临命终时。父母眷属。将是命终人舍宅财物。宝贝衣服。塑画地藏形像。 | hé kuàng lín mìng zhōng shí 。 fù mǔ juàn shǔ 。 jiāng shì mìng zhōng rén shè zhái cái wù 。 bǎo bèi yī fú 。 sù huà dì zàng xíng xiàng 。 | Hà huống lâm mạng chung thời. Phụ mẫu quyến thuộc. Tương thị mạng chung nhân xá trạch tài vật. Bảo bối y phục. Tố họa Địa Tạng hình tượng. | "How much more so if, at the time of death, the parents and relatives use the dying person's house, wealth, jewels, and clothing to commission the sculpting or painting of Earth Store's image." | "Huống chi là lúc sắp mạng chung, cha mẹ cùng hàng quyến thuộc đem của cải nhà cửa, vật báu, y phục của người sắp chết đó, mà đắp vẽ hình tượng của Ngài Địa Tạng Bồ Tát."
+[00:05:20] 或使病人未终之时。眼耳见闻。知道眷属将舍宅宝贝等。为其自身塑画地藏菩萨形像。 | huò shǐ bìng rén wèi zhōng zhī shí 。 yǎn ěr jiàn wén 。 zhī dào juàn shǔ jiāng shè zhái bǎo bèi děng 。 wèi qí zì shēn sù huà dì zàng pú sà xíng xiàng 。 | Hoặc sử bệnh nhân vị chung chi thời. Nhãn nhĩ kiến văn. Tri đạo quyến thuộc tương xá trạch bảo bối đẳng. Vị kỳ tự thân tố họa Địa Tạng Bồ Tát hình tượng. | "Or if they let the sick person, while not yet dead, see and hear that the relatives are using his house, jewels, etc., to sculpt or paint Earth Store Bodhisattva's image for his sake." | "Hoặc làm cho người bịnh lúc chưa chết, mắt thấy tai nghe, biết rằng hàng quyến thuộc đem nhà cửa vật báu... vì mình mà đắp vẽ hình tượng của Ngài Địa Tạng Bồ Tát."
+[00:05:33] 是人若是业报合受重病者。承斯功德。寻即除愈。寿命增益。 | shì rén ruò shì yè bào hé shòu zhòng bìng zhě 。 chéng sī gōng dé 。 xún jí chú yù 。 shòu mìng zēng yì 。 | Thị nhân nhược thị nghiệp báo hợp thọ trọng bệnh giả. Thừa tư công đức. Tầm tức trừ dũ. Thọ mạng tăng ích. | "If that person's karmic retribution is such that he should undergo severe illness, through this merit he will immediately be cured and his lifespan increased." | "Người đó nếu nghiệp báo phải mang bịnh nặng, thời nhờ công đức này liền được lành mạnh, tuổi thọ thêm lâu."
+[00:05:43] 是人若是业报命尽。应有一切罪障业障。合堕恶趣者。 | shì rén ruò shì yè bào mìng jìn 。 yìng yǒu yí qiè zuì zhàng yè zhàng 。 hé duò è qù zhě 。 | Thị nhân nhược thị nghiệp báo mạng tận. Ưng hữu nhất thiết tội chướng nghiệp chướng. Hợp đọa ác thú giả. | "If that person's karmic retribution is such that his life is ending, and he has offense obstacles and karmic obstacles that should cause him to fall into the Evil Paths..." | "Còn nếu nghiệp báo của người đó mạng sống đã hết, lại có đủ tất cả tội chướng nghiệp chướng, đáng lẽ phải đọa vào ác đạo..."
+[00:05:52] 承斯功德。命终之后。即生人天。受胜妙乐。一切罪障。悉皆消灭。 | chéng sī gōng dé 。 mìng zhōng zhī hòu 。 jí shēng rén tiān 。 shòu shèng miào lè 。 yí qiè zuì zhàng 。 xī jiē xiāo miè 。 | Thừa tư công đức. Mạng chung chi hậu. Tức sanh nhân thiên. Thọ thắng diệu lạc. Nhất thiết tội chướng. Tất giai tiêu diệt. | "...through this merit, after he dies, he will be born among humans and gods, enjoy excellent and wonderful bliss, and all his offense obstacles will be eliminated." | "...nhưng nhờ công đức này, nên sau khi mạng chung, liền được sanh vào cõi người, cõi Trời, hưởng sự vui thù thắng vi diệu, tất cả tội chướng thảy đều tiêu sạch."
+[00:06:04] 复次观世音菩萨。若未来世。有男子女人。 | fù cì guān shì yīn pú sà 。 ruò wèi lái shì 。 yǒu nán zǐ nǚ rén 。 | Phục thứ Quan Thế Âm Bồ Tát. Nhược vị lai thế. Hữu nam tử nữ nhân. | "Moreover, Avalokitesvara Bodhisattva, in the future, if there are men or women..." | "Lại nữa, này Quan Thế Âm Bồ Tát! Trong đời sau, nếu có kẻ nam người nữ nào..."
+[00:06:09] 或乳哺时。或三岁五岁十岁以下。亡失父母。乃及亡失兄弟姐妹。 | huò rǔ bǔ shí 。 huò sān suì wǔ suì shí suì yǐ xià 。 wáng shī fù mǔ 。 nǎi jí wáng shī xiōng dì jiě mèi 。 | Hoặc nhũ bộ thời. Hoặc tam tuế ngũ tuế thập tuế dĩ hạ. Vong thất phụ mẫu. Nãi cập vong thất huynh đệ tỷ muội. | "...who, while still nursing or under the age of three, five, or ten, lose their parents, or lose their brothers and sisters..." | "...hoặc lúc còn bú mớm, hoặc lúc lên ba, hoặc lúc lên năm tuổi, mười tuổi trở xuống mà chết mất cha mẹ, cho đến chết mất anh em chị em."
+[00:06:18] 是人年既长大。思忆父母。及诸眷属。不知落在何趣。生何世界。生何天中。 | shì rén nián jì zhǎng dà 。 sī yì fù mǔ 。 jí zhū juàn shǔ 。 bù zhī luò zài hé qù 。 shēng hé shì jiè 。 shēng hé tiān zhōng 。 | Thị nhân niên ký trưởng đại. Tư ức phụ mẫu. Cập chư quyến thuộc. Bất tri lạc tại hà thú. Sanh hà thế giới. Sanh hà thiên trung. | "When these people grow up, they miss their parents and relatives, not knowing what path they have fallen into, what world they have been born in, or what heaven they have been born in." | "Người đó khi khôn lớn, thương nhớ cha mẹ và những người thân quyến, không rõ thác sanh vào chốn nào, ở thế giới nào, hoặc sanh lên cõi trời nào?"
+[00:06:30] 是人若能塑画地藏菩萨形像。乃至闻名。 | shì rén ruò néng sù huà dì zàng pú sà xíng xiàng 。 nǎi zhì wén míng 。 | Thị nhân nhược năng tố họa Địa Tạng Bồ Tát hình tượng. Nãi chí văn danh. | "If these people can sculpt or paint Earth Store Bodhisattva's image, or even hear his name..." | "Người đó như có thể đắp vẽ hình tượng Ngài Địa Tạng Bồ Tát, cho đến nghe danh hiệu Ngài..."
+[00:06:35] 一瞻一礼。一日至七日。莫退初心。 | yī zhān yī lǐ 。 yī rì zhì qī rì 。 mò tuì chū xīn 。 | Nhất chiêm nhất lễ. Nhất nhật chí thất nhật. Mạc thối sơ tâm. | "...and gaze at and bow to him once, and for one to seven days not retreat from their initial resolve..." | "...rồi chiêm ngưỡng lễ bái một lần, từ một ngày cho đến bảy ngày, đừng thối thất tâm ban đầu..."
+[00:06:40] 闻名见形。瞻礼供养。 | wén míng jiàn xíng 。 zhān lǐ gòng yàng 。 | Văn danh kiến hình. Chiêm lễ cúng dường. | "...hearing his name, seeing his form, gazing at, worshipping, and making offerings." | "...nghe danh hiệu, thấy hình tượng, chiêm lễ cúng dường."
+[00:06:43] 是人眷属。假因业故。堕恶趣者。计当劫数。 | shì rén juàn shǔ 。 jiǎ yīn yè gù 。 duò è qù zhě 。 jì dāng jié shù 。 | Thị nhân quyến thuộc. Giả nhân nghiệp cố. Đọa ác thú giả. Kế đương kiếp số. | "If their relatives had fallen into the Evil Paths due to karma and were destined to remain there for aeons..." | "Thời quyến thuộc đã khuất đó, giả sử do ác nghiệp mà bị đọa vào ác đạo, tính đến số kiếp..."
+[00:06:49] 承斯男女。兄弟姐妹。塑画地藏形像。瞻礼功德。寻即解脱。 | chéng sī nán nǚ 。 xiōng dì jiě mèi 。 sù huà dì zàng xíng xiàng 。 zhān lǐ gōng dé 。 xún jí jiě tuō 。 | Thừa tư nam nữ. Huynh đệ tỷ muội. Tố họa Địa Tạng hình tượng. Chiêm lễ công đức. Tầm tức giải thoát. | "...through the merit of their sons, daughters, brothers, or sisters sculpting or painting Earth Store's image and gazing at and worshipping it, they will immediately be liberated." | "...nhờ công đức đắp vẽ hình tượng Ngài Địa Tạng Bồ Tát và chiêm lễ của con cái, anh em, chị em này, mà liền được giải thoát."
+[00:06:58] 生人天中。受胜妙乐。 | shēng rén tiān zhōng 。 shòu shèng miào lè 。 | Sanh nhân thiên trung. Thọ thắng diệu lạc. | "They will be born among humans and gods and receive excellent and wonderful bliss." | "Sanh lên cõi người cõi Trời hưởng sự vui thù thắng vi diệu."
+[00:07:01] 是人眷属。如有福力。已生人天。受胜妙乐者。 | shì rén juàn shǔ 。 rú yǒu fú lì 。 yǐ shēng rén tiān 。 shòu shèng miào lè zhě 。 | Thị nhân quyến thuộc. Như hữu phước lực. Dĩ sanh nhân thiên. Thọ thắng diệu lạc giả. | "If their relatives already had blessings and were born among humans and gods receiving excellent and wonderful bliss..." | "Giả sử quyến thuộc đó đã sẵn có phước lực, đã được sanh làm người hay làm Trời hưởng sự vui thù thắng vi diệu rồi..."
+[00:07:07] 即承斯功德。转增圣因。受无量乐。 | jí chéng sī gōng dé 。 zhuǎn zēng shèng yīn 。 shòu wú liàng lè 。 | Tức thừa tư công đức. Chuyển tăng thánh nhân. Thọ vô lượng lạc. | "...they will receive this merit, which will increase their holy causes, and they will enjoy measureless happiness." | "...thời nhờ công đức này mà nhân thánh tăng trưởng, hưởng sự vui vô lượng."
+[00:07:13] 是人更能三七日中。一心瞻礼地藏形像。 | shì rén gèng néng sān qī rì zhōng 。 yī xīn zhān lǐ dì zàng xíng xiàng 。 | Thị nhân cánh năng tam thất nhật trung. Nhất tâm chiêm lễ Địa Tạng hình tượng. | "If that person can further, for twenty-one days, single-mindedly gaze at and worship Earth Store's image..." | "Lại như người đó có thể trong ba tuần thất (21 ngày), nhất tâm chiêm lễ hình tượng Ngài Địa Tạng Bồ Tát..."
+[00:07:19] 念其名字。满于万遍。当得菩萨现无边身。 | niàn qí míng zì 。 mǎn yú wàn biàn 。 dāng dé pú sà xiàn wú biān shēn 。 | Niệm kỳ danh tự. Mãn ư vạn biến. Đương đắc Bồ Tát hiện vô biên thân. | "...and recite his name a full ten thousand times, the Bodhisattva will manifest a boundless body..." | "...niệm danh hiệu của Ngài đủ một muôn biến, sẽ đặng Ngài Bồ Tát hiện thân vô biên..."
+[00:07:26] 具告是人。眷属生界。 | jù gào shì rén 。 juàn shǔ shēng jiè 。 | Cụ cáo thị nhân. Quyến thuộc sanh giới. | "...and tell that person the realm where his relatives have been born." | "...mách bảo cho người đó rõ cõi mà hàng quyến thuộc đã sanh về."
+[00:07:29] 或于梦中。菩萨现大神力。亲领是人。 | huò yú mèng zhōng 。 pú sà xiàn dà shén lì 。 qīn lǐng shì rén 。 | Hoặc ư mộng trung. Bồ Tát hiện đại thần lực. Thân lãnh thị nhân. | "Or in a dream, the Bodhisattva will manifest great spiritual power and personally lead that person..." | "Hoặc trong giấc mộng, Ngài Bồ Tát hiện sức thần thông lớn, đích thân dắt người đó..."
+[00:07:34] 于诸世界。见诸眷属。 | yú zhū shì jiè 。 jiàn zhū juàn shǔ 。 | Ư chư thế giới. Kiến chư quyến thuộc. | "...to various worlds to see his relatives." | "...đến các thế giới thấy hàng quyến thuộc."
+[00:07:37] 更能每日念菩萨名千遍。至于千日。 | gèng néng měi rì niàn pú sà míng qiān biàn 。 zhì yú qiān rì 。 | Cánh năng mỗi nhật niệm Bồ Tát danh thiên biến. Chí ư thiên nhật. | "If he can further recite the Bodhisattva's name one thousand times every day for one thousand days..." | "Nếu lại có thể mỗi ngày niệm danh hiệu Bồ Tát một nghìn biến, luôn đến một nghìn ngày..."
+[00:07:42] 是人当得菩萨遣所在土地鬼神。终身卫护。 | shì rén dāng dé pú sà qiǎn suǒ zài tǔ dì guǐ shén 。 zhōng shēn wèi hù 。 | Thị nhân đương đắc Bồ Tát khiển sở tại Thổ Địa Quỷ Thần. Chung thân vệ hộ. | "...that person will be protected for life by the local Earth Spirits and ghosts dispatched by the Bodhisattva." | "...thời người đó sẽ được Bồ Tát sai các vị Quỷ Thần ở đó gìn giữ trọn đời."
+[00:07:49] 现世衣食丰溢。无诸疾苦。 | xiàn shì yī shí fēng yì 。 wú zhū jí kǔ 。 | Hiện thế y thực phong dật. Vô chư tật khổ. | "In the present life, he will have abundant food and clothing and no suffering from illness." | "Hiện đời y thực dư dật, không có các bịnh khổ."
+[00:07:53] 乃至横事不入其门。何况及身。 | nǎi zhì hèng shì bù rù qí mén 。 hé kuàng jí shēn 。 | Nãi chí hoạnh sự bất nhập kỳ môn. Hà huống cập thân. | "Even accidents will not enter his door, much less affect his person." | "Cho đến các sự hoạnh tai còn không hề vào đến cửa, huống là đến thân."
+[00:07:57] 是人毕竟得菩萨摩顶授记。 | shì rén bì jìng dé pú sà mó dǐng shòu jì 。 | Thị nhân tất cánh đắc Bồ Tát ma đảnh thọ ký. | "That person will ultimately receive a prediction from the Bodhisattva, who will rub his crown." | "Người đó rốt ráo được Ngài Bồ Tát xoa đảnh thọ ký cho."
+[00:08:02] 复次观世音菩萨。若未来世有善男子善女人。欲发广大慈心。救度一切众生者。 | fù cì guān shì yīn pú sà 。 ruò wèi lái shì yǒu shàn nán zǐ shàn nǚ rén 。 yù fā guǎng dà cí xīn 。 jiù dù yí qiè zhòng shēng zhě 。 | Phục thứ Quan Thế Âm Bồ Tát. Nhược vị lai thế hữu thiện nam tử thiện nữ nhân. Dục phát quảng đại từ tâm. Cứu độ nhất thiết chúng sanh giả. | "Moreover, Avalokitesvara Bodhisattva, in the future, if good men or good women wish to give rise to a vast compassionate heart to rescue all living beings..." | "Lại nữa, này Quan Thế Âm Bồ Tát! Trong đời sau, như có kẻ thiện nam người thiện nữ nào, muốn phát lòng từ bi rộng lớn để cứu độ tất cả chúng sanh..."
+[00:08:14] 欲修无上菩提者。欲出离三界者。 | yù xiū wú shàng pú tí zhě 。 yù chū lí sān jiè zhě 。 | Dục tu Vô Thượng Bồ Đề giả. Dục xuất ly tam giới giả. | "...wish to cultivate Unsurpassed Bodhi, or wish to leave the Three Realms..." | "...muốn tu đạo Vô Thượng Bồ Đề, muốn ra khỏi tam giới..."
+[00:08:19] 是诸人等。见地藏形像。及闻名者。至心归依。 | shì zhū rén děng 。 jiàn dì zàng xíng xiàng 。 jí wén míng zhě 。 zhì xīn guī yī 。 | Thị chư nhân đẳng. Kiến Địa Tạng hình tượng. Cập văn danh giả. Chí tâm quy y. | "...if these people see Earth Store's image or hear his name, and sincerely take refuge..." | "...những người đó thấy hình tượng Ngài Địa Tạng Bồ Tát và nghe danh hiệu Ngài, rồi chí tâm quy y..."
+[00:08:26] 或以香华衣服。宝贝饮食。供养瞻礼。 | huò yǐ xiāng huā yī fú 。 bǎo bèi yǐn shí 。 gòng yàng zhān lǐ 。 | Hoặc dĩ hương hoa y phục. Bảo bối ẩm thực. Cúng dường chiêm lễ. | "...or make offerings of incense, flowers, clothing, jewels, food, and drink, and gaze at and worship him..." | "...hoặc đem hương hoa, y phục, bảo vật, đồ ăn thức uống để cúng dường chiêm ngưỡng đảnh lễ..."
+[00:08:32] 是善男女等。所愿速成。永无障碍。 | shì shàn nán nǚ děng 。 suǒ yuàn sù chéng 。 yǒng wú zhàng ài 。 | Thị thiện nam nữ đẳng. Sở nguyện tốc thành. Vĩnh vô chướng ngại. | "...the wishes of these good men and women will be quickly fulfilled, and they will never have obstacles." | "...thời người thiện nam thiện nữ ấy, sở nguyện chóng thành tựu, vĩnh viễn không bị chướng ngại."
+[00:08:38] 复次观世音。若未来世。有善男子善女人。 | fù cì guān shì yīn 。 ruò wèi lái shì 。 yǒu shàn nán zǐ shàn nǚ rén 。 | Phục thứ Quan Thế Âm. Nhược vị lai thế. Hữu thiện nam tử thiện nữ nhân. | "Moreover, Avalokitesvara, in the future, if good men or good women..." | "Lại nữa, này Quan Thế Âm! Trong đời sau, như có kẻ thiện nam người thiện nữ nào..."
+[00:08:43] 欲求现在未来百千万亿等愿。百千万亿等事。 | yù qiú xiàn zài wèi lái bǎi qiān wàn yì děng yuàn 。 bǎi qiān wàn yì děng shì 。 | Dục cầu hiện tại vị lai bách thiên vạn ức đẳng nguyện. Bách thiên vạn ức đẳng sự. | "...wish to fulfill hundreds of thousands of millions of wishes and succeed in hundreds of thousands of millions of affairs in the present and future..." | "...muốn cầu trăm nghìn muôn ức điều nguyện, trăm nghìn muôn ức sự về hiện tại cùng vị lai..."
+[00:08:51] 但当归依瞻礼。供养赞叹。地藏菩萨形像。 | dàn dāng guī yī zhān lǐ 。 gòng yàng zàn tàn 。 dì zàng pú sà xíng xiàng 。 | Đãn đương quy y chiêm lễ. Cúng dường tán thán. Địa Tạng Bồ Tát hình tượng. | "...they should simply take refuge in, gaze at, worship, make offerings to, and praise Earth Store Bodhisattva's image." | "...thời chỉ nên quy y, chiêm ngưỡng, đảnh lễ, cúng dường, ngợi khen hình tượng Ngài Địa Tạng Bồ Tát..."
+[00:08:59] 如是所愿所求。悉皆成就。 | rú shì suǒ yuàn suǒ qiú 。 xī jiē chéng jiù 。 | Như thị sở nguyện sở cầu. Tất giai thành tựu. | "Then all their wishes and seekings will be fulfilled." | "...như thế thời các điều sở nguyện sở cầu thảy đều thành tựu."
+[00:09:03] 复愿地藏菩萨具大慈悲。永拥护我。 | fù yuàn dì zàng pú sà jù dà cí bēi 。 yǒng yōng hù wǒ 。 | Phục nguyện Địa Tạng Bồ Tát cụ đại từ bi. Vĩnh ủng hộ ngã. | "If they further wish for Earth Store Bodhisattva, with his great compassion, to protect them forever..." | "Lại cầu mong Ngài Địa Tạng Bồ Tát đượm lòng đại từ bi ủng hộ cho mình mãi mãi."
+[00:09:08] 是人于睡梦中。即得菩萨摩顶授记。 | shì rén yú shuì mèng zhōng 。 jí dé pú sà mó dǐng shòu jì 。 | Thị nhân ư thụy mộng trung. Tức đắc Bồ Tát ma đảnh thọ ký. | "...that person will receive the Bodhisattva's rubbing of the crown and prediction in a dream." | "Người ấy trong giấc chiêm bao, liền được Ngài Địa Tạng Bồ Tát xoa đảnh thọ ký."
+[00:09:14] 复次观世音菩萨。若未来世。善男子善女人。 | fù cì guān shì yīn pú sà 。 ruò wèi lái shì 。 shàn nán zǐ shàn nǚ rén 。 | Phục thứ Quan Thế Âm Bồ Tát. Nhược vị lai thế. Thiện nam tử thiện nữ nhân. | "Moreover, Avalokitesvara Bodhisattva, in the future, if good men or good women..." | "Lại nữa, này Quan Thế Âm Bồ Tát! Trong đời sau, như có người thiện nam kẻ thiện nữ nào..."
+[00:09:20] 于大乘经典。深生珍重。发不思议心。欲读欲诵。 | yú dà chéng jīng diǎn 。 shēn shēng zhēn zhòng 。 fā bù sī yì xīn 。 yù dú yù sòng 。 | Ư Đại Thừa kinh điển. Thâm sanh trân trọng. Phát bất tư nghị tâm. Dục độc dục tụng. | "...deeply treasure the Great Vehicle Sutras, give rise to an inconceivable resolve, and wish to read and recite them..." | "...đối với kinh điển Đại Thừa sanh lòng trân trọng thâm sâu, phát tâm không thể nghĩ bàn, muốn đọc muốn tụng..."
+[00:09:28] 纵遇明师教视令熟。旋得旋忘。动经年月。不能读诵。 | zòng yù míng shī jiào shì lìng shú 。 xuán dé xuán wàng 。 dòng jīng nián yuè 。 bù néng dú sòng 。 | Tung ngộ minh sư giáo thị linh thục. Tuyền đắc tuyền vong. Động kinh niên nguyệt. Bất năng độc tụng. | "...even if they meet a bright teacher who instructs them so they become familiar, they immediately forget. They may try for months and years but cannot read or recite them." | "...dù gặp bậc minh sư dạy bảo cho thành thục, nhưng học rồi lại quên, trải qua nhiều năm tháng vẫn không đọc tụng được."
+[00:09:39] 是善男子等。有宿业障。未得消除。故于大乘经典。无读诵性。 | shì shàn nán zǐ děng 。 yǒu sù yè zhàng 。 wèi dé xiāo chú 。 gù yú dà chéng jīng diǎn 。 wú dú sòng xìng 。 | Thị thiện nam tử đẳng. Hữu túc nghiệp chướng. Vị đắc tiêu trừ. Cố ư Đại Thừa kinh điển. Vô độc tụng tánh. | "These good men and others have past karmic obstacles that have not yet been eliminated. Therefore, they do not have the capacity to read and recite Great Vehicle Sutras." | "Những người thiện nam đó vì có nghiệp chướng đời trước chưa trừ sạch, cho nên đối với kinh điển Đại Thừa không có tánh đọc tụng."
+[00:09:50] 如是之人。闻地藏菩萨名。见地藏菩萨像。 | rú shì zhī rén 。 wén dì zàng pú sà míng 。 jiàn dì zàng pú sà xiàng 。 | Như thị chi nhân. Văn Địa Tạng Bồ Tát danh. Kiến Địa Tạng Bồ Tát tượng. | "Such people should hear Earth Store Bodhisattva's name and see Earth Store Bodhisattva's image..." | "Những hạng người này, khi nghe danh hiệu Ngài Địa Tạng Bồ Tát, thấy hình tượng Ngài Địa Tạng Bồ Tát..."
+[00:09:57] 具以本心恭敬陈白。更以香华。衣服饮食。一切玩具。供养菩萨。 | jù yǐ běn xīn gōng jìng chén bái 。 gèng yǐ xiāng huā 。 yī fú yǐn shí 。 yí qiè wán jù 。 gòng yàng pú sà 。 | Cụ dĩ bổn tâm cung kính trần bạch. Cánh dĩ hương hoa. Y phục ẩm thực. Nhất thiết ngoạn cụ. Cúng dường Bồ Tát. | "...and respectfully state their situation with their original mind. They should also make offerings of incense, flowers, clothing, food, drink, and all kinds of playthings to the Bodhisattva." | "...nên đem hết bổn tâm cung kính bày tỏ với Ngài, rồi dùng hương hoa, y phục, đồ ăn thức uống, tất cả đồ ngọc báu... cúng dường Bồ Tát."
+[00:10:09] 以净水一盏。经一日一夜安菩萨前。然后合掌请服。 | yǐ jìng shuǐ yī zhǎn 。 jīng yī rì yī yè ān pú sà qián 。 rán hòu hé zhǎng qǐng fú 。 | Dĩ tịnh thủy nhất trản. Kinh nhất nhật nhất dạ an Bồ Tát tiền. Nhiên hậu hợp chưởng thỉnh phục. | "They should place a cup of pure water before the Bodhisattva for one day and one night. Then, placing their palms together, they should request to drink it." | "Dùng một chén nước trong để trước tượng Bồ Tát một ngày một đêm, sau đó chắp tay thỉnh để uống."
+[00:10:18] 回首向南。临入口时。至心郑重。 | huí shǒu xiàng nán 。 lín rù kǒu shí 。 zhì xīn zhèng zhòng 。 | Hồi thủ hướng Nam. Lâm nhập khẩu thời. Chí tâm trịnh trọng. | "Turning their heads to the south, as they are about to drink, they should be sincere and solemn." | "Xoay mặt về hướng Nam, lúc nước sắp vào miệng phải chí tâm trịnh trọng."
+[00:10:23] 服水既毕。一七日或三七日。 | fú shuǐ jì bì 。 yī qī rì huò sān qī rì 。 | Phục thủy ký tất. Nhất thất nhật hoặc tam thất nhật. | "After drinking the water, for one to three weeks..." | "Uống nước xong, trong một tuần thất hoặc ba tuần thất..."
+[00:10:27] 至心精进。慎五辛酒肉。邪淫妄语。及诸杀害。 | zhì xīn jīng jìn 。 shèn wǔ xīn jiǔ ròu 。 xié yín wàng yǔ 。 jí zhū shā hài 。 | Chí tâm tinh tấn. Thận ngũ tân tửu nhục. Tà dâm vọng ngữ. Cập chư sát hại. | "...they must be sincere and diligent, avoiding the five pungent plants, wine, meat, sexual misconduct, lying, and killing." | "...phải chí tâm kiêng cữ ngũ tân, rượu, thịt, tà dâm, vọng ngữ và các việc giết hại."
+[00:10:35] 是善男子善女人。于睡梦中。具见地藏菩萨现无边身。 | shì shàn nán zǐ shàn nǚ rén 。 yú shuì mèng zhōng 。 jù jiàn dì zàng pú sà xiàn wú biān shēn 。 | Thị thiện nam tử thiện nữ nhân. Ư thụy mộng trung. Cụ kiến Địa Tạng Bồ Tát hiện vô biên thân. | "Those good men and women will see Earth Store Bodhisattva manifesting a boundless body in their dreams..." | "Người thiện nam thiện nữ đó, trong giấc chiêm bao thấy Ngài Địa Tạng Bồ Tát hiện thân vô biên..."
+[00:10:44] 于是人处。授灌顶水。其人梦觉。即获聪明。 | yú shì rén chù 。 shòu guàn dǐng shuǐ 。 qí rén mèng jué 。 jí huò cōng míng 。 | Ư thị nhân xứ. Thọ quán đảnh thủy. Kỳ nhân mộng giác. Tức hoạch thông minh. | "...and sprinkling water on their heads. When they wake from the dream, they will obtain intelligence." | "...đến chỗ người đó thọ ký và rưới nước trên đảnh. Người đó khi tỉnh giấc mộng, liền được thông minh."
+[00:10:51] 应是经典。一历耳根。即当永记。更不忘失一句一偈。 | yìng shì jīng diǎn 。 yī lì ěr gēn 。 jí dāng yǒng jì 。 gèng bù wàng shī yī jù yī jì 。 | Ưng thị kinh điển. Nhất lịch nhĩ căn. Tức đương vĩnh ký. Cánh bất vong thất nhất cú nhất kệ. | "Once the Sutras pass through their ears, they will remember them eternally and never forget a single sentence or verse." | "Các kinh điển đó, một phen lọt vào lỗ tai liền nhớ mãi, không còn quên một câu một kệ nào nữa."
+[00:11:00] 复次观世音菩萨。若未来世。有诸人等。 | fù cì guān shì yīn pú sà 。 ruò wèi lái shì 。 yǒu zhū rén děng 。 | Phục thứ Quan Thế Âm Bồ Tát. Nhược vị lai thế. Hữu chư nhân đẳng. | "Moreover, Avalokitesvara Bodhisattva, in the future, if there are people..." | "Lại nữa, này Quan Thế Âm Bồ Tát! Trong đời sau, như có những người..."
+[00:11:05] 衣食不足。求者乖愿。或多病疾。或多凶衰。家宅不安。眷属分散。 | yī shí bù zú 。 qiú zhě guāi yuàn 。 huò duō bìng jí 。 huò duō xiōng shuāi 。 jiā zhái bù ān 。 juàn shǔ fēn sàn 。 | Y thực bất túc. Cầu giả quai nguyện. Hoặc đa bệnh tật. Hoặc đa hung suy. Gia trạch bất an. Quyến thuộc phân tán. | "...who lack sufficient clothing and food, whose wishes are thwarted, who are often sick, who encounter much bad luck, whose households are uneasy, whose relatives are scattered..." | "...cơm áo thiếu thốn, cầu chi cũng không toại nguyện, hoặc thân đa bịnh tật, hoặc nhiều sự hung suy, nhà cửa không yên, quyến thuộc chia lìa..."
+[00:11:16] 或诸横事。多来忤身。睡梦之间。多有惊怖。 | huò zhū hèng shì 。 duō lái wǔ shēn 。 shuì mèng zhī jiān 。 duō yǒu jīng bù 。 | Hoặc chư hoạnh sự. Đa lai ngỗ thân. Thụy mộng chi gian. Đa hữu kinh bố. | "...or who are often beset by accidents, or who have many terrifying dreams..." | "...hoặc các sự tai vạ cứ đến quấy nhiễu nơi thân, trong giấc mộng thường hay kinh sợ."
+[00:11:23] 如是人等。闻地藏名。见地藏形。 | rú shì rén děng 。 wén dì zàng míng 。 jiàn dì zàng xíng 。 | Như thị nhân đẳng. Văn Địa Tạng danh. Kiến Địa Tạng hình. | "If such people hear Earth Store's name and see Earth Store's image..." | "Những người như thế đó, khi nghe danh hiệu Ngài Địa Tạng, thấy hình tượng Ngài Địa Tạng..."
+[00:11:28] 至心恭敬。念满万遍。 | zhì xīn gōng jìng 。 niàn mǎn wàn biàn 。 | Chí tâm cung kính. Niệm mãn vạn biến. | "...and sincerely and respectfully recite his name ten thousand times..." | "...nên chí tâm cung kính niệm đủ một muôn biến."
+[00:11:32] 是诸不如意事。渐渐消灭。即得安乐。衣食丰溢。乃至于睡梦中。悉皆安乐。 | shì zhū bù rú yì shì 。 jiàn jiàn xiāo miè 。 jí dé ān lè 。 yī shí fēng yì 。 nǎi zhì yú shuì mèng zhōng 。 xī jiē ān lè 。 | Thị chư bất như ý sự. Tiệm tiệm tiêu diệt. Tức đắc an lạc. Y thực phong dật. Nãi chí ư thụy mộng trung. Tất giai an lạc. | "...those unpleasant things will gradually disappear, and they will obtain peace and happiness. They will have abundant food and clothing, and even in their dreams they will be peaceful and happy." | "Thời những sự không toại ý đó sẽ tiêu sạch lần lần, liền được an vui, đồ ăn mặc dư dật, cho đến trong giấc mộng thảy đều an vui."
+[00:11:44] 复次观世音菩萨。若未来世。有善男子善女人。 | fù cì guān shì yīn pú sà 。 ruò wèi lái shì 。 yǒu shàn nán zǐ shàn nǚ rén 。 | Phục thứ Quan Thế Âm Bồ Tát. Nhược vị lai thế. Hữu thiện nam tử thiện nữ nhân. | "Moreover, Avalokitesvara Bodhisattva, in the future, if good men or good women..." | "Lại nữa, này Quan Thế Âm Bồ Tát! Trong đời sau, như có người thiện nam thiện nữ..."
+[00:11:50] 或因治生。或因公私。或因生死。或因急事。 | huò yīn zhì shēng 。 huò yīn gōng sī 。 huò yīn shēng sǐ 。 huò yīn jí shì 。 | Hoặc nhân trị sanh. Hoặc nhân công tư. Hoặc nhân sanh tử. Hoặc nhân cấp sự. | "...because of livelihood, public or private affairs, birth or death, or urgent business..." | "...hoặc vì sự sanh sống, hoặc vì việc công việc tư, hoặc vì sự sanh sự tử, hoặc vì việc gấp..."
+[00:11:57] 入山林中。过渡河海。乃及大水。或经险道。 | rù shān lín zhōng 。 guò dù hé hǎi 。 nǎi jí dà shuǐ 。 huò jīng xiǎn dào 。 | Nhập sơn lâm trung. Quá độ hà hải. Nãi cập đại thủy. Hoặc kinh hiểm đạo. | "...enter mountains or forests, cross rivers or seas or great waters, or pass through dangerous paths..." | "...mà phải vào trong rừng núi, hay qua sông vượt biển, hoặc gặp nước lụt lớn, hoặc đi ngang đường hiểm trở."
+[00:12:05] 是人先当念地藏菩萨名万遍。 | shì rén xiān dāng niàn dì zàng pú sà míng wàn biàn 。 | Thị nhân tiên đương niệm Địa Tạng Bồ Tát danh vạn biến. | "...those people should first recite Earth Store Bodhisattva's name ten thousand times." | "Người ấy trước nên niệm danh hiệu Ngài Địa Tạng Bồ Tát một muôn biến."
+[00:12:10] 所过土地。鬼神卫护。行住坐卧。永保安乐。 | suǒ guò tǔ dì 。 guǐ shén wèi hù 。 xíng zhù zuò wò 。 yǒng bǎo ān lè 。 | Sở quá thổ địa. Quỷ thần vệ hộ. Hành trụ tọa ngọa. Vĩnh bảo an lạc. | "The ghosts and spirits of the land they pass through will protect them. Whether walking, standing, sitting, or lying down, they will be forever peaceful and happy." | "Được vậy thời đi qua nơi nào, chốn đó cũng có quỷ thần hộ vệ, lúc đi đứng nằm ngồi, vĩnh viễn được an ổn vui vẻ."
+[00:12:18] 乃至逢于虎狼狮子。一切毒害。不能损之。 | nǎi zhì féng yú hǔ láng shī zǐ 。 yí qiè dú hài 。 bù néng sǔn zhī 。 | Nãi chí phùng ư hổ lang sư tử. Nhất thiết độc hại. Bất năng tổn chi. | "Even if they encounter tigers, wolves, lions, or any poisons, they will not be harmed." | "Cho đến dẫu gặp cọp, beo, sư tử... nhưng tất cả loài độc hại đều không thể phạm đến người đó được."
+[00:12:26] 佛告观世音菩萨。是地藏菩萨。于阎浮提有大因缘。 | fó gào guān shì yīn pú sà 。 shì dì zàng pú sà 。 yú yán fú tí yǒu dà yīn yuán 。 | Phật cáo Quan Thế Âm Bồ Tát. Thị Địa Tạng Bồ Tát. Ư Diêm Phù Đề hữu đại nhân duyên. | The Buddha told Avalokitesvara Bodhisattva, "This Earth Store Bodhisattva has great causes and conditions with Jambudvipa." | Đức Phật bảo Ngài Quan Thế Âm Bồ Tát: "Ngài Địa Tạng Bồ Tát đây có nhân duyên rất lớn với cõi Diêm Phù Đề."
+[00:12:34] 若说于诸众生见闻利益等事。百千劫中。说不能尽。 | ruò shuō yú zhū zhòng shēng jiàn wén lì yì děng shì 。 bǎi qiān jié zhōng 。 shuō bù néng jìn 。 | Nhược thuyết ư chư chúng sanh kiến văn lợi ích đẳng sự. Bách thiên kiếp trung. Thuyết bất năng tận. | "If I were to speak of the benefits derived by living beings from seeing and hearing him, I could not finish in hundreds of thousands of aeons." | "Nếu nói về những sự chúng sanh thấy hình nghe danh của Ngài mà được lợi ích, thời dầu nói đến trăm nghìn kiếp cũng không hết được."
+[00:12:43] 是故观世音。汝以神力流布是经。 | shì gù guān shì yīn 。 rǔ yǐ shén lì liú bù shì jīng 。 | Thị cố Quan Thế Âm. Nhữ dĩ thần lực lưu bố thị kinh. | "Therefore, Avalokitesvara, you should use your spiritual power to propagate this Sutra..." | "Vì thế, này Quan Thế Âm! Ông nên dùng sức thần thông của mình lưu bố kinh này..."
+[00:12:49] 令娑婆世界众生。百千万劫永受安乐。 | lìng suō pó shì jiè zhòng shēng 。 bǎi qiān wàn jié yǒng shòu ān lè 。 | Linh Ta Bà thế giới chúng sanh. Bách thiên vạn kiếp vĩnh thọ an lạc. | "...so that living beings in the Saha World will enjoy peace and happiness forever, for hundreds of thousands of millions of aeons." | "...làm cho chúng sanh trong cõi Ta Bà, trăm nghìn muôn kiếp hưởng sự an vui mãi mãi."
+[00:12:56] 尔时世尊而说偈言。 | ěr shí shì zūn ér shuō jì yán 。 | Nhĩ thời Thế Tôn nhi thuyết kệ ngôn. | At that time the World Honored One spoke verses, saying: | Bấy giờ đức Thế Tôn mới nói kệ rằng:
+[00:13:00] 吾观地藏威神力。恒河沙劫说难尽。 | wú guān dì zàng wēi shén lì 。 héng hé shā jié shuō nán jìn 。 | Ngô quan Địa Tạng oai thần lực. Hằng Hà sa kiếp thuyết nan tận. | "I observe Earth Store's awesome spiritual power; Speaking for aeons like Ganges sands, I could not finish." | "Ta xem Địa Tạng sức oai thần / Kiếp số Hằng sa nói chẳng cùng."
+[00:13:07] 见闻瞻礼一念间。利益人天无量事。 | jiàn wén zhān lǐ yī niàn jiān 。 lì yì rén tiān wú liàng shì 。 | Kiến văn chiêm lễ nhất niệm gian. Lợi ích nhân thiên vô lượng sự. | "Seeing, hearing, gazing, and bowing for but a moment / Benefits humans and gods in measureless ways." | "Thấy nghe một niệm chiêm ngưỡng lễ / Lợi ích Trời Người vô lượng sự."
+[00:13:13] 若男若女若龙神。报尽应当堕恶道。 | ruò nán ruò nǚ ruò lóng shén 。 bào jìn yīng dāng duò è dào 。 | Nhược nam nhược nữ nhược Long Thần. Báo tận ưng đương đọa ác đạo. | "If men, women, dragons, or spirits / Are nearing the end of their retribution and should fall into the Evil Paths," | "Hoặc nam hoặc nữ hoặc Rồng Thần / Báo hết phải sa vào đường ác."
+[00:13:19] 至心归依大士身。寿命转增除罪障。 | zhì xīn guī yī dà shì shēn 。 shòu mìng zhuǎn zēng chú zuì zhàng 。 | Chí tâm quy y Đại Sĩ thân. Thọ mạng chuyển tăng trừ tội chướng. | "Sincerely taking refuge in the Great Knight's body, / Their lifespans will increase and their offense obstacles will be removed." | "Chí tâm quy y thân Đại Sĩ / Thọ mạng chuyển tăng trừ tội chướng."
+[00:13:26] 少失父母恩爱者。未知魂神在何趣。 | shào shī fù mǔ ēn ài zhě 。 wèi zhī hún shén zài hé qù 。 | Thiếu thất phụ mẫu ân ái giả. Vị tri hồn thần tại hà thú. | "Those who lost their loving parents when young / And do not know what paths their spirits are in," | "Kẻ mồ côi mất cha mẹ sớm / Chẳng biết hồn thần ở chốn nào."
+[00:13:32] 兄弟姐妹及诸亲。生长以来皆不识。 | xiōng dì jiě mèi jí zhū qīn 。 shēng zhǎng yǐ lái jiē bù shí 。 | Huynh đệ tỷ muội cập chư thân. Sanh trưởng dĩ lai giai bất thức. | "Lost brothers, sisters, and relatives / Whom they have never known since growing up," | "Anh em chị em cùng thân quyến / Sanh lớn đến nay đều chẳng biết."
+[00:13:37] 或塑或画大士身。悲恋瞻礼不暂舍。 | huò sù huò huà dà shì shēn 。 bēi liàn zhān lǐ bù zàn shě 。 | Hoặc tố hoặc họa Đại Sĩ thân. Bi luyến chiêm lễ bất tạm xả. | "If they sculpt or paint the Great Knight's image / And sadly gaze at and worship it without pause," | "Hoặc nặn hoặc vẽ hình Đại Sĩ / Cảm thương chiêm lễ chẳng muốn rời."
+[00:13:43] 三七日中念其名。菩萨当现无边体。 | sān qī rì zhōng niàn qí míng 。 pú sà dāng xiàn wú biān tǐ 。 | Tam thất nhật trung niệm kỳ danh. Bồ Tát đương hiện vô biên thể. | "Reciting his name for twenty-one days, / The Bodhisattva will manifest a boundless body" | "Hăm mốt ngày luôn niệm danh Ngài / Bồ Tát sẽ hiện thân vô biên."
+[00:13:49] 示其眷属所生界。纵堕恶趣寻出离。 | shì qí juàn shǔ suǒ shēng jiè 。 zòng duò è qù xún chū lí 。 | Thị kỳ quyến thuộc sở sanh giới. Tung đọa ác thú tầm xuất ly. | "And show the realms where their relatives are born. / Even if they have fallen into Evil Paths, they will quickly leave." | "Chỉ rành quyến thuộc ở nơi nào / Dẫu sa đường ác cũng ra khỏi."
+[00:13:55] 若能不退是初心。即获摩顶受圣记。 | ruò néng bù tuì shì chū xīn 。 jí huò mó dǐng shòu shèng jì 。 | Nhược năng bất thối thị sơ tâm. Tức hoạch ma đảnh thọ thánh ký. | "If they can maintain this initial resolve without retreating, / They will receive a crown-rubbing and a holy prediction." | "Nếu được chẳng lui tâm ban đầu / Liền được xoa đảnh thọ thánh ký."
+[00:14:01] 欲修无上菩提者。乃至出离三界苦。 | yù xiū wú shàng pú tí zhě 。 nǎi zhì chū lí sān jiè kǔ 。 | Dục tu Vô Thượng Bồ Đề giả. Nãi chí xuất ly tam giới khổ. | "Those who wish to cultivate Unsurpassed Bodhi / And leave behind the suffering of the Three Realms," | "Muốn tu quả Vô Thượng Bồ Đề / Cho đến cầu ra khổ tam giới."
+[00:14:06] 是人既发大悲心。先当瞻礼大士像。 | shì rén jì fā dà bēi xīn 。 xiān dāng zhān lǐ dà shì xiàng 。 | Thị nhân ký phát đại bi tâm. Tiên đương chiêm lễ Đại Sĩ tượng. | "Having given rise to great compassion, / They should first gaze at and bow to the Great Knight's image." | "Người ấy đã phát tâm đại bi / Trước nên chiêm lễ tượng Đại Sĩ."
+[00:14:12] 一切诸愿速成就。永无业障能遮止。 | yí qiè zhū yuàn sù chéng jiù 。 yǒng wú yè zhàng néng zhē zhǐ 。 | Nhất thiết chư nguyện tốc thành tựu. Vĩnh vô nghiệp chướng năng già chỉ. | "All their wishes will be quickly fulfilled, / And no karmic obstacles will ever stop them." | "Nguyện gì cũng được chóng thành tựu / Nghiệp chướng vĩnh viễn chẳng ngăn được."
+[00:14:18] 有人发心念经典。欲度群迷超彼岸。 | yǒu rén fā xīn niàn jīng diǎn 。 yù dù qún mí chāo bǐ àn 。 | Hữu nhân phát tâm niệm kinh điển. Dục độ quần mê siêu bỉ ngạn. | "Some resolve to recite Sutras / Wishing to cross over the confused multitude to the other shore." | "Có người phát tâm tụng kinh điển / Muốn độ quần sanh qua bờ kia."
+[00:14:24] 虽立是愿不思议。旋读旋忘多废失。 | suī lì shì yuàn bù sī yì 。 xuán dú xuán wàng duō fèi shī 。 | Tuy lập thị nguyện bất tư nghị. Tuyền độc tuyền vong đa phế thất. | "Although they make this inconceivable vow, / They read and then forget, losing much." | "Dầu lập thệ nguyện không nghĩ bàn / Đọc rồi lại quên thường bỏ sót."
+[00:14:30] 斯人有业障惑故。于大乘经不能记。 | sī rén yǒu yè zhàng huò gù 。 yú dà chéng jīng bù néng jì 。 | Tư nhân hữu nghiệp chướng hoặc cố. Ư Đại Thừa kinh bất năng ký. | "Because these people have karmic obstacles and confusion, / They cannot remember the Great Vehicle Sutras." | "Người này nghiệp chướng làm mê hoặc / Nơi kinh Đại Thừa không nhớ được."
+[00:14:35] 供养地藏以香华。衣服饮食诸玩具。 | gòng yàng dì zàng yǐ xiāng huā 。 yī fú yǐn shí zhū wán jù 。 | Cúng dường Địa Tạng dĩ hương hoa. Y phục ẩm thực chư ngoạn cụ. | "They should make offerings to Earth Store with incense and flowers, / Clothing, food, drink, and various playthings." | "Cúng dường Địa Tạng dùng hương hoa / Y phục đồ ăn cùng các vật."
+[00:14:41] 以净水安大士前。一日一夜求服之。 | yǐ jìng shuǐ ān dà shì qián 。 yī rì yī yè qiú fú zhī 。 | Dĩ tịnh thủy an Đại Sĩ tiền. Nhất nhật nhất dạ cầu phục chi. | "Place pure water before the Great Knight / For one day and one night, then request to drink it." | "Để chén nước trong trước Đại Sĩ / Một ngày một đêm xin uống vào."
+[00:14:47] 发殷重心慎五辛。酒肉邪淫及妄语。 | fā yīn zhòng xīn shèn wǔ xīn 。 jiǔ ròu xié yín jí wàng yǔ 。 | Phát ân trọng tâm thận ngũ tân. Tửu nhục tà dâm cập vọng ngữ. | "With a sincere and solemn mind, avoid the five pungent plants, / Wine, meat, sexual misconduct, and lying." | "Sanh lòng ân trọng cữ ngũ tân / Rượu thịt tà dâm cùng vọng ngữ."
+[00:14:53] 三七日内勿杀害。至心思念大士名。 | sān qī rì nèi wù shā hài 。 zhì xīn sī niàn dà shì míng 。 | Tam thất nhật nội vật sát hại. Chí tâm tư niệm Đại Sĩ danh. | "Do not kill or harm for twenty-one days, / And sincerely recite the Great Knight's name." | "Trong hăm mốt ngày chớ sát sanh / Chí tâm tưởng niệm tên Đại Sĩ."
+[00:14:59] 即于梦中见无边。觉来便得利根耳。 | jí yú mèng zhōng jiàn wú biān 。 jué lái biàn dé lì gēn ěr 。 | Tức ư mộng trung kiến vô biên. Giác lai tiện đắc lợi căn nhĩ. | "They will see the Boundless One in a dream, / And upon waking will obtain keen hearing." | "Liền ở trong mộng thấy vô biên / Tỉnh dậy liền đặng căn tánh lanh."
+[00:15:05] 应是经教历耳闻。千万生中永不忘。 | yìng shì jīng jiào lì ěr wén 。 qiān wàn shēng zhōng yǒng bù wàng 。 | Ưng thị kinh giáo lịch nhĩ văn. Thiên vạn sanh trung vĩnh bất vong. | "Once the teachings of the Sutras pass through their ears, / They will never forget them for thousands of millions of lives." | "Kinh giáo nghe qua lọt vào tai / Nghìn muôn đời sau không hề quên."
+[00:15:11] 以是大士不思议。能使斯人获此慧。 | yǐ shì dà shì bù sī yì 。 néng shǐ sī rén huò cǐ huì 。 | Dĩ thị Đại Sĩ bất tư nghị. Năng sử tư nhân hoạch thử huệ. | "This is because the Great Knight is inconceivable / And can cause such people to obtain this wisdom." | "Chính nhờ Đại Sĩ bất tư nghị / Hay khiến người ấy được huệ này."
+[00:15:16] 贫穷众生及疾病。家宅凶衰眷属离。 | pín qióng zhòng shēng jí jí bìng 。 jiā zhái xiōng shuāi juàn shǔ lí 。 | Bần cùng chúng sanh cập tật bệnh. Gia trạch hung suy quyến thuộc ly. | "Living beings who are poor, sick, / Whose households are declining, whose relatives are scattered," | "Chúng sanh nghèo khổ cùng ốm đau / Cửa nhà hung suy quyến thuộc lìa."
+[00:15:22] 睡梦之中悉不安。求者乖违无称遂。 | shuì mèng zhī zhōng xī bù ān 。 qiú zhě guāi wéi wú chēng suì 。 | Thụy mộng chi trung tất bất an. Cầu giả quai vi vô xứng toại. | "Who are uneasy in their dreams, / And whose wishes are thwarted and unfulfilled," | "Trong giấc chiêm bao thường chẳng an / Cầu chi hỏng đó không vừa ý."
+[00:15:28] 至心瞻礼地藏像。一切恶事皆消灭。 | zhì xīn zhān lǐ dì zàng xiàng 。 yí qiè è shì jiē xiāo miè 。 | Chí tâm chiêm lễ Địa Tạng tượng. Nhất thiết ác sự giai tiêu diệt. | "Should sincerely gaze at and bow to Earth Store's image. / All evil matters will be eliminated." | "Chí tâm chiêm lễ tượng Địa Tạng / Tất cả việc ác thảy tiêu trừ."
+[00:15:34] 至于梦中尽得安。衣食丰溢神鬼护。 | zhì yú mèng zhōng jìn dé ān 。 yī shí fēng yì shén guǐ hù 。 | Chí ư mộng trung tận đắc an. Y thực phong dật thần quỷ hộ. | "Even their dreams will become peaceful. / They will have abundant food and clothing and be protected by ghosts and spirits." | "Cho đến trong mộng đều được an / Ăn mặc dư dật thần quỷ hộ."
+[00:15:40] 欲入山林及渡海。毒恶禽兽恶人难。 | yù rù shān lín jí dù hǎi 。 dú è qín shòu è rén nàn 。 | Dục nhập sơn lâm cập độ hải. Độc ác cầm thú ác nhân nạn. | "Those wishing to enter mountains or forests or cross the sea, / Facing poisonous and evil birds and beasts, or difficulties from evil people," | "Muốn vào núi rừng qua sông biển / Cầm thú độc ác giặc cướp đón."
+[00:15:46] 恶神恶鬼并恶风。一切诸难诸苦恼。 | è shén è guǐ bìng è fēng 。 yí qiè zhū nàn zhū kǔ nǎo 。 | Ác thần ác quỷ tịnh ác phong. Nhất thiết chư nạn chư khổ não. | "Evil spirits, evil ghosts, and evil winds, / And all kinds of disasters and sufferings," | "Ác thần ác quỷ cùng ác phong / Tất cả tai nạn các khổ não."
+[00:15:51] 但当瞻礼及供养。地藏菩萨大士像。 | dàn dāng zhān lǐ jí gòng yàng 。 dì zàng pú sà dà shì xiàng 。 | Đãn đương chiêm lễ cập cúng dường. Địa Tạng Bồ Tát Đại Sĩ tượng. | "Should simply gaze at, bow to, and make offerings / To the image of the Great Knight Earth Store Bodhisattva." | "Chỉ nên chiêm lễ cùng cúng dường / Hình tượng Địa Tạng Đại Bồ Tát."
+[00:15:57] 如是山林大海中。应是诸恶皆消灭。 | rú shì shān lín dà hǎi zhōng 。 yìng shì zhū è jiē xiāo miè 。 | Như thị sơn lâm đại hải trung. Ưng thị chư ác giai tiêu diệt. | "In such mountains, forests, and great seas, / All evils will be eliminated." | "Trong núi rừng kia cùng biển cả / Các sự độc ác thảy tiêu tan."
+[00:16:03] 观音至心听吾说。地藏无尽不思议。 | guān yīn zhì xīn tīng wú shuō 。 dì zàng wú jìn bù sī yì 。 | Quan Âm chí tâm thính ngô thuyết. Địa Tạng vô tận bất tư nghị. | "Avalokitesvara, listen sincerely to what I say. / Earth Store is endless and inconceivable." | "Quan Âm chí tâm nghe Ta nói / Địa Tạng oai thần không nghĩ bàn."
+[00:16:09] 百千万劫说不周。广宣大士如是力。 | bǎi qiān wàn jié shuō bù zhōu 。 guǎng xuān dà shì rú shì lì 。 | Bách thiên vạn kiếp thuyết bất chu. Quảng tuyên Đại Sĩ như thị lực. | "Hundreds of thousands of millions of aeons of speaking would not be enough. / Widely proclaim the Great Knight's powers like this." | "Trăm nghìn muôn kiếp nói chẳng hết / Tuyên dương Đại Sĩ sức như thế."
+[00:16:15] 地藏名字人若闻。乃至见像瞻礼者。 | dì zàng míng zì rén ruò wén 。 nǎi zhì jiàn xiàng zhān lǐ zhě 。 | Địa Tạng danh tự nhân nhược văn. Nãi chí kiến tượng chiêm lễ giả. | "If people hear Earth Store's name / Or see his image and gaze at and bow to it," | "Người nào được nghe tên Địa Tạng / Cho đến thấy tượng chiêm lễ Ngài."
+[00:16:21] 香华衣服饮食奉。供养百千受妙乐。 | xiāng huā yī fú yǐn shí fèng 。 gòng yàng bǎi qiān shòu miào lè 。 | Hương hoa y phục ẩm thực phụng. Cúng dường bách thiên thọ diệu lạc. | "Offering incense, flowers, clothing, food, and drink, / They will enjoy wonderful bliss for hundreds of thousands of lives." | "Hương hoa y phục đồ ăn uống / Cúng dường trăm nghìn hưởng diệu lạc."
+[00:16:27] 若能以此回法界。毕竟成佛超生死。 | ruò néng yǐ cǐ huí fǎ jiè 。 bì jìng chéng fó chāo shēng sǐ 。 | Nhược năng dĩ thử hồi Pháp Giới. Tất cánh thành Phật siêu sanh tử. | "If they can dedicate this merit to the Dharma Realm, / They will ultimately become Buddhas and transcend birth and death." | "Nếu đem hồi hướng cho Pháp Giới / Rốt ráo thành Phật thoát tử sanh."
+[00:16:33] 是故观音汝当知。普告恒沙诸国土。 | shì gù guān yīn rǔ dāng zhī 。 pǔ gào héng shā zhū guó tǔ 。 | Thị cố Quan Âm nhữ đương tri. Phổ cáo Hằng sa chư quốc độ. | "Therefore, Avalokitesvara, you should know this / And universally tell it to the lands as numerous as Ganges sands." | "Vì thế Quan Âm ông nên biết / Truyền bá rộng ra cho hằng sa."
+`;
+
+        // --- TAM THIEN TU DATA (Sample ~3000 Common Characters) ---
+        const tamThienTuStr = "天地举存子孙六三家国前后牛马距牙无有犬羊归走拜跪去来女男带冠足多爱憎识知木根易难旨甘柱梁床席欠余锄鞠烛灯升降田宅老童雀鸡我他伯姨铅锡役功翰翼圣贤仙佛潦潮鸢凤丈寻盘盏茧丝梅李滓清胸臆墨朱娇熟慎廉私慕至回乡市妇夫内中门屋英蒂菲葱苍白苦酸驺驾石金音信听闻鸟兽羽毛皮角甲鳞行飞潜泳龙虎龟麟卵胎化湿形体面神颐目口唇舌齿耳鼻喉颜鬓眉发头首脑额顶颐颔项颈肩背膂胁腋腕肱臂手掌指甲脚腿膝胫踝踵趾身躯骨肉髓脑血脉筋皮肠胃心肝脾肺肾胆胞胎精气神魂魄志意念想思虑忧愁喜怒哀乐恐惊悲欢聪明智慧愚痴暗钝才艺技能工巧百工士农工商君臣父子夫妇兄弟朋友宾主师生主仆奴婢官吏兵卒将帅军旅甲胄弓矢刀剑矛盾旌旗鼓钲车船舟楫帆樯橹棹桥梁道路街巷城郭宫室殿堂亭台楼阁园林池沼陂塘井灶釜甑碗碟杯盘匙箸壶觞尊爵几案箱箧囊橐衣裳冠冕鞋袜簪珥環钏锦绣罗绮布帛丝麻棉絮裁缝纺织耕稼种植收获仓廪府库钱财货贿贸易买卖秤尺斗斛斤两钱分铢寸丈寻常毫厘圭撮数算加减乘除年月日时春夏秋冬寒暑冷热风云雨雪雷电霜露霞雾虹霓星辰日月阴阳乾坤宇宙世界山川江河湖海陵陆高原平原草木花果竹苇松柏桑麻稻粱麦豆黍稷禽兽虫鱼飞走潜伏动植矿物金银铜铁铅锡珠玉宝石琉璃珊瑚玛瑙琥珀珍珠象牙犀角麝香牛黄虎骨鹿茸熊胆龟板鳖甲蝉蜕蛇皮蜂房蚕砂红黄蓝白黑紫绿青赤橙灰褐方圆长短高低大小厚薄广狭深浅远近轻重急缓快慢好坏善恶美丑是非真假虚实有无得失成败兴亡盛衰治乱安危吉凶祸福寿夭贫富贵贱尊卑上下左右内外中间东西南北四方八面古今往来宇宙洪荒玄黄日月盈昃辰宿列张寒来暑往秋收冬藏闰余成岁律吕调阳云腾致雨露结为霜金生丽水玉出昆冈剑号巨阙珠称夜光果珍李柰菜重芥姜海咸河淡鳞潜羽翔龙师火帝鸟官人皇始制文字乃服衣裳推位让国有虞陶唐吊民伐罪周发殷汤坐朝问道垂拱平章爱育黎首臣伏戎羌遐迩一体率宾归王鸣凤在竹白驹食场化被草木赖及万方盖此身发四大五常恭惟鞠养岂敢毁伤女慕贞洁男效才良知过必改得能莫忘罔谈彼短靡恃己长信使可覆器欲难量墨悲丝染诗赞羔羊景行维贤克念作圣德建名立形端表正空谷传声虚堂习听祸因恶积福缘善庆尺璧非宝寸阴是竞资父事君曰严与敬孝当竭力忠则尽命临深履薄夙兴温清似兰斯馨如松之盛川流不息渊澄取映容止若思言辞安定笃初诚美慎终宜令荣业所基籍甚无竟学优登仕摄职从政存以甘棠去而益咏乐殊贵贱礼别尊卑上和下睦夫唱妇随外受傅训入奉母仪诸姑伯叔犹子比儿孔怀兄弟同气连枝交友投分切磨箴规仁慈隐恻造次弗离节义廉退颠沛匪亏性静情逸心动神疲守真志满逐物意移坚持雅操好爵自縻都邑华夏东西二京背邙面洛浮渭据泾宫殿盘郁楼观飞惊图写禽兽画彩仙灵丙舍傍启甲帐对楹肆筵设席鼓瑟吹笙升阶纳陛弁转疑星右通广内左达承明既集坟典亦聚群英杜稿钟隶漆书壁经府罗将相路侠槐卿户封八县家给千兵高冠陪辇驱毂振缨世禄侈富车驾肥轻策功茂实勒碑刻铭磻溪伊尹佐时阿衡奄宅曲阜微旦孰营桓公匡合济弱扶倾绮回汉惠说感武丁俊乂密勿多士寔宁晋楚更霸赵魏困横假途灭域践土会盟何遵约法韩弊烦刑起翦颇牧用军最精宣威沙漠驰誉丹青九州禹迹百郡秦并岳宗泰岱禅主云亭雁门紫塞鸡田赤城昆池碣石巨野洞庭旷远绵邈岩岫杳冥治本于农务兹稼穑俶载南亩我艺黍稷税熟贡新劝赏黜陟孟轲敦素史鱼秉直庶几中庸劳谦谨敕聆音察理鉴貌辨色贻厥嘉猷勉其祗植省躬讥诫宠增抗极殆辱近耻林皋幸即两疏见机解组谁逼索居闲处沉默寂寥求古寻论散虑逍遥欣奏累遣戚谢欢招渠荷的历园莽抽条枇杷晚翠梧桐早凋陈根委翳落叶飘摇游鹍独运凌摩绛霄";
+        
+        const tamThienTuSet = new Set(tamThienTuStr);
+
+        // --- APP STATE ---
+        let transcripts = [];
+        let simulationInterval = null;
+        let isPlaying = false;
+        let currentSimulationTime = 0; 
+        const simulationSpeed = 1; 
+        let analysisMode = false;
+        let vocabChartInstance = null;
+
+        // --- CORE FUNCTIONS ---
+
+        // 1. Text-to-Speech Functionality (iOS Optimized & Retry Logic)
+        
+        // GLOBAL VARIABLE to prevent iOS Safari Garbage Collection (Critical Fix)
+        window.currentUtterance = null; 
+        let availableVoices = [];
+
+        function loadVoices() {
+            if ('speechSynthesis' in window) {
+                availableVoices = window.speechSynthesis.getVoices();
+            }
+        }
+        
+        // Initialize voices (Chrome loads immediately, iOS waits for event)
+        if ('speechSynthesis' in window) {
+            loadVoices();
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        function speakText(text, btnId, retry = true) {
+            if (!text) return; // Prevent empty text errors
+
+            if ('speechSynthesis' in window) {
+                // Cancel current speech if any to avoid queue backup
+                window.speechSynthesis.cancel();
+                
+                // Visual feedback
+                if(btnId) {
+                    document.querySelectorAll('.speaking-active').forEach(el => el.classList.remove('speaking-active'));
+                    const btn = document.getElementById(btnId);
+                    if(btn) btn.classList.add('speaking-active');
+                }
+
+                // Create Utterance
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // --- iOS FIX: EXPLICITLY FIND CHINESE VOICE ---
+                // iOS sometimes ignores 'lang' property if voice is not set explicitly
+                if (retry) {
+                    if (availableVoices.length === 0) {
+                        availableVoices = window.speechSynthesis.getVoices();
+                    }
+                    
+                    const zhVoice = availableVoices.find(v => v.lang === 'zh-CN') || 
+                                    availableVoices.find(v => v.lang.startsWith('zh'));
+                    
+                    if (zhVoice) {
+                        utterance.voice = zhVoice;
+                        utterance.lang = zhVoice.lang;
+                    } else {
+                        utterance.lang = 'zh-CN'; // Fallback
+                    }
+                } else {
+                    // Retry with minimal configuration to avoid "isTrusted" errors
+                    utterance.lang = 'zh-CN'; 
+                    // Do not set specific voice object on retry
+                }
+                
+                utterance.rate = 0.8; // Slower rate for learning
+                
+                // --- iOS FIX: PREVENT GARBAGE COLLECTION ---
+                // Assign to global variable so Safari doesn't kill it mid-speech
+                window.currentUtterance = utterance;
+
+                utterance.onend = function() {
+                    if(btnId) {
+                        const btn = document.getElementById(btnId);
+                        if(btn) btn.classList.remove('speaking-active');
+                    }
+                    window.currentUtterance = null; // Clean up
+                };
+
+                utterance.onerror = function(e) {
+                    console.error("Speech Error:", e);
+                    
+                    // Smart Retry Logic for "isTrusted" errors
+                    if (retry) {
+                        console.log("Retrying speech with simple configuration...");
+                        // Clear active state momentarily
+                        if(btnId) {
+                            const btn = document.getElementById(btnId);
+                            if(btn) btn.classList.remove('speaking-active');
+                        }
+                        
+                        setTimeout(() => {
+                            speakText(text, btnId, false); // Retry with retry=false
+                        }, 100);
+                        return;
+                    }
+
+                    if(btnId) {
+                        const btn = document.getElementById(btnId);
+                        if(btn) btn.classList.remove('speaking-active');
+                    }
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.warn("Trình duyệt không hỗ trợ Text-to-Speech");
+            }
+        }
+
+        // 2. Parse Data
+        function parseSubtitles(raw) {
+            const lines = raw.trim().split('\n');
+            const parsed = [];
+            // Regex captures: 1=HH, 2=MM, 3=SS, 4=Chinese, 5=Pinyin, 6=Viet (Han), 7=English, 8=Viet (Trans)
+            const regex = /\[(\d{2}):(\d{2}):(\d{2})\]\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*)/;
+
+            lines.forEach((line, index) => {
+                const match = line.match(regex);
+                if (match) {
+                    const hours = parseInt(match[1]);
+                    const minutes = parseInt(match[2]);
+                    const seconds = parseInt(match[3]);
+                    const cnText = match[4].trim();
+                    const pinyinText = match[5].trim();
+                    const vietHanText = match[6].trim();
+                    const enText = match[7].trim();
+                    const vietTransText = match[8].trim();
+                    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                    
+                    parsed.push({
+                        id: index,
+                        timeFormatted: `${hours > 0 ? match[1] + ':' : ''}${match[2]}:${match[3]}`,
+                        seconds: totalSeconds,
+                        cn: cnText,
+                        pinyin: pinyinText,
+                        vietHan: vietHanText,
+                        en: enText,
+                        vietTrans: vietTransText,
+                        // Search text combined
+                        searchText: (cnText + ' ' + pinyinText + ' ' + vietHanText + ' ' + enText + ' ' + vietTransText).toLowerCase()
+                    });
+                }
+            });
+            return parsed;
+        }
+
+        // 3. Analyze Vocabulary (unchanged logic)
+        function analyzeVocabulary(items) {
+            const allChars = new Set();
+            items.forEach(item => {
+                const chars = item.cn.match(/[\u4e00-\u9fa5]/g);
+                if (chars) chars.forEach(c => allChars.add(c));
+            });
+
+            let inCount = 0;
+            let outCount = 0;
+            const total = allChars.size;
+
+            allChars.forEach(char => {
+                if (tamThienTuSet.has(char)) inCount++;
+                else outCount++;
+            });
+
+            const inPerc = total > 0 ? Math.round((inCount / total) * 100) : 0;
+            const outPerc = total > 0 ? 100 - inPerc : 0;
+
+            document.getElementById('uniqueCharCount').textContent = total;
+            document.getElementById('inTTTCount').textContent = inCount;
+            document.getElementById('inTTTPerc').textContent = `${inPerc}%`;
+            document.getElementById('outTTTCount').textContent = outCount;
+            document.getElementById('outTTTPerc').textContent = `${outPerc}%`;
+
+            const commentEl = document.getElementById('analysisComment');
+            if (inPerc > 80) commentEl.textContent = `Văn bản sử dụng phần lớn là các chữ căn bản (${inPerc}%), cho thấy ngôn ngữ kinh điển khá gần gũi và dễ tiếp cận với người có vốn Hán ngữ cơ sở.`;
+            else if (inPerc > 50) commentEl.textContent = `Văn bản có sự kết hợp cân bằng giữa từ vựng căn bản và thuật ngữ chuyên sâu.`;
+            else commentEl.textContent = `Văn bản chứa nhiều thuật ngữ chuyên môn hoặc chữ hiếm gặp, cần tra cứu kỹ.`;
+
+            renderVocabChart(inCount, outCount);
+        }
+
+        function renderVocabChart(inCount, outCount) {
+            const ctx = document.getElementById('vocabChart').getContext('2d');
+            if(vocabChartInstance) vocabChartInstance.destroy();
+            
+            // Determine if dark mode is active (by checking body bg color)
+            const isDark = getComputedStyle(document.body).backgroundColor === 'rgb(28, 25, 23)'; // Stone 900
+            const textColor = isDark ? '#e7e5e4' : '#44403c';
+
+            vocabChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Trong Tam Thiên Tự', 'Ngoài danh sách'],
+                    datasets: [{
+                        data: [inCount, outCount],
+                        backgroundColor: ['#22c55e', '#f59e0b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { 
+                                usePointStyle: true, 
+                                font: { family: "'Noto Sans', sans-serif" },
+                                color: textColor
+                            } 
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw;
+                                    const total = context.chart._metasets[context.datasetIndex].total;
+                                    const perc = Math.round((val/total)*100) + '%';
+                                    return ` ${context.label}: ${val} (${perc})`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // 4. Render List (Updated with Audio Button)
+        function renderList(items) {
+            const container = document.getElementById('transcriptContainer');
+            container.innerHTML = '';
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="p-8 text-center text-stone-500 flex flex-col items-center gap-2"><span class="text-2xl">📭</span><span>Không tìm thấy nội dung phù hợp.</span></div>';
+                document.getElementById('visibleCount').textContent = '0 câu';
+                return;
+            }
+
+            items.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.id = `line-${item.id}`;
+                div.className = 'transcript-item p-4 rounded-lg cursor-pointer mb-2';
+                div.onclick = () => jumpToTime(item.seconds);
+                
+                let processedCn = item.cn;
+                if (analysisMode) {
+                    processedCn = item.cn.split('').map(char => {
+                        if (/[\u4e00-\u9fa5]/.test(char)) {
+                            if (tamThienTuSet.has(char)) {
+                                return `<span class="char-basic" title="Có trong Tam Thiên Tự">${char}</span>`;
+                            } else {
+                                return `<span class="char-advanced" title="Không có trong danh sách">${char}</span>`;
+                            }
+                        }
+                        return char;
+                    }).join('');
+                }
+
+                // Add Audio Button (Stop propagation to prevent jump when clicking audio)
+                // Note: We send Chinese text (item.cn) to the TTS engine because engines pronounce Hanzi correctly as Pinyin.
+                div.innerHTML = `
+                    <div class="flex gap-4 items-start relative pr-8">
+                        <span class="text-xs font-mono text-amber-500 bg-amber-900/30 px-2 py-1 rounded h-fit shrink-0 mt-2 border border-amber-800/50">${item.timeFormatted}</span>
+                        <div class="flex-1 space-y-1">
+                            <div class="cn-text text-xl">${processedCn}</div>
+                            <div class="pinyin-text">${item.pinyin}</div>
+                            <div class="viet-han-text">${item.vietHan}</div>
+                            <div class="viet-trans-text">${item.vietTrans}</div>
+                            <div class="en-text">${item.en}</div>
+                        </div>
+                        <button id="audio-btn-${item.id}" 
+                                onclick="event.stopPropagation(); speakText('${item.cn.replace(/'/g, "\\'")}', 'audio-btn-${item.id}')" 
+                                class="absolute right-0 top-2 text-stone-600 hover:text-amber-500 transition-all p-2 rounded-full hover:bg-stone-700/50 audio-btn" 
+                                title="Nghe đọc Pinyin">
+                            🔊
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            
+            document.getElementById('visibleCount').textContent = `${items.length} câu`;
+        }
+
+        // 5. Initialize Stats & Jump
+        function initJumpSelect(data) {
+            const select = document.getElementById('jumpSelect');
+            if(data.length === 0) return;
+            const totalMinutes = Math.ceil(data[data.length - 1].seconds / 60);
+            select.innerHTML = '<option value="0">00:00 - Khởi đầu</option>';
+            for(let i = 1; i <= totalMinutes; i++) {
+                const option = document.createElement('option');
+                option.value = i * 60;
+                option.textContent = `${i < 10 ? '0'+i : i}:00`;
+                select.appendChild(option);
+            }
+            select.addEventListener('change', (e) => jumpToTime(parseInt(e.target.value)));
+        }
+
+        // 6. Simulation Logic
+        function jumpToTime(seconds) {
+            currentSimulationTime = seconds;
+            updateTimeDisplay(currentSimulationTime);
+            highlightCurrentLine();
+            scrollToActive();
+        }
+        function updateTimeDisplay(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            const formatted = `${h > 0 ? h + ':' : ''}${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+            document.getElementById('currentTimeDisplay').textContent = formatted;
+        }
+        function highlightCurrentLine() {
+            let activeItem = null;
+            for (let i = transcripts.length - 1; i >= 0; i--) {
+                if (transcripts[i].seconds <= currentSimulationTime) {
+                    activeItem = transcripts[i];
+                    break;
+                }
+            }
+            
+            // Check if active item changed
+            const currentActive = document.querySelector('.active-line');
+            const newActiveId = activeItem ? `line-${activeItem.id}` : null;
+            
+            if (currentActive && currentActive.id !== newActiveId) {
+                currentActive.classList.remove('active-line');
+            }
+
+            if (activeItem && (!currentActive || currentActive.id !== newActiveId)) {
+                const el = document.getElementById(newActiveId);
+                if (el) {
+                    el.classList.add('active-line');
+                    // Auto Read Logic
+                    if(isPlaying && document.getElementById('autoRead').checked) {
+                        speakText(activeItem.cn, `audio-btn-${activeItem.id}`);
+                    }
+                }
+            }
+        }
+        function scrollToActive() {
+            const active = document.querySelector('.active-line');
+            if (active) active.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        function togglePlay() {
+            const btnPlay = document.getElementById('btnPlay');
+            const btnPause = document.getElementById('btnPause');
+            if (isPlaying) {
+                clearInterval(simulationInterval);
+                window.speechSynthesis.cancel(); // Stop audio on pause
+                isPlaying = false;
+                btnPlay.classList.remove('hidden'); btnPlay.classList.add('flex');
+                btnPause.classList.add('hidden');
+            } else {
+                isPlaying = true;
+                btnPlay.classList.add('hidden');
+                btnPause.classList.remove('hidden'); btnPause.classList.add('flex');
+                
+                // Trigger immediate highlight check for audio start
+                highlightCurrentLine();
+
+                simulationInterval = setInterval(() => {
+                    currentSimulationTime++;
+                    updateTimeDisplay(currentSimulationTime);
+                    highlightCurrentLine(); // This triggers audio if needed
+                    if(currentSimulationTime % 2 === 0) scrollToActive();
+                    if (transcripts.length > 0 && currentSimulationTime > transcripts[transcripts.length-1].seconds + 20) togglePlay();
+                }, 1000 / simulationSpeed);
+            }
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            transcripts = parseSubtitles(rawSubtitleData);
+            analyzeVocabulary(transcripts);
+            renderList(transcripts);
+            initJumpSelect(transcripts);
+            
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = transcripts.filter(t => 
+                    t.searchText.includes(term) || t.timeFormatted.includes(term)
+                );
+                renderList(filtered);
+            });
+
+            document.getElementById('btnPlay').addEventListener('click', togglePlay);
+            document.getElementById('btnPause').addEventListener('click', togglePlay);
+            document.getElementById('btnReset').addEventListener('click', () => {
+                if(isPlaying) togglePlay();
+                jumpToTime(0);
+            });
+
+            const tttBtn = document.getElementById('tttToggle');
+            tttBtn.addEventListener('click', () => {
+                analysisMode = !analysisMode;
+                if (analysisMode) {
+                    tttBtn.classList.add('bg-green-900', 'border-green-700', 'ring-2', 'ring-green-500', 'ring-offset-1', 'ring-offset-stone-900');
+                    tttBtn.classList.remove('bg-stone-800');
+                    document.getElementById('transcriptContainer').classList.add('analysis-mode-active');
+                    document.getElementById('analysisLegend').classList.remove('hidden');
+                    
+                    const term = document.getElementById('searchInput').value.toLowerCase();
+                    const currentItems = transcripts.filter(t => t.searchText.includes(term));
+                    renderList(currentItems);
+                    highlightCurrentLine();
+                    scrollToActive();
+                    document.getElementById('analysisLegend').scrollIntoView({behavior: 'smooth', block: 'center'});
+                } else {
+                    tttBtn.classList.remove('bg-green-900', 'border-green-700', 'ring-2', 'ring-green-500', 'ring-offset-1', 'ring-offset-stone-900');
+                    tttBtn.classList.add('bg-stone-800');
+                    document.getElementById('transcriptContainer').classList.remove('analysis-mode-active');
+                    document.getElementById('analysisLegend').classList.add('hidden');
+                    
+                    const term = document.getElementById('searchInput').value.toLowerCase();
+                    renderList(transcripts.filter(t => t.searchText.includes(term)));
+                    highlightCurrentLine();
+                }
+            });
+
+            const modeBtn = document.getElementById('modeToggle');
+            let isLightMode = false; // Default is Dark now
+            modeBtn.addEventListener('click', () => {
+                isLightMode = !isLightMode;
+                const body = document.body;
+                
+                // Toggle Logic
+                if(isLightMode) {
+                    // Switch to LIGHT
+                    body.style.backgroundColor = '#fdfbf7'; 
+                    body.style.color = '#44403c';
+                    modeBtn.textContent = "🌙 Chế độ Tối";
+                    modeBtn.classList.remove('text-stone-300');
+                    modeBtn.classList.add('text-stone-700', 'bg-stone-100');
+
+                    // Global elements styles for Light
+                    document.querySelectorAll('.bg-stone-900').forEach(el => el.classList.replace('bg-stone-900', 'bg-white'));
+                    document.querySelectorAll('.bg-stone-800').forEach(el => el.classList.replace('bg-stone-800', 'bg-white'));
+                    document.querySelectorAll('.text-stone-200').forEach(el => el.classList.replace('text-stone-200', 'text-stone-800'));
+                    document.querySelectorAll('.text-stone-400').forEach(el => el.classList.replace('text-stone-400', 'text-stone-500'));
+                    
+                    // Specific Text Colors
+                    const cnEls = document.querySelectorAll('.cn-text');
+                    cnEls.forEach(el => el.style.color = '#292524');
+                    const vietHanEls = document.querySelectorAll('.viet-han-text');
+                    vietHanEls.forEach(el => el.style.color = '#b45309');
+                    const vietTransEls = document.querySelectorAll('.viet-trans-text');
+                    vietTransEls.forEach(el => el.style.color = '#15803d');
+                    const enEls = document.querySelectorAll('.en-text');
+                    enEls.forEach(el => el.style.color = '#57534e');
+                    
+                } else {
+                    // Switch to DARK (Default)
+                    body.style.backgroundColor = '#1c1917'; 
+                    body.style.color = '#e7e5e4';
+                    modeBtn.textContent = "☀️ Chế độ Sáng";
+                    modeBtn.classList.add('text-stone-300');
+                    modeBtn.classList.remove('text-stone-700', 'bg-stone-100');
+                    
+                    location.reload(); 
+                }
+            });
+        });
+    </script>
+</body>
+</html>
