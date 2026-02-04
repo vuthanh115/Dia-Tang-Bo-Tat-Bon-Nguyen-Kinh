@@ -3,946 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kinh Địa Tạng - Phẩm 1 (Audio Pinyin)</title>
+    <title>Mục Lục - Kinh Địa Tạng Bồ Tát Bổn Nguyện</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        dark: {
-                            bg: '#1c1917',      /* Stone 900 */
-                            card: '#292524',    /* Stone 800 */
-                            border: '#44403c',  /* Stone 700 */
-                            text: '#e7e5e4',    /* Stone 200 */
-                            muted: '#a8a29e'    /* Stone 400 */
-                        }
+                        dark: { bg: '#1c1917', card: '#292524', border: '#44403c', text: '#e7e5e4' }
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Noto+Sans:wght@300;400;500;600&family=Be+Vietnam+Pro:wght@400;500;600&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&display=swap'); /* Font for Chinese */
-        
-        body {
-            font-family: 'Noto Sans', sans-serif;
-            background-color: #1c1917; /* Stone 900 - Dark Mode Default */
-            color: #e7e5e4; /* Stone 200 */
-        }
-        
-        h1, h2, h3, .serif {
-            font-family: 'Noto Serif', serif;
-        }
-
-        .chart-container {
-            position: relative; 
-            width: 100%; 
-            max-width: 800px; 
-            margin-left: auto; 
-            margin-right: auto; 
-            height: 300px; 
-            max-height: 400px; 
-        }
-
-        /* Custom scrollbar - Dark version */
-        .custom-scroll::-webkit-scrollbar {
-            width: 8px;
-        }
-        .custom-scroll::-webkit-scrollbar-track {
-            background: #292524;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background-color: #57534e;
-            border-radius: 4px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb:hover {
-            background-color: #78716c;
-        }
-
-        /* Active line - Dark version */
-        .active-line {
-            background-color: #451a03; /* Amber 950/Darker */
-            border-left: 4px solid #f59e0b; /* Amber 500 */
-            padding-left: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .transcript-item {
-            transition: all 0.2s ease;
-            border-left: 4px solid transparent;
-            border-bottom: 1px solid #44403c; /* Stone 700 */
-            position: relative; /* For absolute positioning of audio button */
-        }
-        .transcript-item:hover {
-            background-color: #292524; /* Stone 800 */
-            border-left-color: #57534e;
-        }
-
-        /* Typography for multi-lingual display - DARK MODE COLORS */
-        .cn-text {
-            font-family: "Noto Serif SC", "SimSun", serif;
-            font-size: 1.6em;
-            color: #e7e5e4; /* Stone 200 - White-ish */
-            margin-bottom: 0.2rem;
-            line-height: 1.4;
-            font-weight: 500;
-        }
-        .pinyin-text {
-            color: #a8a29e; /* Stone 400 - Light Gray */
-            font-size: 0.85em;
-            margin-bottom: 0.35rem;
-            font-family: 'Noto Sans', sans-serif;
-            font-style: italic;
-        }
-        .viet-han-text {
-            color: #fbbf24; /* Amber 400 - Bright Amber */
-            font-size: 1.05em;
-            font-weight: 700;
-            line-height: 1.5;
-            font-family: 'Noto Serif', serif;
-            margin-bottom: 0.2rem;
-        }
-        .viet-trans-text {
-            color: #86efac; /* Green 300 - Light Green */
-            font-size: 1.05em;
-            font-family: 'Be Vietnam Pro', sans-serif;
-            line-height: 1.6;
-            margin-bottom: 0.2rem;
-            font-weight: 500;
-        }
-        .en-text {
-            color: #78716c; /* Stone 500 - Dim Gray */
-            font-size: 0.9em;
-            font-style: italic;
-            font-family: 'Noto Serif', serif;
-            line-height: 1.4;
-            opacity: 0.8;
-        }
-
-        /* Highlight classes for Tam Thien Tu analysis - Dark Mode Adapted */
-        .char-basic {
-            color: #14532d; /* Green 900 */
-            background-color: #86efac; /* Green 300 */
-            border-radius: 2px;
-            padding: 0 2px;
-            font-weight: bold;
-        }
-        .char-advanced {
-            color: #f59e0b; /* Amber 500 */
-            border-bottom: 1px dotted #f59e0b;
-        }
-        
-        .analysis-mode-active .cn-text {
-            line-height: 1.8;
-        }
-        
-        /* Audio Button Pulse Animation */
-        @keyframes pulse-ring {
-            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
-            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-        }
-        .speaking-active .audio-btn {
-            color: #fbbf24;
-            animation: pulse-ring 2s infinite;
-        }
-
-        /* Utility for input placeholder in dark mode */
-        ::placeholder {
-            color: #78716c;
-        }
-        
-        /* Card Hover Effect for Table of Contents */
-        .chapter-card {
-            transition: all 0.3s ease;
-        }
-        .chapter-card:hover {
-            transform: translateY(-4px);
-            border-color: #f59e0b; /* Amber 500 */
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Noto+Sans:wght@300;400;500;600&display=swap');
+        body { font-family: 'Noto Sans', sans-serif; background-color: #1c1917; color: #e7e5e4; }
+        .serif { font-family: 'Noto Serif', serif; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); border-color: #f59e0b; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
     </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col py-12 px-4 bg-stone-900">
 
-    <!-- Navigation / Header -->
-    <header class="bg-stone-900 shadow-md border-b border-stone-700 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold serif shadow-sm shadow-amber-900">Đ</div>
-                <div>
-                    <h1 class="text-lg md:text-xl font-bold text-stone-200 tracking-wide serif leading-tight">Kinh Địa Tạng</h1>
-                    <p class="text-xs text-stone-500 font-medium">Phẩm 1: 5 Ngôn Ngữ Đối Chiếu</p>
-                </div>
-            </div>
-            <nav class="hidden md:flex gap-6 text-sm font-medium text-stone-400">
-                <a href="#dashboard" class="hover:text-amber-500 transition-colors">Tổng Quan</a>
-                <a href="#transcript" class="hover:text-amber-500 transition-colors">Nội Dung</a>
-                <!-- MỚI: Link tới mục lục cuối trang -->
-                <a href="#chapter-list" class="hover:text-amber-500 transition-colors text-amber-500/80">📚 Mục Lục</a>
-            </nav>
-            <div class="flex gap-2">
-                <button id="tttToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-green-400 rounded-md text-sm font-medium transition-colors border border-stone-700" title="Tô màu chữ có trong Tam Thiên Tự">
-                    🌿 Soi Tam Thiên Tự
-                </button>
-                <button id="modeToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-md text-sm font-medium transition-colors border border-stone-700">
-                    ☀️ Chế độ Sáng
-                </button>
-            </div>
+    <!-- Header -->
+    <div class="text-center mb-12 space-y-4">
+        <div class="w-24 h-24 bg-amber-700 rounded-full flex items-center justify-center text-5xl font-bold serif shadow-lg mx-auto border-4 border-stone-800 text-white shadow-amber-900/50">
+            Đ
         </div>
-    </header>
+        <h1 class="text-3xl md:text-5xl font-bold text-amber-500 serif tracking-wide">Kinh Địa Tạng</h1>
+        <p class="text-stone-400 italic text-lg serif">Bổn Nguyện Công Đức</p>
+        <div class="w-20 h-1 bg-amber-800 mx-auto rounded-full mt-4"></div>
+    </div>
 
-    <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-4 py-8 space-y-10 max-w-6xl">
-
-        <!-- Hanzi Analysis Dashboard -->
-        <section id="dashboard" class="bg-stone-800 p-6 md:p-8 rounded-2xl shadow-lg border border-stone-700">
-            <div class="mb-6 pb-4 border-b border-stone-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h3 class="text-xl font-bold text-stone-200 flex items-center gap-2 serif">
-                        <span class="text-green-500">📖</span> Phân Tích Từ Vựng (Tam Thiên Tự)
-                    </h3>
-                    <p class="text-sm text-stone-400 mt-1">
-                        Đối chiếu chữ Hán trong Phẩm 1 với danh sách 3.000 chữ căn bản.
-                    </p>
-                </div>
-                <div class="text-right">
-                    <div class="text-2xl font-bold text-stone-200" id="uniqueCharCount">0</div>
-                    <div class="text-xs text-stone-500">Tổng chữ Hán duy nhất (không lặp)</div>
+    <!-- Mục Lục Grid -->
+    <div class="max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Phẩm 1 -->
+        <a href="pham1.html" class="block bg-stone-800 p-6 rounded-xl border border-stone-700 card-hover group relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">1</div>
+            <div class="relative z-10">
+                <span class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-2 block">Phẩm Thứ Nhất</span>
+                <h3 class="text-xl font-bold text-stone-200 mt-1 group-hover:text-amber-400 transition-colors serif h-14">Thần Thông Trên Cung Trời Đao Lợi</h3>
+                <div class="mt-4 flex items-center text-sm text-stone-500 group-hover:text-stone-300 transition-colors gap-2">
+                    <span>Đã có nội dung</span> <span class="text-green-500">●</span>
                 </div>
             </div>
+        </a>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Chart -->
-                <div class="col-span-1 h-64 chart-container flex items-center justify-center">
-                    <canvas id="vocabChart"></canvas>
-                </div>
-
-                <!-- Details -->
-                <div class="col-span-2 space-y-6">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-4 bg-green-900/20 rounded-lg border border-green-800/50">
-                            <div class="text-sm text-green-400 font-medium mb-1">Thuộc Tam Thiên Tự</div>
-                            <div class="text-3xl font-bold text-green-500" id="inTTTCount">0</div>
-                            <div class="text-xs text-green-400/70 mt-1" id="inTTTPerc">0%</div>
-                        </div>
-                        <div class="p-4 bg-amber-900/20 rounded-lg border border-amber-800/50">
-                            <div class="text-sm text-amber-400 font-medium mb-1">Ngoài Tam Thiên Tự</div>
-                            <div class="text-3xl font-bold text-amber-500" id="outTTTCount">0</div>
-                            <div class="text-xs text-amber-400/70 mt-1" id="outTTTPerc">0%</div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-stone-900/50 p-4 rounded-lg text-sm text-stone-400 border border-stone-700">
-                        <p class="mb-2 font-semibold text-stone-300">Nhận xét:</p>
-                        <p id="analysisComment">Đang phân tích dữ liệu...</p>
-                    </div>
+        <!-- Phẩm 2 -->
+        <a href="pham2.html" class="block bg-stone-800 p-6 rounded-xl border border-stone-700 card-hover group relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">2</div>
+            <div class="relative z-10">
+                <span class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-2 block">Phẩm Thứ Hai</span>
+                <h3 class="text-xl font-bold text-stone-200 mt-1 group-hover:text-amber-400 transition-colors serif h-14">Phân Thân Tập Hội</h3>
+                <div class="mt-4 flex items-center text-sm text-stone-500 group-hover:text-stone-300 transition-colors gap-2">
+                    <span>Đã có nội dung</span> <span class="text-green-500">●</span>
                 </div>
             </div>
-        </section>
+        </a>
 
-        <!-- Transcript & Interactive Player -->
-        <section id="transcript" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            <!-- Controls Column (Left) -->
-            <div class="lg:col-span-4 bg-stone-800 p-6 rounded-xl shadow-lg border border-stone-700 sticky top-24">
-                <h3 class="text-lg font-bold text-stone-200 mb-4 serif border-b pb-2 border-stone-700">Bảng Điều Khiển</h3>
-                
-                <div class="space-y-6">
-                    <!-- Simulation Controls -->
-                    <div class="p-4 bg-amber-900/20 rounded-lg border border-amber-800/30">
-                        <p class="text-sm text-amber-500 mb-3 font-semibold flex items-center gap-2">
-                            🎧 Mô phỏng tụng
-                        </p>
-                        <div class="flex gap-2">
-                            <button id="btnPlay" class="flex-1 bg-amber-700 hover:bg-amber-600 text-white py-2.5 px-4 rounded shadow-sm text-sm font-medium transition-colors flex justify-center items-center gap-2">
-                                <span>▶</span> Bắt đầu
-                            </button>
-                            <button id="btnPause" class="flex-1 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-amber-400 py-2.5 px-4 rounded shadow-sm text-sm font-medium transition-colors hidden">
-                                <span>⏸</span> Tạm dừng
-                            </button>
-                            <button id="btnReset" class="px-3 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-stone-300 rounded shadow-sm transition-colors" title="Quay lại từ đầu">
-                                ↺
-                            </button>
-                        </div>
-                        <div class="flex justify-between items-center mt-3 px-1">
-                            <span class="text-xs text-amber-500 font-mono" id="currentTimeDisplay">00:00</span>
-                            <span class="text-xs text-amber-500/50">Tự động cuộn</span>
-                        </div>
-                        <div class="mt-3 flex items-center gap-2">
-                            <input type="checkbox" id="autoRead" class="rounded border-stone-600 text-amber-600 focus:ring-amber-500 bg-stone-900">
-                            <label for="autoRead" class="text-xs text-stone-400 cursor-pointer select-none">Tự động đọc Pinyin khi chạy</label>
-                        </div>
-                    </div>
+        <!-- Các Phẩm Còn Lại (Placeholder) -->
+        <!-- Bạn chỉ cần tạo file pham3.html, pham4.html... rồi sửa link href="#" thành tên file -->
+        
+        <a href="#" class="block bg-stone-800/50 p-6 rounded-xl border border-stone-700/50 card-hover group relative overflow-hidden opacity-70 hover:opacity-100 transition-opacity">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">3</div>
+            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 block">Phẩm Thứ Ba</span>
+            <h3 class="text-xl font-bold text-stone-400 serif h-14 group-hover:text-stone-200">Quán Chúng Sanh Nghiệp Duyên</h3>
+        </a>
 
-                    <!-- Search/Filter -->
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-stone-500 mb-1.5 tracking-wide">Tìm kiếm</label>
-                        <div class="relative">
-                            <input type="text" id="searchInput" placeholder="Tìm kiếm (Việt, Anh, Hán)..." 
-                                   class="w-full pl-9 pr-3 py-2 bg-stone-900 border border-stone-700 text-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm shadow-sm placeholder-stone-600">
-                            <span class="absolute left-3 top-2.5 text-stone-500">🔍</span>
-                        </div>
-                    </div>
+        <a href="#" class="block bg-stone-800/50 p-6 rounded-xl border border-stone-700/50 card-hover group relative overflow-hidden opacity-70 hover:opacity-100 transition-opacity">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">4</div>
+            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 block">Phẩm Thứ Tư</span>
+            <h3 class="text-xl font-bold text-stone-400 serif h-14 group-hover:text-stone-200">Nghiệp Cảm Của Chúng Sanh</h3>
+        </a>
 
-                    <!-- Jump To -->
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-stone-500 mb-1.5 tracking-wide">Chuyển nhanh</label>
-                        <select id="jumpSelect" class="w-full px-3 py-2 border border-stone-700 rounded-lg bg-stone-900 text-stone-300 text-sm focus:ring-amber-500 focus:border-amber-500 shadow-sm cursor-pointer hover:bg-stone-950">
-                            <option value="0">00:00 - Khởi đầu</option>
-                            <!-- Options populated by JS -->
-                        </select>
-                    </div>
+        <a href="#" class="block bg-stone-800/50 p-6 rounded-xl border border-stone-700/50 card-hover group relative overflow-hidden opacity-70 hover:opacity-100 transition-opacity">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">5</div>
+            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 block">Phẩm Thứ Năm</span>
+            <h3 class="text-xl font-bold text-stone-400 serif h-14 group-hover:text-stone-200">Danh Hiệu Của Địa Ngục</h3>
+        </a>
 
-                    <!-- Legend for Analysis -->
-                    <div id="analysisLegend" class="hidden p-4 bg-stone-900/50 rounded-lg border border-stone-700">
-                        <p class="text-xs font-bold text-stone-500 uppercase mb-2">Chú giải màu sắc</p>
-                        <div class="flex flex-col gap-2 text-sm">
-                            <div class="flex items-center gap-2">
-                                <span class="px-1 bg-green-300 text-green-900 rounded font-bold font-serif">天</span>
-                                <span class="text-stone-400">Có trong Tam Thiên Tự</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="px-1 text-amber-500 font-serif border-b border-dotted border-amber-500">忉</span>
-                                <span class="text-stone-400">Không có trong danh sách</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <a href="#" class="block bg-stone-800/50 p-6 rounded-xl border border-stone-700/50 card-hover group relative overflow-hidden opacity-70 hover:opacity-100 transition-opacity">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">6</div>
+            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 block">Phẩm Thứ Sáu</span>
+            <h3 class="text-xl font-bold text-stone-400 serif h-14 group-hover:text-stone-200">Như Lai Tán Thán</h3>
+        </a>
+
+        <a href="#" class="block bg-stone-800/50 p-6 rounded-xl border border-stone-700/50 card-hover group relative overflow-hidden opacity-70 hover:opacity-100 transition-opacity">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">7</div>
+            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 block">Phẩm Thứ Bảy</span>
+            <h3 class="text-xl font-bold text-stone-400 serif h-14 group-hover:text-stone-200">Lợi Ích Cả Kẻ Còn Người Mất</h3>
+        </a>
+
+        <a href="#" class="block bg-stone-800/50 p-6 rounded-xl border border-stone-700/50 card-hover group relative overflow-hidden opacity-70 hover:opacity-100 transition-opacity">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">8</div>
+            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 block">Phẩm Thứ Tám</span>
+            <h3 class="text-xl font-bold text-stone-400 serif h-14 group-hover:text-stone-200">Các Vua Diêm La Khen Ngợi</h3>
+        </a>
+
+        <a href="#" class="block bg-stone-800/50 p-6 rounded-xl border border-stone-700/50 card-hover group relative overflow-hidden opacity-70 hover:opacity-100 transition-opacity">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">9</div>
+            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 block">Phẩm Thứ Chín</span>
+            <h3 class="text-xl font-bold text-stone-400 serif h-14 group-hover:text-stone-200">Xưng Danh Hiệu Chư Phật</h3>
+        </a>
+
+        <a href="#" class="block bg-stone-800/50 p-6 rounded-xl border border-stone-700/50 card-hover group relative overflow-hidden opacity-70 hover:opacity-100 transition-opacity">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">10</div>
+            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 block">Phẩm Thứ Mười</span>
+            <h3 class="text-xl font-bold text-stone-400 serif h-14 group-hover:text-stone-200">Nhân Duyên Công Đức Bố Thí</h3>
+        </a>
+
+        <a href="#" class="block bg-stone-800/50 p-6 rounded-xl border border-stone-700/50 card-hover group relative overflow-hidden opacity-70 hover:opacity-100 transition-opacity">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">11</div>
+            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 block">Phẩm Thứ Mười Một</span>
+            <h3 class="text-xl font-bold text-stone-400 serif h-14 group-hover:text-stone-200">Địa Thần Hộ Pháp</h3>
+        </a>
+
+        <a href="#" class="block bg-stone-800/50 p-6 rounded-xl border border-stone-700/50 card-hover group relative overflow-hidden opacity-70 hover:opacity-100 transition-opacity">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">12</div>
+            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 block">Phẩm Thứ Mười Hai</span>
+            <h3 class="text-xl font-bold text-stone-400 serif h-14 group-hover:text-stone-200">Thấy Nghe Được Lợi Ích</h3>
+        </a>
+
+        <a href="#" class="block bg-stone-800/50 p-6 rounded-xl border border-stone-700/50 card-hover group relative overflow-hidden opacity-70 hover:opacity-100 transition-opacity md:col-span-2 lg:col-span-3 lg:w-1/3 lg:mx-auto">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold serif text-stone-500">13</div>
+            <div class="text-center">
+                <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 block">Phẩm Thứ Mười Ba</span>
+                <h3 class="text-xl font-bold text-stone-400 serif group-hover:text-stone-200">Giao Phó Cho Trời Người</h3>
             </div>
+        </a>
 
-            <!-- List Column (Right) -->
-            <div class="lg:col-span-8">
-                <div class="bg-stone-800 rounded-xl shadow-lg border border-stone-700 overflow-hidden flex flex-col h-[700px]">
-                    <div class="p-4 border-b border-stone-700 bg-stone-800/80 flex flex-wrap gap-2 justify-between items-center backdrop-blur-sm sticky top-0 z-10">
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold text-stone-300 serif">Nội Dung Kinh Văn</span>
-                            <span class="px-2 py-0.5 text-xs bg-stone-700 text-stone-300 rounded border border-stone-600">Hán</span>
-                            <span class="px-2 py-0.5 text-xs bg-amber-900/40 text-amber-400 rounded border border-amber-800/50">Âm</span>
-                            <span class="px-2 py-0.5 text-xs bg-green-900/40 text-green-400 rounded border border-green-800/50">Nghĩa</span>
-                            <span class="px-2 py-0.5 text-xs bg-stone-700/50 text-stone-500 rounded border border-stone-700">Anh</span>
-                        </div>
-                        <span class="text-xs text-stone-400 bg-stone-700 px-2.5 py-1 rounded-full font-medium" id="visibleCount">0 câu</span>
-                    </div>
-                    
-                    <div id="transcriptContainer" class="flex-1 overflow-y-auto custom-scroll p-2 space-y-1 relative scroll-smooth bg-stone-900">
-                        <!-- Content populated by JS -->
-                        <div class="flex flex-col items-center justify-center h-full text-stone-600 gap-2">
-                            <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span>Đang tải dữ liệu...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    </div>
 
-        <!-- CHAPTER LIST SECTION (Mới thêm) -->
-        <section id="chapter-list" class="max-w-4xl mx-auto w-full pt-8 pb-4">
-            <h3 class="text-2xl font-bold text-amber-500 serif mb-6 flex items-center gap-2 border-b border-stone-700 pb-2">
-                <span>📚</span> Danh Sách Các Phẩm
-            </h3>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Phẩm 1 (Đang xem) -->
-                <div class="bg-stone-800/50 p-5 rounded-xl border border-amber-900/50 ring-1 ring-amber-500/20">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1 block">Đang xem</span>
-                            <h4 class="text-lg font-bold text-stone-300 serif">Phẩm 1: Thần Thông Trên Cung Trời Đao Lợi</h4>
-                        </div>
-                        <span class="text-amber-500">📍</span>
-                    </div>
-                </div>
-
-                <!-- Phẩm 2 -->
-                <a href="pham2.html" class="block bg-stone-800 p-5 rounded-xl border border-stone-700 chapter-card group">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1 block group-hover:text-amber-500">Tiếp theo</span>
-                            <h4 class="text-lg font-bold text-stone-200 serif group-hover:text-amber-400 transition-colors">Phẩm 2: Phân Thân Tập Hội</h4>
-                            <p class="text-sm text-stone-500 mt-2 line-clamp-2">Lúc đó phân thân Địa Tạng Bồ Tát ở các nơi có địa ngục trong trăm nghìn muôn ức...</p>
-                        </div>
-                        <span class="text-stone-600 group-hover:text-amber-500 text-xl transform group-hover:translate-x-1 transition-all">➔</span>
-                    </div>
-                </a>
-
-                <!-- Phẩm 3 (Placeholder) -->
-                <div class="block bg-stone-900/30 p-5 rounded-xl border border-stone-800 border-dashed opacity-60">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-xs font-bold text-stone-600 uppercase tracking-wider mb-1 block">Sắp ra mắt</span>
-                            <h4 class="text-lg font-bold text-stone-500 serif">Phẩm 3: Quán Chúng Sanh Nghiệp Duyên</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <footer class="bg-stone-950 text-stone-500 py-10 mt-12 border-t border-stone-800">
-        <div class="container mx-auto px-4 text-center">
-            <div class="serif text-xl text-stone-400 mb-3">Nam Mô Đại Nguyện Địa Tạng Vương Bồ Tát</div>
-            <p class="text-sm opacity-60">Dữ liệu được trích xuất từ nguồn: A Di Đà Phật TV (YouTube)</p>
-            <p class="text-xs opacity-40 mt-2">Phân tích dựa trên danh sách Tam Thiên Tự (~3000 chữ căn bản)</p>
-        </div>
+    <footer class="mt-16 text-stone-600 text-sm text-center">
+        Nam Mô Đại Nguyện Địa Tạng Vương Bồ Tát
     </footer>
 
-    <!-- RAW DATA STORAGE -->
-    <script>
-        // Updated Data: Timestamp [Format HH:MM:SS] Chinese | Pinyin | Viet (Han) | English | Viet (Trans - Meaning)
-        const rawSubtitleData = `
-[00:00:00] 地藏菩萨本愿经 | dì zàng pú sà běn yuàn jīng | Địa Tạng Bồ Tát Bổn Nguyện Kinh | Sutra of the Past Vows of Earth Store Bodhisattva | Kinh Địa Tạng Bồ Tát Bổn Nguyện.
-[00:00:07] 忉利天宫神通品第一 | dāo lì tiān gōng shén tōng pǐn dì yī | Đao Lợi Thiên Cung Thần Thông phẩm đệ nhất | Chapter 1: Spiritual Penetrations in the Palace of the Trayastrimsa Heaven | Phẩm thứ nhất: Thần thông trên cung trời Đao Lợi.
-[00:00:11] 如是我闻。一时佛在忉利天。为母说法。 | rú shì wǒ wén 。 yī shí fó zài dāo lì tiān 。 wèi mǔ shuō fǎ 。 | Như thị ngã văn. Nhất thời Phật tại Đao Lợi Thiên. Vị mẫu thuyết pháp. | Thus have I heard. At one time the Buddha was in the Trayastrimsa Heaven, speaking Dharma for his mother. | Ta nghe như thế này: Một thuở nọ, tại cung trời Đao Lợi, Đức Phật vì Thánh Mẫu mà thuyết pháp.
-[00:00:18] 尔时。十方无量世界。不可说。不可说。一切诸佛。及大菩萨摩诃萨。皆来集会。 | ěr shí 。 shí fāng wú liàng shì jiè 。 bù kě shuō 。 bù kě shuō 。 yí qiè zhū fó 。 jí dà pú sà mó hē sà 。 jiē lái jí huì 。 | Nhĩ thời. Thập phương vô lượng thế giới. Bất khả thuyết. Bất khả thuyết. Nhất thiết chư Phật. Cập đại Bồ Tát Ma Ha Tát. Giai lai tập hội. | At that time, from innumerable worlds in the ten directions, all Buddhas and great Bodhisattvas Mahasattvas, inexpressibly many, all came to the assembly. | Lúc đó, bất khả thuyết bất khả thuyết tất cả chư Phật và đại Bồ Tát trong vô lượng thế giới ở mười phương đều đến hội họp.
-[00:00:27] 赞叹释迦牟尼佛。能于五浊恶世。现不可思议。大智慧神通之力。调伏刚强众生。知苦乐法。 | zàn tàn shì jiā móu ní fó 。 néng yú wǔ zhuó è shì 。 xiàn bù kě sī yì 。 dà zhì huì shén tōng zhī lì 。 tiáo fú gāng qiáng zhòng shēng 。 zhī kǔ lè fǎ 。 | Tán thán Thích Ca Mâu Ni Phật. Năng ư ngũ trược ác thế. Hiện bất khả tư nghị. Đại trí tuệ thần thông chi lực. Điều phục cang cường chúng sanh. Tri khổ lạc pháp. | They praised how Shakyamuni Buddha is able to manifest inconceivable powers of great wisdom and spiritual penetrations in the evil world of the Five Turbidities to tame and subdue stubborn living beings, knowing their distinct sufferings and joys. | Rồi đồng khen ngợi rằng: Đức Phật Thích Ca Mâu Ni có thể ở trong đời ác ngũ trược mà hiện sức đại trí huệ thần thông chẳng thể nghĩ bàn để điều phục chúng sinh cang cường, làm cho chúng nó rõ pháp khổ pháp vui.
-[00:00:36] 各遣侍者。问讯世尊。 | gè qiǎn shì zhě 。 wèn xùn shì zūn 。 | Các khiển thị giả. Vấn hân Thế Tôn. | Each sent his attendants to inquire after the World Honored One. | Khen xong, chư Phật đều sai thị giả kính thăm đức Thế Tôn.
-[00:00:40] 是时如来含笑。放百千万亿。大光明云。 | shì shí rú lái hán xiào 。 fàng bǎi qiān wàn yì 。 dà guāng míng yún 。 | Thị thời Như Lai hàm tiếu. Phóng bách thiên vạn ức. Đại quang minh vân. | At that time, the Tathagata smiled and emitted hundreds of thousands of millions of great clouds of light. | Bấy giờ, đức Như Lai mỉm cười phóng ra trăm nghìn vừng mây sáng rỡ lớn.
-[00:00:45] 所谓大圆满光明云。大慈悲光明云。大智慧光明云。 | suǒ wèi dà yuán mǎn guāng míng yún 。 dà cí bēi guāng míng yún 。 dà zhì huì guāng míng yún 。 | Sở vị Đại viên mãn quang minh vân. Đại từ bi quang minh vân. Đại trí tuệ quang minh vân. | Specifically: The Great Perfect Fullness Cloud of Light, the Great Compassion Cloud of Light, the Great Wisdom Cloud of Light. | Như là: vừng mây sáng rỡ đầy đủ, vừng mây sáng rỡ đại từ bi, vừng mây sáng rỡ đại trí huệ.
-[00:00:51] 大般若光明云。大三昧光明云。大吉祥光明云。大福德光明云。 | dà bō rě guāng míng yún 。 dà sān mèi guāng míng yún 。 dà jí xiáng guāng míng yún 。 dà fú dé guāng míng yún 。 | Đại Bát Nhã quang minh vân. Đại tam muội quang minh vân. Đại cát tường quang minh vân. Đại phước đức quang minh vân. | The Great Prajna Cloud of Light, the Great Samadhi Cloud of Light, the Great Auspicious Cloud of Light, the Great Merit and Virtue Cloud of Light. | Vùng mây sáng rỡ đại Bát Nhã, vừng mây sáng rỡ đại tam muội, vừng mây sáng rỡ đại kiết tường, vừng mây sáng rỡ đại phước đức.
-[00:00:59] 大功德光明云。大归依光明云。大赞叹光明云。 | dà gōng dé guāng míng yún 。 dà guī yī guāng míng yún 。 dà zàn tàn guāng míng yún 。 | Đại công đức quang minh vân. Đại quy y quang minh vân. Đại tán thán quang minh vân. | The Great Virtue Cloud of Light, the Great Refuge Cloud of Light, the Great Praise Cloud of Light. | Vùng mây sáng rỡ đại công đức, vừng mây sáng rỡ đại quy y, vừng mây sáng rỡ đại tán thán...
-[00:01:06] 放如是等不可说光明云已。又出种种微妙之音。 | fàng rú shì děng bù kě shuō guāng míng yún yǐ 。 yòu chū zhǒng zhǒng wēi miào zhī yīn 。 | Phóng như thị đẳng bất khả thuyết quang minh vân dĩ. Hựu xuất chủng chủng vi diệu chi âm. | After emitting such inexpressibly many clouds of light, he also emitted various subtle and wonderful sounds. | Đức Phật phóng ra bất khả thuyết vừng mây sáng rỡ như thế rồi lại phát ra các thứ tiếng vi diệu.
-[00:01:12] 所谓檀波罗蜜音。尸波罗蜜音。羼提波罗蜜音。毗离耶波罗蜜音。禅波罗蜜音。般若波罗蜜音。 | suǒ wèi tán bō luó mì yīn 。 shī bō luó mì yīn 。 chàn tí bō luó mì yīn 。 pí lí yē bō luó mì yīn 。 chán bō luó mì yīn 。 bō rě bō luó mì yīn 。 | Sở vị Đàn Ba La Mật âm. Thi Ba La Mật âm. Sàn Đề Ba La Mật âm. Tỳ Ly Da Ba La Mật âm. Thiền Ba La Mật âm. Bát Nhã Ba La Mật âm. | Specifically: The Dana Paramita sound, the Sila Paramita sound, the Ksanti Paramita sound, the Virya Paramita sound, the Dhyana Paramita sound, the Prajna Paramita sound. | Như là: tiếng Bố thí độ, tiếng Trì giới độ, tiếng Nhẫn nhục độ, tiếng Tinh tấn độ, tiếng Thiền định độ, tiếng Bát nhã độ.
-[00:01:23] 慈悲音。喜舍音。解脱音。无漏音。智慧音。大智慧音。 | cí bēi yīn 。 xǐ shě yīn 。 jiě tuō yīn 。 wú lòu yīn 。 zhì huì yīn 。 dà zhì huì yīn 。 | Từ bi âm. Hỷ xả âm. Giải thoát âm. Vô lậu âm. Trí tuệ âm. Đại trí tuệ âm. | The Compassion sound, the Joyous Giving sound, the Liberation sound, the No-Outflows sound, the Wisdom sound, the Great Wisdom sound. | Tiếng Từ bi, tiếng Hỷ xả, tiếng Giải thoát, tiếng Vô lậu, tiếng Trí huệ, tiếng Đại trí huệ.
-[00:01:30] 师子吼音。大师子吼音。云雷音。大云雷音。 | shī zǐ hǒu yīn 。 dà shī zǐ hǒu yīn 。 yún léi yīn 。 dà yún léi yīn 。 | Sư tử hống âm. Đại sư tử hống âm. Vân lôi âm. Đại vân lôi âm. | The Lion's Roar sound, the Great Lion's Roar sound, the Thundercloud sound, the Great Thundercloud sound. | Tiếng Sư tử hống, tiếng Đại Sư tử hống, tiếng Mây sấm, tiếng Mây sấm lớn.
-[00:01:36] 出如是等不可说不可说音已。娑婆世界。及他方国土。有无量亿天龙鬼神。亦集到忉利天宫。 | chū rú shì děng bù kě shuō bù kě shuō yīn yǐ 。 suō pó shì jiè 。 jí tā fāng guó tǔ 。 yǒu wú liàng yì tiān lóng guǐ shén 。 yì jí dào dāo lì tiān gōng 。 | Xuất như thị đẳng bất khả thuyết bất khả thuyết âm dĩ. Ta Bà thế giới. Cập tha phương quốc độ. Hữu vô lượng ức thiên long quỷ thần. Diệc tập đáo Đao Lợi Thiên cung. | After he had emitted such inexpressibly many sounds, innumerable millions of heavenly beings, dragons, ghosts, and spirits from the Saha world and other lands also gathered in the Palace of the Trayastrimsa Heaven. | Khi đức Phật phát ra bất khả thuyết bất khả thuyết tiếng vi diệu như thế xong, thời có vô lượng ức hàng Trời, Rồng, Quỷ, Thần ở trong cõi Ta bà và cõi nước phương khác cũng đến hội họp nơi cung Trời Đao Lợi.
-[00:01:45] 所谓四天王天。忉利天。须焰摩天。兜率陀天。化乐天。他化自在天。 | suǒ wèi sì tiān wáng tiān 。 dāo lì tiān 。 xū yàn mó tiān 。 dōu shuài tuó tiān 。 huà lè tiān 。 tā huà zì zài tiān 。 | Sở vị Tứ Thiên Vương Thiên. Đao Lợi Thiên. Tu Diệm Ma Thiên. Đâu Suất Đà Thiên. Hóa Lạc Thiên. Tha Hóa Tự Tại Thiên. | Specifically: The Heaven of the Four Kings, the Trayastrimsa Heaven, the Suyama Heaven, the Tushita Heaven, the Nimmanarati Heaven, the Paranirmitavasavartin Heaven. | Như là: Trời Tứ Thiên Vương, Trời Đao Lợi, Trời Tu Diệm Ma, Trời Đâu Suất Đà, Trời Hóa Lạc, Trời Tha Hóa Tự Tại.
-[00:01:53] 梵众天。梵辅天。大梵天。少光天。无量光天。光音天。 | fàn zhòng tiān 。 fàn fǔ tiān 。 dà fàn tiān 。 shǎo guāng tiān 。 wú liàng guāng tiān 。 guāng yīn tiān 。 | Phạm Chúng Thiên. Phạm Phụ Thiên. Đại Phạm Thiên. Thiểu Quang Thiên. Vô Lượng Quang Thiên. Quang Âm Thiên. | The Heaven of the Multitudes of Brahma, the Heaven of the Ministers of Brahma, the Great Brahma Heaven, the Heaven of Limited Light, the Heaven of Limitless Light, the Heaven of Light-Sound. | Trời Phạm Chúng, Trời Phạm Phụ, Trời Đại Phạm, Trời Thiểu Quang, Trời Vô Lượng Quang, Trời Quang Âm.
-[00:02:00] 少净天。无量净天。遍净天。福生天。福爱天。广果天。无想天。无烦天。无热天。善见天。善现天。色究竟天。 | shǎo jìng tiān 。 wú liàng jìng tiān 。 biàn jìng tiān 。 fú shēng tiān 。 fú ài tiān 。 guǎng guǒ tiān 。 wú xiǎng tiān 。 wú fán tiān 。 wú rè tiān 。 shàn jiàn tiān 。 shàn xiàn tiān 。 sè jiū jìng tiān 。 | Thiểu Tịnh Thiên. Vô Lượng Tịnh Thiên. Biến Tịnh Thiên. Phước Sanh Thiên. Phước Ái Thiên. Quảng Quả Thiên. Vô Tưởng Thiên. Vô Phiền Thiên. Vô Nhiệt Thiên. Thiện Kiến Thiên. Thiện Hiện Thiên. Sắc Cứu Cánh Thiên. | The Heaven of Limited Purity, the Heaven of Limitless Purity, the Heaven of Pervasive Purity, the Heaven of the Birth of Blessings, the Heaven of the Love of Blessings, the Heaven of Abundant Fruit, the Heaven of No Thought, the Heaven of No Affliction, the Heaven of No Heat, the Heaven of Good Views, the Heaven of Good Appearance, the Ultimate Form Heaven. | Trời Thiểu Tịnh, Trời Vô Lượng Tịnh, Trời Biến Tịnh, Trời Phước Sanh, Trời Phước Ái, Trời Quảng Quả, Trời Vô Tưởng, Trời Vô Phiền, Trời Vô Nhiệt, Trời Thiện Kiến, Trời Thiện Hiện, Trời Sắc Cứu Cánh.
-[00:02:15] 摩奚首罗天。乃至非想非非想处天。一切天众。龙众。鬼神等众。皆来集会。 | mó xī shǒu luó tiān 。 nǎi zhì fēi xiǎng fēi fēi xiǎng chù tiān 。 yí qiè tiān zhòng 。 lóng zhòng 。 guǐ shén děng zhòng 。 jiē lái jí huì 。 | Ma Hê Thủ La Thiên. Nãi chí Phi Tưởng Phi Phi Tưởng Xứ Thiên. Nhất thiết thiên chúng. Long chúng. Quỷ thần đẳng chúng. Giai lai tập hội. | The Mahesvara Heaven, and so forth, up to the Heaven of Neither Thought nor No Thought. All the multitudes of heavens, dragons, ghosts, spirits, and others gathered together. | Trời Ma Hê Thủ La, cho đến Trời Phi Tưởng Phi Phi Tưởng Xứ. Tất cả Thiên chúng, Long chúng, Quỷ Thần đều đến hội họp.
-[00:02:23] 复有他方国土。及娑婆世界。海神。江神。河神。树神。山神。地神。川泽神。苗稼神。昼神。夜神。空神。天神。饮食神。草木神。如是等神。皆来集会。 | fù yǒu tā fāng guó tǔ 。 jí suō pó shì jiè 。 hǎi shén 。 jiāng shén 。 hé shén 。 shù shén 。 shān shén 。 dì shén 。 chuān zé shén 。 miáo jià shén 。 zhòu shén 。 yè shén 。 kōng shén 。 tiān shén 。 yǐn shí shén 。 cǎo mù shén 。 rú shì děng shén 。 jiē lái jí huì 。 | Phục hữu tha phương quốc độ. Cập Ta Bà thế giới. Hải thần. Giang thần. Hà thần. Thọ thần. Sơn thần. Địa thần. Xuyên trạch thần. Miêu giá thần. Trú thần. Dạ thần. Không thần. Thiên thần. Ẩm thực thần. Thảo mộc thần. Như thị đẳng thần. Giai lai tập hội. | Moreover, there were sea spirits, river spirits, stream spirits, tree spirits, mountain spirits, earth spirits, swamp spirits, sprout and seedling spirits, day spirits, night spirits, space spirits, heaven spirits, food and drink spirits, and grass and wood spirits from other lands and the Saha world. All such spirits gathered together. | Lại có những vị Thần ở cõi Ta bà cùng cõi nước phương khác, như Thần biển, Thần sông, Thần rạch, Thần cây, Thần núi, Thần đất, Thần sông chằm, Thần lúa mạ, Thần chủ ngày, Thần chủ đêm, Thần hư không, Thần trên trời, Thần chủ ăn uống, Thần cây cỏ... Các vị thần như thế đều đến hội họp.
-[00:02:42] 复有他方国土。及娑婆世界。诸大鬼王。所谓恶目鬼王。啖血鬼王。啖精气鬼王。啖胎卵鬼王。行病鬼王。摄毒鬼王。慈心鬼王。福利鬼王。大爱敬鬼王。如是等鬼王。皆来集会。 | fù yǒu tā fāng guó tǔ 。 jí suō pó shì jiè 。 zhū dà guǐ wáng 。 suǒ wèi è mù guǐ wáng 。 dàn xuè guǐ wáng 。 dàn jīng qì guǐ wáng 。 dàn tāi luǎn guǐ wáng 。 xíng bìng guǐ wáng 。 shè dú guǐ wáng 。 cí xīn guǐ wáng 。 fú lì guǐ wáng 。 dà ài jìng guǐ wáng 。 rú shì děng guǐ wáng 。 jiē lái jí huì 。 | Phục hữu tha phương quốc độ. Cập Ta Bà thế giới. Chư đại quỷ vương. Sở vị Ác Mục Quỷ Vương. Đạm Huyết Quỷ Vương. Đạm Tinh Khí Quỷ Vương. Đạm Thai Noãn Quỷ Vương. Hành Bệnh Quỷ Vương. Nhiếp Độc Quỷ Vương. Từ Tâm Quỷ Vương. Phước Lợi Quỷ Vương. Đại Ái Kính Quỷ Vương. Như thị đẳng Quỷ Vương. Giai lai tập hội. | Moreover, there were great ghost kings from other lands and the Saha World: the Evil-Eyed Ghost King, the Blood-Eating Ghost King, the Essence-and-Energy-Eating Ghost King, the Fetus-and-Egg-Eating Ghost King, the Disease-Spreading Ghost King, the Poison-Gathering Ghost King, the Kindhearted Ghost King, the Blessings-and-Profit Ghost King, the Great Love-and-Respect Ghost King, and others. All such ghost kings gathered together. | Lại có những Đại Quỷ Vương ở cõi Ta bà cùng cõi nước phương khác, như: Ác Mục Quỷ Vương, Đạm Huyết Quỷ Vương, Đạm Tinh Khí Quỷ Vương, Đạm Thai Noãn Quỷ Vương, Hành Bệnh Quỷ Vương, Nhiếp Độc Quỷ Vương, Từ Tâm Quỷ Vương, Phước Lợi Quỷ Vương, Đại Ái Kính Quỷ Vương... Các Quỷ Vương như thế đều đến hội họp.
-[00:03:02] 尔时释迦牟尼佛。告文殊师利法王子菩萨摩诃萨。 | ěr shí shì jiā móu ní fó 。 gào wén shū shī lì fǎ wáng zǐ pú sà mó hē sà 。 | Nhĩ thời Thích Ca Mâu Ni Phật. Cáo Văn Thù Sư Lợi Pháp Vương Tử Bồ Tát Ma Ha Tát. | At that time, Shakyamuni Buddha said to the Dharma Prince Manjushri, Bodhisattva Mahasattva: | Bấy giờ đức Thích Ca Mâu Ni Phật bảo Ngài Văn Thù Sư Lợi Pháp Vương Tử Đại Bồ Tát rằng:
-[00:03:08] 汝观是一切诸佛菩萨。及天龙鬼神。此世界。他世界。此国土。他国土。 | rǔ guān shì yí qiè zhū fó pú sà 。 jí tiān lóng guǐ shén 。 cǐ shì jiè 。 tā shì jiè 。 cǐ guó tǔ 。 tā guó tǔ 。 | Như quan thị nhất thiết chư Phật Bồ Tát. Cập thiên long quỷ thần. Thử thế giới. Tha thế giới. Thử quốc độ. Tha quốc độ. | "Look at all these Buddhas, Bodhisattvas, and gods, dragons, ghosts, and spirits from this world and other worlds, this land and other lands." | "Ông xem coi tất cả chư Phật, Bồ tát và Trời, Rồng, Quỷ, Thần đó ở trong thế giới này cùng thế giới khác, ở trong quốc độ này cùng quốc độ khác..."
-[00:03:16] 如是今来集会到忉利天者。汝知数否。 | rú shì jīn lái jí huì dào dāo lì tiān zhě 。 rǔ zhī shù fǒu 。 | Như thị kim lai tập hội đáo Đao Lợi Thiên giả. Như tri số phủ. | "Who have now gathered here in the Trayastrimsa Heaven. Do you know their number?" | "Who have now gathered here in the Trayastrimsa Heaven. Do you know their number?" | "...nay đều đến hội họp tại cung Trời Đao Lợi như thế, ông có biết số bao nhiêu chăng?"
-[00:03:20] 文殊师利白佛言。世尊。若以我神力千劫测度。不能得知。 | wén shū shī lì bái fó yán 。 shì zūn 。 ruò yǐ wǒ shén lì qiān jié cè dù 。 bù néng dé zhī 。 | Văn Thù Sư Lợi bạch Phật ngôn. Thế Tôn. Nhược dĩ ngã thần lực thiên kiếp trắc độ. Bất năng đắc tri. | Manjushri said to the Buddha, "World Honored One, even if I were to measure and calculate with my spiritual powers for a thousand aeons, I would not be able to know it." | Ngài Văn Thù Sư Lợi bạch Phật rằng: "Bạch Đức Thế Tôn! Nếu dùng thần lực của con để tính đếm trong nghìn kiếp cũng không biết là số bao nhiêu!"
-[00:03:27] 佛告文殊师利。吾以佛眼观故。犹不尽数。 | fó gào wén shū shī lì 。 wú yǐ fó yǎn guān gù 。 yóu bù jìn shù 。 | Phật cáo Văn Thù Sư Lợi. Ngô dĩ Phật nhãn quan cố. Do bất tận số. | The Buddha told Manjushri, "Even observing with my Buddha Eye, I cannot count them all." | Đức Phật bảo Ngài Văn Thù Sư Lợi rằng: "Đến Ta dùng Phật nhãn xem hãy còn không đếm xiết!"
-[00:03:32] 此皆是地藏菩萨久远劫来。已度。当度。未度。已成就。当成就。未成就。 | cǐ jiē shì dì zàng pú sà jiǔ yuǎn jié lái 。 yǐ dù 。 dāng dù 。 wèi dù 。 yǐ chéng jiù 。 dāng chéng jiù 。 wèi chéng jiù 。 | Thử giai thị Địa Tạng Bồ Tát cửu viễn kiếp lai. Dĩ độ. Đương độ. Vị độ. Dĩ thành tựu. Đương thành tựu. Vị thành tựu. | "These are all beings whom Earth Store Bodhisattva has crossed over, is crossing over, or will cross over; whom he has led to accomplishment, is leading to accomplishment, or will lead to accomplishment, throughout aeons long since past." | "Số Thánh, phàm này đều của Ngài Địa Tạng Bồ Tát từ thuở kiếp lâu xa đến nay, hoặc đã độ, đương độ, chưa độ, hoặc đã thành tựu, đương thành tựu, chưa thành tựu".
-[00:03:41] 文殊师利白佛言。世尊。我已过去久修善根。证无碍智。 | wén shū shī lì bái fó yán 。 shì zūn 。 wǒ yǐ guò qù jiǔ xiū shàn gēn 。 zhèng wú ài zhì 。 | Văn Thù Sư Lợi bạch Phật ngôn. Thế Tôn. Ngã dĩ quá khứ cửu tu thiện căn. Chứng vô ngại trí. | Manjushri said to the Buddha, "World Honored One, throughout the past I have cultivated good roots and certified to unobstructed wisdom." | Ngài Văn Thù Sư Lợi bạch đức Phật rằng: "Từ thuở lâu xa về trước con đã tu căn lành chứng đặng trí vô ngại".
-[00:03:48] 闻佛所言即当信受。小果声闻天龙八部。及未来世诸众生等。 | wén fó suǒ yán jí dāng xìn shòu 。 xiǎo guǒ shēng wén tiān lóng bā bù 。 jí wèi lái shì zhū zhòng shēng děng 。 | Văn Phật sở ngôn tức đương tín thọ. Tiểu quả Thanh Văn thiên long bát bộ. Cập vị lai thế chư chúng sinh đẳng. | "When I hear what the Buddha says, I immediately accept it with faith. However, Sound Hearers of small attainment, gods, dragons, and the rest of the Eightfold Division, as well as living beings of the future..." | "Nghe lời đức Phật nói đó thời tin nhận liền. Còn hàng tiểu quả Thanh Văn, Trời, Rồng tám bộ chúng và những chúng sinh trong đời sau..."
-[00:03:54] 虽闻如来诚实之语。必怀疑惑。设使顶受未免兴谤。 | suī wén rú lái chéng shí zhī yǔ 。 bì huái yí huò 。 shè shǐ dǐng shòu wèi miǎn xīng bàng 。 | Tuy văn Như Lai thành thật chi ngữ. Tất hoài nghi hoặc. Thiết sử đảnh thọ vị miễn hưng báng. | "Although they hear the Tathagata's sincere words, they will certainly harbor doubts. Even if they receive them respectfully, they may inevitably slander them." | "...dẫu nghe lời thành thật của Như Lai, nhưng chắc là sanh lòng nghi ngờ, dầu cho có lạy vâng đi nữa cũng chưa khỏi hủy báng."
-[00:04:00] 唯愿世尊。广说地藏菩萨摩诃萨。因地作何行。立何愿。而能成就不可思议事。 | wéi yuàn shì zūn 。 guǎng shuō dì zàng pú sà mó hē sà 。 yīn dì zuò hé xíng 。 lì hé yuàn 。 ér néng chéng jiù bù kě sī yì shì 。 | Duy nguyện Thế Tôn. Quảng thuyết Địa Tạng Bồ Tát Ma Ha Tát. Nhân địa tác hà hạnh. Lập hà nguyện. Nhi năng thành tựu bất khả tư nghị sự. | "I only pray that the World Honored One will speak extensively about what practices Earth Store Bodhisattva Mahasattva performed and what vows he made while on the causal ground, such that he has been able to accomplish such inconceivable deeds." | "Cúi mong đức Thế Tôn nói rõ nhơn địa của Địa Tạng Bồ Tát; Ngài tu hạnh gì, lập nguyện gì mà thành tựu được sự không thể nghĩ bàn như thế?"
-[00:04:08] 佛告文殊师利。譬如三千大千世界。所有草木丛林。稻麻竹苇。山石微尘。 | fó gào wén shū shī lì 。 pì rú sān qiān dà qiān shì jiè 。 suǒ yǒu cǎo mù cóng lín 。 dào má zhú wěi 。 shān shí wēi chén 。 | Phật cáo Văn Thù Sư Lợi. Thí như tam thiên đại thiên thế giới. Sở hữu thảo mộc tùng lâm. Đạo ma trúc vi. Sơn thạch vi trần. | The Buddha told Manjushri, "By way of analogy, suppose that all the grasses, trees, forests, rice, hemp, bamboo, reeds, mountains, rocks, and dust motes in the Three Thousand Great Thousand Worlds..." | Đức Phật bảo Ngài Văn Thù Sư Lợi rằng: "Ví như bao nhiêu cỏ, cây, lùm, rừng, lúa, mè, tre, lau, đá, núi, bụi bặm trong cõi Tam Thiên Đại Thiên..."
-[00:04:16] 一物一数。作一恒河。一恒河沙。一沙之界。一界之内。一尘一劫。 | yī wù yī shù 。 zuò yī héng hé 。 yī héng hé shā 。 yī shā zhī jiè 。 yī jiè zhī nèi 。 yī chén yī jié 。 | Nhất vật nhất số. Tác nhất Hằng Hà. Nhất Hằng Hà sa. Nhất sa chi giới. Nhất giới chi nội. Nhất trần nhất kiếp. | "...were each counted as a unit, and for each unit there was a Ganges River; and for each grain of sand in each of those Ganges Rivers there was a world; and for each dust mote in each of those worlds there was an aeon..." | "...cứ một vật làm một sông Hằng, rồi cứ số cát trong mỗi sông Hằng, một hột cát làm một cõi nước, rồi trong một cõi nước cứ một hột bụi nhỏ làm một kiếp..."
-[00:04:23] 一劫之内。所积尘数尽充为劫。地藏菩萨证十地果位以来。千倍多于上喻。 | yī jié zhī nèi 。 suǒ jī chén shù jìn chōng wéi jié 。 dì zàng pú sà zhèng shí dì guǒ wèi yǐ lái 。 qiān bèi duō yú shàng yù 。 | Nhất kiếp chi nội. Sở tích trần số tận xung vi kiếp. Địa Tạng Bồ Tát chứng Thập Địa quả vị dĩ lai. Thiên bối đa ư thượng dụ. | "...and for each dust mote accumulated within each of those aeons there was yet another aeon. The time since Earth Store Bodhisattva certified to the position of the Tenth Ground is a thousand times longer than that analogy." | "...rồi bao nhiêu số bụi nhỏ chứa trong một kiếp đều đem làm kiếp cả. Từ lúc Ngài Địa Tạng Bồ tát chứng quả vị thập địa Bồ tát đến nay nghìn lần lâu hơn số kiếp tỉ dụ ở trên."
-[00:04:32] 何况地藏菩萨在声闻辟支佛地。 | hé kuàng dì zàng pú sà zài shēng wén pì zhī fó dì 。 | Hà huống Địa Tạng Bồ Tát tại Thanh Văn Bích Chi Phật địa. | "How much longer was his time as a Sound Hearer or a Pratyekabuddha?" | "Huống là những thuở Ngài Địa Tạng còn ở bậc Thanh văn và Bích Chi Phật."
-[00:04:36] 文殊师利。此菩萨威神誓愿。不可思议。 | wén shū shī lì 。 cǐ pú sà wēi shén shì yuàn 。 bù kě sī yì 。 | Văn Thù Sư Lợi. Thử Bồ Tát uy thần thệ nguyện. Bất khả tư nghị. | "Manjushri, the awesome spiritual strength and vows of this Bodhisattva are inconceivable." | "Này Văn Thù Sư Lợi! Oai thần thệ nguyện của Bồ tát đó không thể nghĩ bàn đến được."
-[00:04:41] 若未来世。有善男子善女人。闻是菩萨名字。或赞叹。或瞻礼。或称名。或供养。 | ruò wèi lái shì 。 yǒu shàn nán zǐ shàn nǚ rén 。 wén shì pú sà míng zì 。 huò zàn tàn 。 huò zhān lǐ 。 huò chēng míng 。 huò gòng yàng 。 | Nhược vị lai thế. Hữu thiện nam tử thiện nữ nhân. Văn thị Bồ Tát danh tự. Hoặc tán thán. Hoặc chiêm lễ. Hoặc xưng danh. Hoặc cúng dường. | "If in the future, good men or good women hear this Bodhisattva's name, praise him, behold and bow to him, recite his name, or make offerings to him..." | "Về đời sau, nếu có trang thiện nam, người thiện nữ nào nghe danh tự của Địa Tạng Bồ tát, hoặc khen ngợi, hoặc chiêm ngưỡng vái lạy, hoặc xưng danh hiệu, hoặc cúng dường..."
-[00:04:49] 乃至彩画刻镂。塑其形象。是人当得。百返生于三十三天。永不堕恶道。 | nǎi zhì cǎi huà kè lòu 。 sù qī xíng xiàng 。 shì rén dāng dé 。 bǎi fǎn shēng yú sān shí sān tiān 。 yǒng bù duò è dào 。 | Nãi chí thải họa khắc lâu. Tố kỳ hình tượng. Thị nhân đương đắc. Bách phản sanh ư Tam Thập Tam Thiên. Vĩnh bất đọa ác đạo. | "...or if they paint, engrave, sculpt, or mold his image, such persons will be born one hundred times in the Heaven of the Thirty-Three and will never fall into the Evil Paths." | "...nhẫn đến vẽ, khắc, đắp, sơn hình tượng của Địa Tạng Bồ tát, thời người đó sẽ được một trăm lần sanh lên cõi trời Đao Lợi, vĩnh viễn chẳng còn bị sa đọa vào chốn ác đạo."
-[00:04:58] 文殊师利。是地藏菩萨摩诃萨。于过去久远。不可说不可说劫前。身韦大长者子。 | wén shū shī lì 。 shì dì zàng pú sà mó hē sà 。 yú guò qù jiǔ yuǎn 。 bù kě shuō bù kě shuō jié qián 。 shēn wéi dà zhǎng zhě zǐ 。 | Văn Thù Sư Lợi. Thị Địa Tạng Bồ Tát Ma Ha Tát. Ư quá khứ cửu viễn. Bất khả thuyết bất khả thuyết kiếp tiền. Thân vi Đại Trưởng Giả Tử. | "Manjushri, inconceivably many aeons in the past, this Earth Store Bodhisattva Mahasattva was the son of a great Elder." | "Này Văn Thù Sư Lợi! Trải qua bất khả thuyết bất khả thuyết kiếp lâu xa về trước, tiền thân của Ngài Địa Tạng Bồ tát làm một vị Trưởng giả tử."
-[00:05:06] 时世有佛。号曰师子奋迅具足万行如来。 | shí shì yǒu fó 。 hào yuē shī zǐ fèn xùn jù zú wàn xíng rú lái 。 | Thời thế hữu Phật. Hiệu viết Sư Tử Phấn Tấn Cụ Túc Vạn Hạnh Như Lai. | "At that time there was a Buddha named Lion Sprint Complete in Ten Thousand Practices Tathagata." | "Lúc đó, trong đời có đức Phật hiệu là: Sư Tử Phấn Tấn Cụ Túc Vạn Hạnh Như Lai."
-[00:05:10] 时长者子见佛相好。千福庄严。因问彼佛。作何行愿。而得此相。 | shí zhǎng zhě zǐ jiàn fó xiàng hǎo 。 qiān fú zhuāng yán 。 yīn wèn bǐ fó 。 zuò hé xíng yuàn 。 ér dé cǐ xiàng 。 | Thời Trưởng Giả Tử kiến Phật tướng hảo. Thiên phước trang nghiêm. Nhân vấn bỉ Phật. Tác hà hạnh nguyện. Nhi đắc thử tướng. | "The Elder's son saw that the Buddha was replete with fine marks and adorned with a thousand blessings. He asked that Buddha what practices and vows he had performed to obtain such an appearance." | "Trưởng giả tử thấy đức Phật tướng mạo tốt đẹp nghìn phước trang nghiêm, mới bạch hỏi đức Phật tu hạnh nguyện gì mà đặng tốt đẹp như thế?"
-[00:05:18] 时师子奋迅具足万行如来。告长者子。欲证此身。当须久远度脱。一切受苦众生。 | shí shī zǐ fèn xùn jù zú wàn xíng rú lái 。 gào zhǎng zhě zǐ 。 yù zhèng cǐ shēn 。 dāng xū jiǔ yuǎn dù tuō 。 yí qiè shòu kǔ zhòng shēng 。 | Thời Sư Tử Phấn Tấn Cụ Túc Vạn Hạnh Như Lai. Cáo Trưởng Giả Tử. Dục chứng thử thân. Đương tu cửu viễn độ thoát. Nhất thiết thọ khổ chúng sanh. | "Lion Sprint Complete in Ten Thousand Practices Tathagata said to the Elder's son, 'If you wish to certify to this body, you must, throughout a long time, liberate all living beings who are undergoing suffering.'" | "Khi ấy, đức Sư Tử Phấn Tấn Cụ Túc Vạn Hạnh Như Lai bảo Trưởng giả tử rằng: 'Muốn chứng được thân tướng tốt đẹp này, cần phải trải qua trong một thời gian lâu xa độ thoát tất cả chúng sinh bị khốn khổ'."
-[00:05:27] 文殊师利。时长者子。因发愿言。我今尽未来际不可计劫。 | wén shū shī lì 。 shí zhǎng zhě zǐ 。 yīn fā yuàn yán 。 wǒ jīn jìn wèi lái jì bù kě jì jié 。 | Văn Thù Sư Lợi. Thời Trưởng Giả Tử. Nhân phát nguyện ngôn. Ngã kim tận vị lai tế bất khả kế kiếp. | "Manjushri, at that time the Elder's son made a vow, saying: 'From now until the end of future time, throughout incalculable aeons...'" | "Này Văn Thù Sư Lợi! Trưởng giả tử nghe xong liền phát nguyện rằng: Từ nay đến tột số chẳng thể kể xiết ở đời sau..."
-[00:05:33] 为是罪苦六道众生。广设方便。尽令解脱。而我自身方成佛道。 | wèi shì zuì kǔ liù dào zhòng shēng 。 guǎng shè fāng biàn 。 jìn lìng jiě tuō 。 ér wǒ zì shēn fāng chéng fó dào 。 | Vị thị tội khổ lục đạo chúng sanh. Quảng thiết phương tiện. Tận linh giải thoát. Nhi ngã tự thân phương thành Phật đạo. | "'...I will establish many expedient devices for the sake of sinful, suffering living beings in the Six Paths. Only when I have liberated them all will I myself accomplish the Buddha Way.'" | "...tôi vì những chúng sinh tội khổ trong sáu đường mà giảng bày nhiều phương tiện làm cho chúng đó được giải thoát hết cả, rồi tự thân tôi mới chứng thành Phật đạo."
-[00:05:40] 以是于彼佛前。立斯大愿。于今百千万亿。那由他。不可说劫。尚为菩萨。 | yǐ shì yú bǐ fó qián 。 lì sī dà yuàn 。 yú jīn bǎi qiān wàn yì 。 nà yóu tā 。 bù kě shuō jié 。 shàng wéi pú sà 。 | Dĩ thị ư bỉ Phật tiền. Lập tư đại nguyện. Ư kim bách thiên vạn ức. Na do tha. Bất khả thuyết kiếp. Thượng vi Bồ Tát. | "Because he made that great vow before that Buddha, although thousands of millions of nayutas of inexpressible aeons have passed, he is still a Bodhisattva." | "Bởi ở trước đức Phật Sư Tử Phấn Tấn Cụ Túc Vạn Hạnh Như Lai, Ngài lập nguyện rộng đó, nên đến nay đã trải qua trăm nghìn muôn ức vô số bất khả thuyết kiếp, mà Ngài vẫn còn làm vị Bồ tát!"
-[00:05:48] 又于过去。不可思议。阿僧祇劫。时世有佛。号曰觉华定自在王如来。 | yòu yú guò qù 。 bù kě sī yì 。 ā sēng qí jié 。 shí shì yǒu fó 。 hào yuē jué huá dìng zì zài wáng rú lái 。 | Hựu ư quá khứ. Bất khả tư nghị. A tăng kỳ kiếp. Thời thế hữu Phật. Hiệu viết Giác Hoa Định Tự Tại Vương Như Lai. | "Moreover, inconceivable Asankhyeya aeons in the past, there was a Buddha named Flower of Enlightenment Samadhi Easeful King Tathagata." | "Lại thuở bất khả tư nghị vô số kiếp về trước, lúc đó có đức Phật hiệu là: Giác Hoa Định Tự Tại Vương Như Lai."
-[00:05:55] 彼佛寿命四百千万亿。阿僧祇劫。像法之中。有一婆罗门女。 | bǐ fó shòu mìng sì bǎi qiān wàn yì 。 ā sēng qí jié 。 xiàng fǎ zhī zhōng 。 yǒu yī pó luó mén nǚ 。 | Bỉ Phật thọ mạng tứ bách thiên vạn ức. A tăng kỳ kiếp. Tượng pháp chi trung. Hữu nhất Bà La Môn Nữ. | "That Buddha's lifespan was four hundred million Asankhyeya aeons. During the Dharma Image Age, there was a Brahman woman." | "Đức Phật ấy thọ đến bốn trăm nghìn muôn ức vô số kiếp. Trong thời tượng pháp, có một người con gái dòng Bà La Môn..."
-[00:06:00] 宿福深厚。众所钦敬。行住坐卧。诸天卫护。 | sù fú shēn hòu 。 zhòng suǒ qīn jìng 。 xíng zhù zuò wò 。 zhū tiān wèi hù 。 | Túc phước thâm hậu. Chúng sở khâm kính. Hành trụ tọa ngọa. Chư thiên vệ hộ. | "She had deep and thick blessings from previous lives and was respected by everyone. Walking, standing, sitting, and lying down, she was surrounded and protected by gods." | "...người này nhiều đời chứa phước sâu dày, mọi người đều kính nể, khi đi đứng, lúc nằm ngồi, chư Thiên thường theo hộ vệ."
-[00:06:07] 其母信邪。常轻三宝。是时圣女广说方便。劝诱其母。令生正见。 | qí mǔ xìn xié 。 cháng qīng sān bǎo 。 shì shí shèng nǚ guǎng shuō fāng biàn 。 quàn yòu qí mǔ 。 lìng shēng zhèng jiàn 。 | Kỳ mẫu tín tà. Thường khinh Tam Bảo. Thị thời Thánh Nữ quảng thuyết phương tiện. Khuyến dụ kỳ mẫu. Linh sinh chánh kiến. | "However, her mother had improper belief and often slighted the Triple Jewel. The Holy Woman used many expedients to advise and encourage her mother to give rise to right view." | "Bà mẹ của người mê tín tà đạo, thường khinh khi ngôi Tam Bảo. Thuở ấy, mặc dầu Thánh Nữ đem nhiều lời phương tiện khuyên nhủ bà mẹ người, hầu làm cho bà mẹ người sanh chánh kiến..."
-[00:06:15] 而此女母。未全生信。不久命终。魂神堕在。无间地狱。 | ér cǐ nǚ mǔ 。 wèi quán shēng xìn 。 bù jiǔ mìng zhōng 。 hún shén duò zài 。 wú jiàn dì yù 。 | Nhi thử nữ mẫu. Vị toàn sinh tín. Bất cửu mạng chung. Hồn thần đọa tại. Vô Gián Địa Ngục. | "But her mother did not totally believe. Before long, her life ended and her spirit fell into the Uninterrupted Hell." | "...nhưng mà bà mẹ người chưa tin hẳn. Chẳng bao lâu bà ấy chết thần hồn sa đọa vào Vô Gián địa ngục."
-[00:06:20] 时婆罗门女知母在世。不信因果。计当随业。必生恶趣。 | shí pó luó mén nǚ zhī mǔ zài shì 。 bù xìn yīn guǒ 。 jì dāng suí yè 。 bì shēng è qù 。 | Thời Bà La Môn Nữ tri mẫu tại thế. Bất tín nhân quả. Kế đương tùy nghiệp. Tất sanh ác thú. | "The Brahman woman knew that since her mother had not believed in cause and effect while alive, she would certainly fall into the Evil Paths according to her karma." | "Lúc đó, Thánh Nữ biết rằng người mẹ khi còn sống không tin nhơn quả, liệu chắc phải theo nghiệp quấy mà sanh vào đường ác."
-[00:06:26] 遂卖家宅。广求香华及诸供具。于先佛塔寺。大兴供养。 | suì mài jiā zhái 。 guǎng qiú xiāng huā jí zhū gòng jù 。 yú xiān fó tǎ sì 。 dà xīn gòng yàng 。 | Toại mại gia trạch. Quảng cầu hương hoa cập chư cúng cụ. Ư tiên Phật tháp tự. Đại hưng cúng dường. | "She sold her family house, bought incense, flowers, and other offerings, and made great offerings in that Buddha's stupas and temples." | "Thánh Nữ bèn bán nhà, đất, sắm nhiều hương hoa cùng những đồ lễ cúng, rồi đem cúng dường tại các chùa tháp thờ đức Phật Giác Hoa Định Tự Tại Vương."
-[00:06:33] 见觉华定自在王如来。及形像在塔寺中。塑画威容。端严毕备。 | jiàn jué huá dìng zì zài wáng rú lái 。 jí xíng xiàng zài yī sì zhōng 。 sù huà wēi róng 。 duān yán bì bèi 。 | Kiến Giác Hoa Định Tự Tại Vương Như Lai. Cập hình tượng tại nhất tự trung. Tố họa uy dung. Đoan nghiêm tất bị. | "She saw the image of Flower of Enlightenment Samadhi Easeful King Tathagata in a temple. The painted image was dignified and adorned, complete with all marks." | "Trong một ngôi chùa kia thấy hình tượng của đức Giác Hoa Định Tự Tại Vương Như Lai đắp vẽ oai dung đủ cách tôn nghiêm."
-[00:06:38] 时婆罗门女瞻礼尊容倍生敬仰。私自念言。佛名大觉。具一切智。 | shí pó luó mén nǚ zhān lǐ zūn róng bèi shēng jìng yǎng 。 sī zì niàn yán 。 fó míng dà jué 。 jù yí qiè zhì 。 | Thời Bà La Môn Nữ chiêm lễ tôn dung bối sinh kính ngưỡng. Tư tự niệm ngôn. Phật danh Đại Giác. Cụ nhất thiết trí. | "The Brahman woman beheld the honored countenance with redoubled respect. She thought to herself, 'The Buddha is called the Greatly Enlightened One and possesses All-Wisdom.'" | "Thánh Nữ chiêm bái tượng của đức Phật lại càng sanh lòng kính ngưỡng, tự nghĩ thầm rằng: Đức Phật là đấng Đại Giác đủ tất cả trí huệ..."
-[00:06:46] 若在世时我母死后。傥来问佛。必知处所。 | ruò zài shì shí wǒ mǔ sǐ hòu 。 tǎng lái wèn fó 。 bì zhī chù suǒ 。 | Nhược tại thế thời ngã mẫu tử hậu. Thảng lai vấn Phật. Tất tri xứ sở. | "'If he were in the world, I could ask him where my mother has gone after death, and he would certainly know.'" | "...nếu đức Phật còn trụ ở đời, thì khi mẹ tôi khuất, tôi đến bạch hỏi Phật, chắc cũng rõ mẹ tôi sanh vào chốn nào."
-[00:06:50] 时婆罗门女。垂泣良久。瞻恋如来。忽闻空中声曰。 | shí pó luó mén nǚ 。 chuí qì liáng jiǔ 。 zhān liàn rú lái 。 hū wén kōng zhōng shēng yuē 。 | Thời Bà La Môn Nữ. Thùy khấp lương cửu. Chiêm luyến Như Lai. Hốt văn không trung thanh viết. | "The Brahman woman wept for a long time as she gazed longingly at the Tathagata. Suddenly she heard a voice in space saying:" | "Nghĩ đến đó, Thánh Nữ buồn tủi rơi lệ chăm nhìn tượng Như Lai mà lòng quyến luyến mãi. Bỗng nghe trên hư không có tiếng bảo rằng:"
-[00:06:56] 泣者圣女。勿至悲哀。我今示汝母之去处。 | qì zhě shèng nǚ 。 wù zhì bēi āi 。 wǒ jīn shì rǔ mǔ zhī qù chù 。 | Khấp giả Thánh Nữ. Vật chí bi ai. Ngã kim thị nhữ mẫu chi khứ xứ. | "'Weeping Holy Woman, do not be so sorrowful. I shall now show you where your mother has gone.'" | "Thánh Nữ dương khóc kia, thôi đừng có bi ai quá lắm! Nay ta sẽ bảo cho ngươi biết chỗ của mẹ ngươi."
-[00:07:01] 婆罗门女合掌向空。而白空曰。是何神德。宽我忧虑。 | pó luó mén nǚ hé zhǎng xiàng kōng 。 ér bái kōng yuē 。 shì hé shén dé 。 kuān wǒ yōu lǜ 。 | Bà La Môn Nữ hợp chưởng hướng không. Nhi bạch không viết. Thị hà thần đức. Khoan ngã ưu lự. | "The Brahman woman placed her palms together, turned towards space, and said, 'What spirit is this who comforts me in my worry?'" | "Thánh Nữ chắp tay hướng lên hư không mà vái rằng: Đức thần nào đó mà giải bớt lòng sầu lo của tôi như thế?"
-[00:07:07] 我自失母以来。昼夜忆恋。无处可问。知母生界。 | wǒ zì shī mǔ yǐ lái 。 zhòu yè yì liàn 。 wú chù kě wèn 。 zhī mǔ shēng jiè 。 | Ngã tự thất mẫu dĩ lai. Trú dạ ức luyến. Vô xứ khả vấn. Tri mẫu sinh giới. | "'Since I lost my mother, I have held her in memory day and night, but there is nowhere I can ask to find out the realm of her rebirth.'" | "Từ khi mẹ tôi mất đến nay, tôi thương nhớ ngày đêm, không biết đâu để hỏi cho rõ mẹ tôi thác sanh vào chốn nào?"
-[00:07:12] 时空中又声再报女曰。我是汝所瞻礼者。过去觉华定自在王如来。 | shí kōng zhōng yòu shēng zài bào nǚ yuē 。 wǒ shì rǔ suǒ zhān lǐ zhě 。 guò qù jué huá dìng zì zài wáng rú lái 。 | Thời không trung hựu thanh tái báo nữ viết. Ngã thị nhữ sở chiêm lễ giả. Quá khứ Giác Hoa Định Tự Tại Vương Như Lai. | "The voice in space spoke to the woman again, 'I am the one whom you are beholding and worshiping, the past Flower of Enlightenment Samadhi Easeful King Tathagata.'" | "Trên hư không lại có tiếng bảo Thánh Nữ rằng: Ta là đức Phật quá khứ Giác Hoa Định Tự Tại Vương Như Lai mà ngươi đương chiêm bái đó."
-[00:07:20] 见汝忆母倍于常情众生之分。故来告示。 | jiàn rǔ yì mǔ bèi yú cháng qíng zhòng shēng zhī fèn 。 gù lái gào shì 。 | Kiến nhữ ức mẫu bối ư thường tình chúng sinh chi phận. Cố lai cáo thị. | "'Because I see that your regard for your mother is double that of ordinary living beings, I have come to tell you.'" | "Thấy ngươi thương nhớ mẹ trội hơn thường tình của chúng sinh, nên ta đến chỉ bảo."
-[00:07:25] 婆罗门女闻此声已。举身自扑肢节皆损。左右扶侍良久方苏。而白空曰。 | pó luó mén nǚ wén cǐ shēng yǐ 。 jǔ shēn zì pū zhī jié jiē sǔn 。 zuǒ yòu fú shì liáng jiǔ fāng sū 。 ér bái kōng yuē 。 | Bà La Môn Nữ văn thử thanh dĩ. Cử thân tự phác chi tiết giai tổn. Tả hữu phù thị lương cửu phương tô. Nhi bạch không viết. | "Upon hearing this voice, the Brahman woman threw herself on the ground, injuring her limbs and joints. Her attendants supported her, and after a long time she revived. She said to space:" | "Thánh Nữ nghe nói xong liền té xỉu xuống, tay chân mình mẩy đều bị tổn thương. Những người đứng bên vội vàng đỡ dậy, một lát sau Thánh Nữ mới tỉnh lại rồi bạch cùng trên hư không rằng:"
-[00:07:32] 愿佛慈愍。速说我母生界。我今身心将死不久。 | yuàn fó cí mǐn 。 sù shuō wǒ mǔ shēng jiè 。 wǒ jīn shēn xīn jiāng sǐ bù jiǔ 。 | Nguyện Phật từ mẫn. Tốc thuyết ngã mẫu sinh giới. Ngã kim thân tâm tương tử bất cửu. | "'I pray the Buddha will be compassionate and quickly tell me my mother's realm of rebirth. My own death is not far off.'" | "Cúi xin đức Phật xót thương bảo ngay cho rõ chỗ thác sanh của mẹ con, nay thân tâm của con sắp chết mất!"
-[00:07:38] 时觉华定自在王如来。告圣女曰。汝供养毕。但早返舍。 | shí jué huá dìng zì zài wáng rú lái 。 gào shèng nǚ yuē 。 rǔ gòng yàng bì 。 dàn zǎo fǎn shè 。 | Thời Giác Hoa Định Tự Tại Vương Như Lai. Cáo Thánh Nữ viết. Nhữ cúng dường tất. Đãn tảo phản xá. | "Flower of Enlightenment Samadhi Easeful King Tathagata told the Holy Woman, 'After you make your offering, return home early.'" | "Đức Giác Hoa Định Tự Tại Vương Như Lai bảo Thánh Nữ rằng: Cúng dường xong, ngươi mau mau trở về nhà..."
-[00:07:45] 端坐思维吾之名号。即当知母所生去处。 | duān zuò sī wéi wú zhī míng hào 。 jí dāng zhī mǔ suǒ shēng qù chù 。 | Đoan tọa tư duy ngô chi danh hiệu. Tức đương tri mẫu sở sinh khứ xứ. | "'Sit upright and contemplate my name. You will soon know where your mother has gone.'" | "...rồi ngồi ngay thẳng nghĩ tưởng danh hiệu của Ta, thời ngươi sẽ biết chỗ thác sanh của mẹ ngươi."
-[00:07:51] 时婆罗门女。寻礼佛已。即归其舍。以忆母故。端坐念。觉华定自在王如来。 | shí pó luó mén nǚ 。 xún lǐ fó yǐ 。 jí guī qí shè 。 yǐ yì mǔ gù 。 duān zuò niàn 。 jué huá dìng zì zài wáng rú lái 。 | Thời Bà La Môn Nữ. Tầm lễ Phật dĩ. Tức quy kỳ xá. Dĩ ức mẫu cố. Đoan tọa niệm. Giác Hoa Định Tự Tại Vương Như Lai. | "The Brahman woman bowed to the Buddha and returned home. Because she missed her mother, she sat upright and recited the name of Flower of Enlightenment Samadhi Easeful King Tathagata." | "Lễ Phật xong, Thánh Nữ liền trở về nhà. Vì thương nhớ mẹ, nên Thánh Nữ ngồi ngay thẳng niệm danh hiệu của Giác Hoa Định Tự Tại Vương Như Lai."
-[00:07:59] 经一日一夜。忽见自身。到一海边。其水涌沸。多诸恶兽尽复铁身。飞走海上。东西驰逐。 | jīng yī rì yī yè 。 hū jiàn zì shēn 。 dào yī hǎi biān 。 qí shuǐ yǒng fèi 。 duō zhū è shòu jìn fù tiě shēn 。 fēi zǒu hǎi shàng 。 dōng xī chí zhú 。 | Kinh nhất nhật nhất dạ. Hốt kiến tự thân. Đáo nhất hải biên. Kỳ thủy dũng phế. Đa chư ác thú tận phục thiết thân. Phi tẩu hải thượng. Đông tây trì trục. | "After a day and a night, she suddenly saw herself by a sea. The water was boiling. Many evil beasts with iron bodies flew over the sea, rushing east and west." | "Trải suốt một ngày một đêm. Bỗng thấy thân mình đến một bờ biển kia. Nước trong biển đó sôi sùng sục, có rất nhiều thú dữ thân thể toàn bằng sắt bay nhảy trên mặt biển, chạy rảo bên này, xua đuổi bên kia."
-[00:08:08] 见诸男子女人。百千万数。出没海中。被诸恶兽。争取食啖。 | jiàn zhū nán zǐ nǚ rén 。 bǎi qiān wàn shù 。 chū mò hǎi zhōng 。 bèi zhū è shòu 。 zhēng qǔ shí dàn 。 | Kiến chư nam tử nữ nhân. Bách thiên vạn số. Xuất một hải trung. Bị chư ác thú. Tranh thủ thực đạm. | "She saw hundreds of thousands of millions of men and women rising and sinking in the water, being fought over and eaten by the evil beasts." | "Thấy những trai cùng gái số nhiều đến nghìn muôn thoạt chìm thoạt nổi ở trong biển, bị các thú dữ giành nhau ăn thịt."
-[00:08:14] 又见夜叉其形各异。或多手多眼。多足多头。口牙外出利刃如剑。驱诸罪人。 | yòu jiàn yè chā qí xíng gè yì 。 huò duō shǒu duō yǎn 。 duō zú duō tóu 。 kǒu yá wài chū lì rèn rú jiàn 。 qū zhū zuì rén 。 | Hựu kiến Dạ Xoa kỳ hình các dị. Hoặc đa thủ đa nhãn. Đa túc đa đầu. Khẩu nha ngoại xuất lợi nhận như kiếm. Khu chư tội nhân. | "She also saw Yakshas with different shapes - some with many hands and eyes, some with many feet and heads, and some with sharp teeth protruding like swords - herding the offenders." | "Lại thấy quỷ Dạ Xoa hình thù đều lạ lùng: hoặc nhiều tay, nhiều mắt, nhiều chân, nhiều đầu... răng nanh chia ra ngoài miệng bén nhọn dường gươm, lùa những người tội gần thú dữ."
-[00:08:22] 使近恶兽。复自搏攫头足相就。其形万类。不敢久视。 | shǐ jìn è shòu 。 fù zì bó jué tóu zú xiāng jiù 。 qí xíng wàn lèi 。 bù gǎn jiǔ shì 。 | Sử cận ác thú. Phục tự bác quyết đầu túc tương tựu. Kỳ hình vạn loại. Bất cảm cửu thị. | "They drove the offenders towards the evil beasts. The Yakshas also seized the offenders, twisting their heads and feet together in a myriad of terrifying shapes that one dared not look at." | "Rồi quỷ lại chụp bắt người tội, túm quắp đầu chân người tội lại, hình trạng muôn thứ chẳng dám nhìn lâu."
-[00:08:28] 时婆罗门女。以念佛力故。自然无惧。 | shí pó luó mén nǚ 。 yǐ niàn fó lì gù 。 zì rán wú jù 。 | Thời Bà La Môn Nữ. Dĩ niệm Phật lực cố. Tự nhiên vô cụ. | "The Brahman woman, by the power of reciting the Buddha's name, was naturally unafraid." | "Khi ấy, Thánh Nữ nhờ nương sức niệm Phật nên tự nhiên không kinh sợ."
-[00:08:33] 有一鬼王。名曰无毒。稽首来迎。白圣女曰。善哉菩萨。何缘来此。 | yǒu yī guǐ wáng 。 míng yuē wú dú 。 qí shǒu lái yíng 。 bái shèng nǚ yuē 。 shàn zāi pú sà 。 hé yuán lái cǐ 。 | Hữu nhất Quỷ Vương. Danh viết Vô Độc. Kê thủ lai nghênh. Bạch Thánh Nữ viết. Thiện tai Bồ Tát. Hà duyên lai thử. | "A ghost king named Poisonless bowed his head to greet her and said, 'Welcome, O Bodhisattva. What brings you here?'" | "Có một vị Quỷ Vương tên là Vô Độc, đến cúi đầu nghinh tiếp, hỏi Thánh Nữ rằng: Hay thay Bồ tát! Ngài có duyên sự gì đến chốn này?"
-[00:08:40] 时婆罗门女。问鬼王曰。此是何处。无毒答曰。此是大铁围山。西面第一重海。 | shí pó luó mén nǚ 。 wèn guǐ wáng yuē 。 cǐ shì hé chù 。 wú dú dá yuē 。 cǐ shì dà tiě wéi shān 。 xī miàn dì yī chóng hǎi 。 | Thời Bà La Môn Nữ. Vấn Quỷ Vương viết. Thử thị hà xứ. Vô Độc đáp viết. Thử thị Đại Thiết Vi Sơn. Tây diện đệ nhất trùng hải. | "The Brahman woman asked the ghost king, 'What is this place?' Poisonless answered, 'This is the first sea to the west of the Great Iron Ring Mountain.'" | "Thánh Nữ hỏi Quỷ Vương rằng: Đây là chốn nào? Quỷ Vương Vô Độc đáp rằng: Đây là từng biển thứ nhất ở phía Tây núi đại Thiết Vi."
-[00:08:49] 圣女问曰。我闻铁围之内。地狱在中。是事实否。无毒答曰。实有地狱。 | shèng nǚ wèn yuē 。 wǒ wén tiě wéi zhī nèi 。 dì yù zài zhōng 。 shì shì shí fǒu 。 wú dú dá yuē 。 shí yǒu dì yù 。 | Thánh Nữ vấn viết. Ngã văn Thiết Vi chi nội. Địa Ngục tại trung. Thị sự thật phủ. Vô Độc đáp viết. Thật hữu Địa Ngục. | "The Holy Woman asked, 'I have heard that hell is within the Iron Ring. Is that true?' Poisonless answered, 'It is true that there is a hell.'" | "Thánh Nữ hỏi rằng: Tôi nghe trong núi Thiết Vi có địa ngục, việc ấy có thiệt như thế chăng? Vô Độc đáp rằng: Thiệt có địa ngục."
-[00:08:57] 圣女问曰。我今云何。得到狱所。无毒答曰。若非威神。即须业力。非此二事。终不能到。 | shèng nǚ wèn yuē 。 wǒ jīn yún hé 。 dé dào yù suǒ 。 wú dú dá yuē 。 ruò fēi wēi shén 。 jí xū yè lì 。 fēi cǐ èr shì 。 zhōng bù néng dào 。 | Thánh Nữ vấn viết. Ngã kim vân hà. Đắc đáo ngục sở. Vô Độc đáp viết. Nhược phi uy thần. Tức tu nghiệp lực. Phi thử nhị sự. Chung bất năng đáo. | "The Holy Woman asked, 'How have I now come to the hells?' Poisonless answered, 'If it is not by awesome spiritual power, then it must be by the power of karma. Without one of these two, one cannot come here.'" | "Thánh Nữ hỏi rằng: Nay tôi làm sao để được đến chốn địa ngục đó? Vô Độc đáp rằng: Nếu không phải sức oai thần cần phải do nghiệp lực. Ngoài hai điều này ra ắt không bao giờ có thể đến đó được."
-[00:09:06] 圣女又问。此水何缘。而乃涌沸。多诸罪人。及以恶兽。 | shèng nǚ yòu wèn 。 cǐ shuǐ hé yuán 。 ér nǎi yǒng fèi 。 duō zhū zuì rén 。 jí yǐ è shòu 。 | Thánh Nữ hựu vấn. Thử thủy hà duyên. Nhi nãi dũng phế. Đa chư tội nhân. Cập dĩ ác thú. | "The Holy Woman asked, 'Why is this water boiling, and why are there so many offenders and evil beasts?'" | "Thánh Nữ lại hỏi: Duyên cớ vì sao mà nước trong biển này sôi sùng sục như thế, và có những người tội cùng với các thú dữ?"
-[00:09:12] 无毒答曰。此是阎浮提造恶众生。新死之者。经四十九日后。无人继嗣。为作功德。救拔苦难。 | wú dú dá yuē 。 cǐ shì yán fú tí zào è zhòng shēng 。 xīn sǐ zhī zhě 。 jīng sì shí jiǔ rì hòu 。 wú rén jì sì 。 wèi zuò gōng dé 。 jiù bá kǔ nàn 。 | Vô Độc đáp viết. Thử thị Diêm Phù Đề tạo ác chúng sanh. Tân tử chi giả. Kinh tứ thập cửu nhật hậu. Vô nhân kế tự. Vị tác công đức. Cứu bạt khổ nạn. | "Poisonless answered, 'These are the newly dead beings of Jambudvipa who created evil karma. If after forty-nine days no one performs meritorious deeds to rescue them from suffering...'" | "Vô Độc đáp rằng: Những người tội trong biển này là những kẻ tạo ác ở cõi Diêm Phù Đề mới chết, trong khoảng bốn mươi chín ngày không người kế tự để làm công đức hầu cứu vớt khổ nạn cho..."
-[00:09:22] 生时又无善因。当据本业所感地狱。自然先渡此海。 | shēng shí yòu wú shàn yīn 。 dāng jù běn yè suǒ gǎn dì yù 。 zì rán xiān dù cǐ hǎi 。 | Sanh thời hựu vô thiện nhân. Đương cứ bản nghiệp sở cảm Địa Ngục. Tự nhiên tiên độ thử hải. | "'...and if they have no good causes of their own, they will fall into the hells according to their karma. Naturally, they must first pass through this sea.'" | "...lúc sống, kẻ đó lại không làm được nhơn lành nào cả. Vì thế nên cứ theo nghiệp ác của họ đã gây tạo mà cảm lấy báo khổ ở địa ngục, tự nhiên họ phải lội qua biển này."
-[00:09:28] 海东十万由旬。又有一海。其苦倍此。彼海之东。又有一海。其苦复倍。 | hǎi dōng shí wàn yóu xún 。 yòu yǒu yī hǎi 。 qí kǔ bèi cǐ 。 bǐ hǎi zhī dōng 。 yòu yǒu yī hǎi 。 qí kǔ fù bèi 。 | Hải đông thập vạn do tuần. Hựu hữu nhất hải. Kỳ khổ bội thử. Bỉ hải chi đông. Hựu hữu nhất hải. Kỳ khổ phục bội. | "'Ten thousand yojanas east of this sea is another sea where the suffering is double. East of that sea is yet another sea where the suffering is doubled again.'" | "Cách biển này mười muôn do tuần về phía Đông lại có một cái biển, những sự thống khổ trong biển đó gấp bội hơn biển này. Phía Đông của biển đó lại có một cái biển nữa, sự thống khổ trong đó càng trội hơn."
-[00:09:35] 三业恶因之所招感。共号业海。其处是也。 | sān yè è yīn zhī suǒ zhāo gǎn 。 gòng hào yè hǎi 。 qí chù shì yě 。 | Tam nghiệp ác nhân chi sở chiêu cảm. Cộng hiệu Nghiệp Hải. Kỳ xứ thị dã. | "'These are called the Seas of Karma, created by the evil causes of the three karmas. This is the place.'" | "Đó đều là do những nghiệp nhơn xấu xa của ba nghiệp mà cảm vời ra, đồng gọi là biển nghiệp, chính là ba cái biển này vậy."
-[00:09:40] 圣女又问鬼王无毒曰。地狱何在。无毒答曰。三海之内。是大地狱。 | shèng nǚ yòu wèn guǐ wáng wú dú yuē 。 dì yù hé zài 。 wú dú dá yuē 。 sān hǎi zhī nèi 。 shì dà dì yù 。 | Thánh Nữ hựu vấn Quỷ Vương Vô Độc viết. Địa Ngục hà tại. Vô Độc đáp viết. Tam hải chi nội. Thị Đại Địa Ngục. | "The Holy Woman asked the ghost king Poisonless, 'Where is hell?' Poisonless answered, 'Within the three seas are the great hells.'" | "Thánh Nữ lại hỏi Quỷ Vương Vô Độc rằng: Địa ngục ở đâu? Vô Độc đáp rằng: Trong ba cái biển đó đều là địa ngục..."
-[00:09:48] 其数百千。各各差别。所谓大者。具有十八。次有五百。苦毒无量。次有千百。亦无量苦。 | qí shù bǎi qiān 。 gè gè chā bié 。 suǒ wèi dà zhě 。 jù yǒu shí bā 。 cì yǒu wǔ bǎi 。 kǔ dú wú liàng 。 cì yǒu qiān bǎi 。 yì wú liàng kǔ 。 | Kỳ số bách thiên. Các các sai biệt. Sở vị đại giả. Cụ hữu thập bát. Thứ hữu ngũ bách. Khổ độc vô lượng. Thứ hữu thiên bách. Diệc vô lượng khổ. | "'There are hundreds of thousands of them, each different. There are eighteen great ones. Next there are five hundred, where the suffering is limitless. And next there are thousands of hundreds, also with limitless suffering.'" | "...nhiều đến số trăm nghìn, mỗi ngục đều khác nhau. Về địa ngục lớn thời có 18 chỗ, bực kế đó có 500 chỗ đủ không lường sự khổ sở, bực kế nữa có đến nghìn trăm cũng không lường sự khổ."
-[00:09:57] 圣女又问大鬼王曰。我母死来未久。不知魂神。当至何趣。 | shèng nǚ yòu wèn dà guǐ wáng yuē 。 wǒ mǔ sǐ lái wèi jiǔ 。 bù zhī hún shén 。 dāng zhì hé qù 。 | Thánh Nữ hựu vấn Đại Quỷ Vương viết. Ngã mẫu tử lai vị cửu. Bất tri hồn thần. Đương chí hà khứ. | "The Holy Woman asked the great ghost king, 'My mother died not long ago. I do not know where her spirit has gone.'" | "Thánh Nữ lại hỏi đại Quỷ Vương rằng: Thân mẫu của tôi mới khuất gần đây, không rõ thần hồn của người phải sa vào chốn nào?"
-[00:10:04] 鬼王问圣女曰。菩萨之母。在生习何行业。 | guǐ wáng wèn shèng nǚ yuē 。 pú sà zhī mǔ 。 zài shēng xí hé xíng yè 。 | Quỷ Vương vấn Thánh Nữ viết. Bồ Tát chi mẫu. Tại sanh tập hà hạnh nghiệp. | "The ghost king asked the Holy Woman, 'What deeds did the Bodhisattva's mother do while she was alive?'" | "Quỷ Vương hỏi Thánh Nữ rằng: Thân mẫu của Bồ tát khi còn sống quen làm những nghiệp gì?"
-[00:10:08] 圣女答曰。我母邪见。讥毁三宝。设或暂信。旋又不敬。死虽日浅。未知生处。 | shèng nǚ dá yuē 。 wǒ mǔ xié jiàn 。 jī huǐ sān bǎo 。 shè huò zàn xìn 。 xuán yòu bù jìng 。 sǐ suī rì qiǎn 。 wèi zhī shēng chù 。 | Thánh Nữ đáp viết. Ngã mẫu tà kiến. Cơ hủy Tam Bảo. Thiết hoặc tạm tín. Tuyền hựu bất kính. Tử tuy nhật thiển. Vị tri sanh xứ. | "The Holy Woman answered, 'My mother had improper views and ridiculed the Triple Jewel. Even if she believed for a moment, she would soon become disrespectful again. She died recently, and I do not know her place of rebirth.'" | "Thánh Nữ đáp rằng: Thân mẫu của tôi mê tín tà đạo khinh chê ngôi Tam Bảo, hoặc có lúc tạm thời tin chánh pháp, xong rồi chẳng kính. Dầu khuất không bao lâu, mà chưa rõ đọa lạc vào đâu?"
-[00:10:17] 无毒问曰。菩萨之母。姓氏何等。圣女答曰。我父我母。俱婆罗门种。 | wú dú wèn yuē 。 pú sà zhī mǔ 。 xìng shì hé děng 。 shèng nǚ dá yuē 。 wǒ fù wǒ mǔ 。 jù pó luó mén zhǒng 。 | Vô Độc vấn viết. Bồ Tát chi mẫu. Tính thị hà đẳng. Thánh Nữ đáp viết. Ngã phụ ngã mẫu. Cụ Bà La Môn chủng. | "Poisonless asked, 'What was the Bodhisattva's mother's name and clan?' The Holy Woman answered, 'My father and mother were both of the Brahman caste.'" | "Vô Độc hỏi rằng: Thân mẫu của Bồ tát tên họ là gì? Thánh Nữ đáp rằng: Thân phụ và thân mẫu của tôi đều dòng dõi Bà La Môn."
-[00:10:24] 父号尸罗善现。母号悦帝利。 | fù hào shī luó shàn xiàn 。 mǔ hào yuè dì lì 。 | Phụ hiệu Thi La Thiện Hiện. Mẫu hiệu Duyệt Đế Lợi. | "'My father's name was Shila Shanxian. My mother's name was Yue Di Li.'" |  "Thân phụ tôi hiệu là Thi La Thiện Kiến. Thân mẫu tôi hiệu là Duyệt Đế Lợi."
-[00:10:28] 无毒合掌。启菩萨曰。愿圣者却返本处。无至忧忆悲恋。 | wú dú hé zhǎng 。 qǐ pú sà yuē 。 yuàn shèng zhě què fǎn běn chù 。 wú zhì yōu yì bēi liàn 。 | Vô Độc hợp chưởng. Khải Bồ Tát viết. Nguyện Thánh Giả khước phản bản xứ. Vô chí ưu ức bi luyến. | "Poisonless placed his palms together and said to the Bodhisattva, 'Please, Holy One, return to your original place. Do not be worried or sorrowful.'" | "Vô Độc chắp tay thưa Thánh Nữ rằng: Xin Thánh Nữ hãy về, chớ đem lòng thương nhớ buồn rầu quá lắm nữa."
-[00:10:35] 悦帝利罪女生天以来。经今三日。云承孝顺之子。为母设供修福。 | yuè dì lì zuì nǚ shēng tiān yǐ lái 。 jīng jīn sān rì 。 yún chéng xiào shùn zhī zǐ 。 wèi mǔ shè gòng xiū fú 。 | Duyệt Đế Lợi tội nữ sanh thiên dĩ lai. Kinh kim tam nhật. Vân thừa hiếu thuận chi tử. Vị mẫu thiết cúng tu phước. | "'The sinful woman Yue Di Li ascended to heaven three days ago. It is said that she received the benefit of her filial child who made offerings and cultivated merit for her sake.'" | "Tội nữ Duyệt Đế Lợi được sanh lên cõi trời đến nay đã ba ngày rồi. Nghe nói nhờ con gái của người có lòng hiếu thuận, vì mẹ mà sắm sửa lễ vật, tu tạo phước lành..."
-[00:10:41] 布施觉华定自在王如来塔寺。非唯菩萨之母。得脱地狱。 | bù shī jué huá dìng zì zài wáng rú lái tǎ sì 。 fēi wéi pú sà zhī mǔ 。 dé tuō dì yù 。 | Bố thí Giác Hoa Định Tự Tại Vương Như Lai tháp tự. Phi duy Bồ Tát chi mẫu. Đắc thoát Địa Ngục. | "'Offers were made at the stupa of Flower of Enlightenment Samadhi Easeful King Tathagata. Not only the Bodhisattva's mother was released from hell.'" | "...cúng dường chùa tháp, thờ đức Giác Hoa Định Tự Tại Vương Như Lai. Chẳng phải chỉ riêng thân mẫu của Bồ tát đặng thoát khỏi địa ngục..."
-[00:10:46] 应是无间罪人。此日悉得受乐。俱同生讫。鬼王言毕。合掌而退。 | yìng shì wú jiàn zuì rén 。 cǐ rì xī dé shòu lè 。 jù tóng shēng qì 。 guǐ wáng yán bì 。 hé zhǎng ér tuì 。 | Ưng thị Vô Gián tội nhân. Thử nhật tất đắc thọ lạc. Cụ đồng sanh ngất. Quỷ Vương ngôn tất. Hợp chưởng nhi thối. | "'All the offenders in the Uninterrupted Hell also received bliss on that day and were born together with her.' After saying this, the ghost king placed his palms together and withdrew." | "...mà ngày đó, những tội nhơn Vô Gián cũng đều được vui vẻ, đồng đặng thác sanh cả. Nói xong, Quỷ Vương chắp tay chào Thánh Nữ mà cáo lui."
-[00:10:54] 婆罗门女。寻如梦归。悟此事已。便于觉华定自在王如来塔像之前。立弘誓愿。 | pó luó mén nǚ 。 xún rú mèng guī 。 wù cǐ shì yǐ 。 biàn yú jué huá dìng zì zài wáng rú lái tǎ xiàng zhī qián 。 lì hóng shì yuàn 。 | Bà La Môn Nữ. Tầm như mộng quy. Ngộ thử sự dĩ. Tiện ư Giác Hoa Định Tự Tại Vương Như Lai tháp tượng chi tiền. Lập hoằng thệ nguyện. | "The Brahman woman returned as if from a dream. Understanding this event, she went before the image of Flower of Enlightenment Samadhi Easeful King Tathagata and made a vast vow:" | "Bấy giờ, Thánh Nữ dường chiêm bao chợt thức tỉnh, rõ biết việc đó rồi, bèn đối trước tháp tượng của đức Giác Hoa Định Tự Tại Vương Như Lai mà phát thệ nguyện rộng lớn rằng:"
-[00:11:02] 愿我尽未来劫。应有罪苦众生。广设方便。使令解脱。 | yuàn wǒ jìn wèi lái jié 。 yìng yǒu zuì kǔ zhòng shēng 。 guǎng shè fāng biàn 。 shǐ lìng jiě tuō 。 | Nguyện ngã tận vị lai kiếp. Ưng hữu tội khổ chúng sanh. Quảng thiết phương tiện. Sử linh giải thoát. | "'May I, throughout future aeons, establish many expedient devices for the sake of sinful and suffering living beings, causing them to be liberated.'" | "Tôi nguyện từ nay nhẫn đến đời vị lai những chúng sinh mắc phải tội khổ, thì tôi lập ra nhiều phương chước làm cho chúng đó được giải thoát."
-[00:11:09] 佛告文殊师利。时鬼王无毒者。当今财首菩萨是。 | fó gào wén shū shī lì 。 shí guǐ wáng wú dú zhě 。 dāng jīn cái shǒu pú sà shì 。 | Phật cáo Văn Thù Sư Lợi. Thời Quỷ Vương Vô Độc giả. Đương kim Tài Thủ Bồ Tát thị. | "The Buddha told Manjushri, 'The ghost king Poisonless is the present Wealthy Leader Bodhisattva.'" | "Đức Phật bảo Ngài Văn Thù Sư Lợi rằng: Quỷ Vương Vô Độc đó nay chính ông Tài Thủ Bồ tát."
-[00:11:16] 婆罗门女者。即地藏菩萨是。 | pó luó mén nǚ zhě 。 jí dì zàng pú sà shì 。 | Bà La Môn Nữ giả. Tức Địa Tạng Bồ Tát thị. | "'And the Brahman woman is Earth Store Bodhisattva.'" | "Còn Thánh Nữ Bà La Môn đó nay là Địa Tạng Bồ tát vậy."
-`;
-
-        // --- TAM THIEN TU DATA (Sample ~3000 Common Characters) ---
-        const tamThienTuStr = "天地举存子孙六三家国前后牛马距牙无有犬羊归走拜跪去来女男带冠足多爱憎识知木根易难旨甘柱梁床席欠余锄鞠烛灯升降田宅老童雀鸡我他伯姨铅锡役功翰翼圣贤仙佛潦潮鸢凤丈寻盘盏茧丝梅李滓清胸臆墨朱娇熟慎廉私慕至回乡市妇夫内中门屋英蒂菲葱苍白苦酸驺驾石金音信听闻鸟兽羽毛皮角甲鳞行飞潜泳龙虎龟麟卵胎化湿形体面神颐目口唇舌齿耳鼻喉颜鬓眉发头首脑额顶颐颔项颈肩背膂胁腋腕肱臂手掌指甲脚腿膝胫踝踵趾身躯骨肉髓脑血脉筋皮肠胃心肝脾肺肾胆胞胎精气神魂魄志意念想思虑忧愁喜怒哀乐恐惊悲欢聪明智慧愚痴暗钝才艺技能工巧百工士农工商君臣父子夫妇兄弟朋友宾主师生主仆奴婢官吏兵卒将帅军旅甲胄弓矢刀剑矛盾旌旗鼓钲车船舟楫帆樯橹棹桥梁道路街巷城郭宫室殿堂亭台楼阁园林池沼陂塘井灶釜甑碗碟杯盘匙箸壶觞尊爵几案箱箧囊橐衣裳冠冕鞋袜簪珥環钏锦绣罗绮布帛丝麻棉絮裁缝纺织耕稼种植收获仓廪府库钱财货贿贸易买卖秤尺斗斛斤两钱分铢寸丈寻常毫厘圭撮数算加减乘除年月日时春夏秋冬寒暑冷热风云雨雪雷电霜露霞雾虹霓星辰日月阴阳乾坤宇宙世界山川江河湖海陵陆高原平原草木花果竹苇松柏桑麻稻粱麦豆黍稷禽兽虫鱼飞走潜伏动植矿物金银铜铁铅锡珠玉宝石琉璃珊瑚玛瑙琥珀珍珠象牙犀角麝香牛黄虎骨鹿茸熊胆龟板鳖甲蝉蜕蛇皮蜂房蚕砂红黄蓝白黑紫绿青赤橙灰褐方圆长短高低大小厚薄广狭深浅远近轻重急缓快慢好坏善恶美丑是非真假虚实有无得失成败兴亡盛衰治乱安危吉凶祸福寿夭贫富贵贱尊卑上下左右内外中间东西南北四方八面古今往来宇宙洪荒玄黄日月盈昃辰宿列张寒来暑往秋收冬藏闰余成岁律吕调阳云腾致雨露结为霜金生丽水玉出昆冈剑号巨阙珠称夜光果珍李柰菜重芥姜海咸河淡鳞潜羽翔龙师火帝鸟官人皇始制文字乃服衣裳推位让国有虞陶唐吊民伐罪周发殷汤坐朝问道垂拱平章爱育黎首臣伏戎羌遐迩一体率宾归王鸣凤在竹白驹食场化被草木赖及万方盖此身发四大五常恭惟鞠养岂敢毁伤女慕贞洁男效才良知过必改得能莫忘罔谈彼短靡恃己长信使可覆器欲难量墨悲丝染诗赞羔羊景行维贤克念作圣德建名立形端表正空谷传声虚堂习听祸因恶积福缘善庆尺璧非宝寸阴是竞资父事君曰严与敬孝当竭力忠则尽命临深履薄夙兴温清似兰斯馨如松之盛川流不息渊澄取映容止若思言辞安定笃初诚美慎终宜令荣业所基籍甚无竟学优登仕摄职从政存以甘棠去而益咏乐殊贵贱礼别尊卑上和下睦夫唱妇随外受傅训入奉母仪诸姑伯叔犹子比儿孔怀兄弟同气连枝交友投分切磨箴规仁慈隐恻造次弗离节义廉退颠沛匪亏性静情逸心动神疲守真志满逐物意移坚持雅操好爵自縻都邑华夏东西二京背邙面洛浮渭据泾宫殿盘郁楼观飞惊图写禽兽画彩仙灵丙舍傍启甲帐对楹肆筵设席鼓瑟吹笙升阶纳陛弁转疑星右通广内左达承明既集坟典亦聚群英杜稿钟隶漆书壁经府罗将相路侠槐卿户封八县家给千兵高冠陪辇驱毂振缨世禄侈富车驾肥轻策功茂实勒碑刻铭磻溪伊尹佐时阿衡奄宅曲阜微旦孰营桓公匡合济弱扶倾绮回汉惠说感武丁俊乂密勿多士寔宁晋楚更霸赵魏困横假途灭域践土会盟何遵约法韩弊烦刑起翦颇牧用军最精宣威沙漠驰誉丹青九州禹迹百郡秦并岳宗泰岱禅主云亭雁门紫塞鸡田赤城昆池碣石巨野洞庭旷远绵邈岩岫杳冥治本于农务兹稼穑俶载南亩我艺黍稷税熟贡新劝赏黜陟孟轲敦素史鱼秉直庶几中庸劳谦谨敕聆音察理鉴貌辨色贻厥嘉猷勉其祗植省躬讥诫宠增抗极殆辱近耻林皋幸即两疏见机解组谁逼索居闲处沉默寂寥求古寻论散虑逍遥欣奏累遣戚谢欢招渠荷的历园莽抽条枇杷晚翠梧桐早凋陈根委翳落叶飘摇游鹍独运凌摩绛霄";
-        
-        const tamThienTuSet = new Set(tamThienTuStr);
-
-        // --- APP STATE ---
-        let transcripts = [];
-        let simulationInterval = null;
-        let isPlaying = false;
-        let currentSimulationTime = 0; 
-        const simulationSpeed = 1; 
-        let analysisMode = false;
-        let vocabChartInstance = null;
-
-        // --- CORE FUNCTIONS ---
-
-        // 1. Text-to-Speech Functionality (iOS Optimized)
-        
-        // GLOBAL VARIABLE to prevent iOS Safari Garbage Collection (Critical Fix)
-        window.currentUtterance = null; 
-        let availableVoices = [];
-
-        function loadVoices() {
-            if ('speechSynthesis' in window) {
-                availableVoices = window.speechSynthesis.getVoices();
-            }
-        }
-        
-        // Initialize voices (Chrome loads immediately, iOS waits for event)
-        if ('speechSynthesis' in window) {
-            loadVoices();
-            window.speechSynthesis.onvoiceschanged = loadVoices;
-        }
-
-        function speakText(text, btnId) {
-            if ('speechSynthesis' in window) {
-                // Cancel current speech if any to avoid queue backup
-                window.speechSynthesis.cancel();
-                
-                // Visual feedback
-                if(btnId) {
-                    document.querySelectorAll('.speaking-active').forEach(el => el.classList.remove('speaking-active'));
-                    const btn = document.getElementById(btnId);
-                    if(btn) btn.classList.add('speaking-active');
-                }
-
-                // Create Utterance
-                const utterance = new SpeechSynthesisUtterance(text);
-                
-                // --- iOS FIX: EXPLICITLY FIND CHINESE VOICE ---
-                // iOS sometimes ignores 'lang' property if voice is not set explicitly
-                if (availableVoices.length === 0) {
-                    availableVoices = window.speechSynthesis.getVoices();
-                }
-                
-                const zhVoice = availableVoices.find(v => v.lang === 'zh-CN') || 
-                                availableVoices.find(v => v.lang.startsWith('zh'));
-                
-                if (zhVoice) {
-                    utterance.voice = zhVoice;
-                    utterance.lang = zhVoice.lang;
-                } else {
-                    utterance.lang = 'zh-CN'; // Fallback
-                }
-                
-                utterance.rate = 0.8; // Slower rate for learning
-                
-                // --- iOS FIX: PREVENT GARBAGE COLLECTION ---
-                // Assign to global variable so Safari doesn't kill it mid-speech
-                window.currentUtterance = utterance;
-
-                utterance.onend = function() {
-                    if(btnId) {
-                        const btn = document.getElementById(btnId);
-                        if(btn) btn.classList.remove('speaking-active');
-                    }
-                    window.currentUtterance = null; // Clean up
-                };
-
-                utterance.onerror = function(e) {
-                    console.error("Speech Error:", e);
-                    if(btnId) {
-                        const btn = document.getElementById(btnId);
-                        if(btn) btn.classList.remove('speaking-active');
-                    }
-                    // Silent retry logic could go here, but avoiding infinite loops
-                };
-
-                window.speechSynthesis.speak(utterance);
-            } else {
-                alert("Trình duyệt của bạn không hỗ trợ đọc âm thanh (Text-to-Speech). Vui lòng thử trên Chrome, Edge hoặc Safari mới nhất.");
-            }
-        }
-
-        // 2. Parse Data
-        function parseSubtitles(raw) {
-            const lines = raw.trim().split('\n');
-            const parsed = [];
-            // Regex captures: 1=HH, 2=MM, 3=SS, 4=Chinese, 5=Pinyin, 6=Viet (Han), 7=English, 8=Viet (Trans)
-            const regex = /\[(\d{2}):(\d{2}):(\d{2})\]\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*)/;
-
-            lines.forEach((line, index) => {
-                const match = line.match(regex);
-                if (match) {
-                    const hours = parseInt(match[1]);
-                    const minutes = parseInt(match[2]);
-                    const seconds = parseInt(match[3]);
-                    const cnText = match[4].trim();
-                    const pinyinText = match[5].trim();
-                    const vietHanText = match[6].trim();
-                    const enText = match[7].trim();
-                    const vietTransText = match[8].trim();
-                    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-                    
-                    parsed.push({
-                        id: index,
-                        timeFormatted: `${hours > 0 ? match[1] + ':' : ''}${match[2]}:${match[3]}`,
-                        seconds: totalSeconds,
-                        cn: cnText,
-                        pinyin: pinyinText,
-                        vietHan: vietHanText,
-                        en: enText,
-                        vietTrans: vietTransText,
-                        // Search text combined
-                        searchText: (cnText + ' ' + pinyinText + ' ' + vietHanText + ' ' + enText + ' ' + vietTransText).toLowerCase()
-                    });
-                }
-            });
-            return parsed;
-        }
-
-        // 3. Analyze Vocabulary (unchanged logic)
-        function analyzeVocabulary(items) {
-            const allChars = new Set();
-            items.forEach(item => {
-                const chars = item.cn.match(/[\u4e00-\u9fa5]/g);
-                if (chars) chars.forEach(c => allChars.add(c));
-            });
-
-            let inCount = 0;
-            let outCount = 0;
-            const total = allChars.size;
-
-            allChars.forEach(char => {
-                if (tamThienTuSet.has(char)) inCount++;
-                else outCount++;
-            });
-
-            const inPerc = total > 0 ? Math.round((inCount / total) * 100) : 0;
-            const outPerc = total > 0 ? 100 - inPerc : 0;
-
-            document.getElementById('uniqueCharCount').textContent = total;
-            document.getElementById('inTTTCount').textContent = inCount;
-            document.getElementById('inTTTPerc').textContent = `${inPerc}%`;
-            document.getElementById('outTTTCount').textContent = outCount;
-            document.getElementById('outTTTPerc').textContent = `${outPerc}%`;
-
-            const commentEl = document.getElementById('analysisComment');
-            if (inPerc > 80) commentEl.textContent = `Văn bản sử dụng phần lớn là các chữ căn bản (${inPerc}%), cho thấy ngôn ngữ kinh điển khá gần gũi và dễ tiếp cận với người có vốn Hán ngữ cơ sở.`;
-            else if (inPerc > 50) commentEl.textContent = `Văn bản có sự kết hợp cân bằng giữa từ vựng căn bản và thuật ngữ chuyên sâu.`;
-            else commentEl.textContent = `Văn bản chứa nhiều thuật ngữ chuyên môn hoặc chữ hiếm gặp, cần tra cứu kỹ.`;
-
-            renderVocabChart(inCount, outCount);
-        }
-
-        function renderVocabChart(inCount, outCount) {
-            const ctx = document.getElementById('vocabChart').getContext('2d');
-            if(vocabChartInstance) vocabChartInstance.destroy();
-            
-            // Determine if dark mode is active (by checking body bg color)
-            const isDark = getComputedStyle(document.body).backgroundColor === 'rgb(28, 25, 23)'; // Stone 900
-            const textColor = isDark ? '#e7e5e4' : '#44403c';
-
-            vocabChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Trong Tam Thiên Tự', 'Ngoài danh sách'],
-                    datasets: [{
-                        data: [inCount, outCount],
-                        backgroundColor: ['#22c55e', '#f59e0b'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { 
-                            position: 'bottom', 
-                            labels: { 
-                                usePointStyle: true, 
-                                font: { family: "'Noto Sans', sans-serif" },
-                                color: textColor
-                            } 
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const val = context.raw;
-                                    const total = context.chart._metasets[context.datasetIndex].total;
-                                    const perc = Math.round((val/total)*100) + '%';
-                                    return ` ${context.label}: ${val} (${perc})`;
-                                }
-                            }
-                        }
-                    },
-                    cutout: '70%'
-                }
-            });
-        }
-
-        // 4. Render List (Updated with Audio Button)
-        function renderList(items) {
-            const container = document.getElementById('transcriptContainer');
-            container.innerHTML = '';
-            
-            if (items.length === 0) {
-                container.innerHTML = '<div class="p-8 text-center text-stone-500 flex flex-col items-center gap-2"><span class="text-2xl">📭</span><span>Không tìm thấy nội dung phù hợp.</span></div>';
-                document.getElementById('visibleCount').textContent = '0 câu';
-                return;
-            }
-
-            items.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.id = `line-${item.id}`;
-                div.className = 'transcript-item p-4 rounded-lg cursor-pointer mb-2';
-                div.onclick = () => jumpToTime(item.seconds);
-                
-                let processedCn = item.cn;
-                if (analysisMode) {
-                    processedCn = item.cn.split('').map(char => {
-                        if (/[\u4e00-\u9fa5]/.test(char)) {
-                            if (tamThienTuSet.has(char)) {
-                                return `<span class="char-basic" title="Có trong Tam Thiên Tự">${char}</span>`;
-                            } else {
-                                return `<span class="char-advanced" title="Không có trong danh sách">${char}</span>`;
-                            }
-                        }
-                        return char;
-                    }).join('');
-                }
-
-                // Add Audio Button (Stop propagation to prevent jump when clicking audio)
-                // Note: We send Chinese text (item.cn) to the TTS engine because engines pronounce Hanzi correctly as Pinyin.
-                div.innerHTML = `
-                    <div class="flex gap-4 items-start relative pr-8">
-                        <span class="text-xs font-mono text-amber-500 bg-amber-900/30 px-2 py-1 rounded h-fit shrink-0 mt-2 border border-amber-800/50">${item.timeFormatted}</span>
-                        <div class="flex-1 space-y-1">
-                            <div class="cn-text text-xl">${processedCn}</div>
-                            <div class="pinyin-text">${item.pinyin}</div>
-                            <div class="viet-han-text">${item.vietHan}</div>
-                            <div class="viet-trans-text">${item.vietTrans}</div>
-                            <div class="en-text">${item.en}</div>
-                        </div>
-                        <button id="audio-btn-${item.id}" 
-                                onclick="event.stopPropagation(); speakText('${item.cn.replace(/'/g, "\\'")}', 'audio-btn-${item.id}')" 
-                                class="absolute right-0 top-2 text-stone-600 hover:text-amber-500 transition-all p-2 rounded-full hover:bg-stone-700/50 audio-btn" 
-                                title="Nghe đọc Pinyin">
-                            🔊
-                        </button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-            
-            document.getElementById('visibleCount').textContent = `${items.length} câu`;
-        }
-
-        // 5. Initialize Stats & Jump
-        function initJumpSelect(data) {
-            const select = document.getElementById('jumpSelect');
-            if(data.length === 0) return;
-            const totalMinutes = Math.ceil(data[data.length - 1].seconds / 60);
-            select.innerHTML = '<option value="0">00:00 - Khởi đầu</option>';
-            for(let i = 1; i <= totalMinutes; i++) {
-                const option = document.createElement('option');
-                option.value = i * 60;
-                option.textContent = `${i < 10 ? '0'+i : i}:00`;
-                select.appendChild(option);
-            }
-            select.addEventListener('change', (e) => jumpToTime(parseInt(e.target.value)));
-        }
-
-        // 6. Simulation Logic
-        function jumpToTime(seconds) {
-            currentSimulationTime = seconds;
-            updateTimeDisplay(currentSimulationTime);
-            highlightCurrentLine();
-            scrollToActive();
-        }
-        function updateTimeDisplay(seconds) {
-            const h = Math.floor(seconds / 3600);
-            const m = Math.floor((seconds % 3600) / 60);
-            const s = seconds % 60;
-            const formatted = `${h > 0 ? h + ':' : ''}${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
-            document.getElementById('currentTimeDisplay').textContent = formatted;
-        }
-        function highlightCurrentLine() {
-            let activeItem = null;
-            for (let i = transcripts.length - 1; i >= 0; i--) {
-                if (transcripts[i].seconds <= currentSimulationTime) {
-                    activeItem = transcripts[i];
-                    break;
-                }
-            }
-            
-            // Check if active item changed
-            const currentActive = document.querySelector('.active-line');
-            const newActiveId = activeItem ? `line-${activeItem.id}` : null;
-            
-            if (currentActive && currentActive.id !== newActiveId) {
-                currentActive.classList.remove('active-line');
-            }
-
-            if (activeItem && (!currentActive || currentActive.id !== newActiveId)) {
-                const el = document.getElementById(newActiveId);
-                if (el) {
-                    el.classList.add('active-line');
-                    // Auto Read Logic
-                    if(isPlaying && document.getElementById('autoRead').checked) {
-                        speakText(activeItem.cn, `audio-btn-${activeItem.id}`);
-                    }
-                }
-            }
-        }
-        function scrollToActive() {
-            const active = document.querySelector('.active-line');
-            if (active) active.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        function togglePlay() {
-            const btnPlay = document.getElementById('btnPlay');
-            const btnPause = document.getElementById('btnPause');
-            if (isPlaying) {
-                clearInterval(simulationInterval);
-                window.speechSynthesis.cancel(); // Stop audio on pause
-                isPlaying = false;
-                btnPlay.classList.remove('hidden'); btnPlay.classList.add('flex');
-                btnPause.classList.add('hidden');
-            } else {
-                isPlaying = true;
-                btnPlay.classList.add('hidden');
-                btnPause.classList.remove('hidden'); btnPause.classList.add('flex');
-                
-                // Trigger immediate highlight check for audio start
-                highlightCurrentLine();
-
-                simulationInterval = setInterval(() => {
-                    currentSimulationTime++;
-                    updateTimeDisplay(currentSimulationTime);
-                    highlightCurrentLine(); // This triggers audio if needed
-                    if(currentSimulationTime % 2 === 0) scrollToActive();
-                    if (transcripts.length > 0 && currentSimulationTime > transcripts[transcripts.length-1].seconds + 20) togglePlay();
-                }, 1000 / simulationSpeed);
-            }
-        }
-
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
-            transcripts = parseSubtitles(rawSubtitleData);
-            analyzeVocabulary(transcripts);
-            renderList(transcripts);
-            initJumpSelect(transcripts);
-            
-            document.getElementById('searchInput').addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase();
-                const filtered = transcripts.filter(t => 
-                    t.searchText.includes(term) || t.timeFormatted.includes(term)
-                );
-                renderList(filtered);
-            });
-
-            document.getElementById('btnPlay').addEventListener('click', togglePlay);
-            document.getElementById('btnPause').addEventListener('click', togglePlay);
-            document.getElementById('btnReset').addEventListener('click', () => {
-                if(isPlaying) togglePlay();
-                jumpToTime(0);
-            });
-
-            const tttBtn = document.getElementById('tttToggle');
-            tttBtn.addEventListener('click', () => {
-                analysisMode = !analysisMode;
-                if (analysisMode) {
-                    tttBtn.classList.add('bg-green-900', 'border-green-700', 'ring-2', 'ring-green-500', 'ring-offset-1', 'ring-offset-stone-900');
-                    tttBtn.classList.remove('bg-stone-800');
-                    document.getElementById('transcriptContainer').classList.add('analysis-mode-active');
-                    document.getElementById('analysisLegend').classList.remove('hidden');
-                    
-                    const term = document.getElementById('searchInput').value.toLowerCase();
-                    const currentItems = transcripts.filter(t => t.searchText.includes(term));
-                    renderList(currentItems);
-                    highlightCurrentLine();
-                    scrollToActive();
-                    document.getElementById('analysisLegend').scrollIntoView({behavior: 'smooth', block: 'center'});
-                } else {
-                    tttBtn.classList.remove('bg-green-900', 'border-green-700', 'ring-2', 'ring-green-500', 'ring-offset-1', 'ring-offset-stone-900');
-                    tttBtn.classList.add('bg-stone-800');
-                    document.getElementById('transcriptContainer').classList.remove('analysis-mode-active');
-                    document.getElementById('analysisLegend').classList.add('hidden');
-                    
-                    const term = document.getElementById('searchInput').value.toLowerCase();
-                    renderList(transcripts.filter(t => t.searchText.includes(term)));
-                    highlightCurrentLine();
-                }
-            });
-
-            const modeBtn = document.getElementById('modeToggle');
-            let isLightMode = false; // Default is Dark now
-            modeBtn.addEventListener('click', () => {
-                isLightMode = !isLightMode;
-                const body = document.body;
-                
-                // Toggle Logic
-                if(isLightMode) {
-                    // Switch to LIGHT
-                    body.style.backgroundColor = '#fdfbf7'; 
-                    body.style.color = '#44403c';
-                    modeBtn.textContent = "🌙 Chế độ Tối";
-                    modeBtn.classList.remove('text-stone-300');
-                    modeBtn.classList.add('text-stone-700', 'bg-stone-100');
-
-                    // Global elements styles for Light
-                    document.querySelectorAll('.bg-stone-900').forEach(el => el.classList.replace('bg-stone-900', 'bg-white'));
-                    document.querySelectorAll('.bg-stone-800').forEach(el => el.classList.replace('bg-stone-800', 'bg-white'));
-                    document.querySelectorAll('.text-stone-200').forEach(el => el.classList.replace('text-stone-200', 'text-stone-800'));
-                    document.querySelectorAll('.text-stone-400').forEach(el => el.classList.replace('text-stone-400', 'text-stone-500'));
-                    
-                    // Specific Text Colors
-                    const cnEls = document.querySelectorAll('.cn-text');
-                    cnEls.forEach(el => el.style.color = '#292524');
-                    const vietHanEls = document.querySelectorAll('.viet-han-text');
-                    vietHanEls.forEach(el => el.style.color = '#b45309');
-                    const vietTransEls = document.querySelectorAll('.viet-trans-text');
-                    vietTransEls.forEach(el => el.style.color = '#15803d');
-                    const enEls = document.querySelectorAll('.en-text');
-                    enEls.forEach(el => el.style.color = '#57534e');
-                    
-                } else {
-                    // Switch to DARK (Default)
-                    body.style.backgroundColor = '#1c1917'; 
-                    body.style.color = '#e7e5e4';
-                    modeBtn.textContent = "☀️ Chế độ Sáng";
-                    modeBtn.classList.add('text-stone-300');
-                    modeBtn.classList.remove('text-stone-700', 'bg-stone-100');
-                    
-                    location.reload(); 
-                }
-            });
-        });
-    </script>
 </body>
 </html>
