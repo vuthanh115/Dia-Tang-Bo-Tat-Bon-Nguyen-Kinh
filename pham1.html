@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kinh Địa Tạng - Phẩm 1</title>
+    <title>Kinh Địa Tạng - Phẩm 1 (Audio Pinyin)</title>
     <meta property="og:title" content="Phẩm 1: Thần Thông Trên Cung Trời Đao Lợi - Kinh Địa Tạng" />
     <meta property="og:description" content="Kinh Địa Tạng Bồ Tát Bổn Nguyện - Phẩm thứ nhất." />
     <meta property="og:image" content="https://vuthanh115.github.io/Dia-Tang-Bo-Tat-Bon-Nguyen-Kinh/Dia_Tang_Vuong_Bo_Tat.jpg" />
@@ -17,11 +17,7 @@
                 extend: {
                     colors: {
                         dark: {
-                            bg: '#1c1917',      /* Stone 900 */
-                            card: '#292524',    /* Stone 800 */
-                            border: '#44403c',  /* Stone 700 */
-                            text: '#e7e5e4',    /* Stone 200 */
-                            muted: '#a8a29e'    /* Stone 400 */
+                            bg: '#1c1917', card: '#292524', border: '#44403c', text: '#e7e5e4', muted: '#a8a29e'
                         }
                     }
                 }
@@ -38,14 +34,14 @@
         .custom-scroll::-webkit-scrollbar { width: 8px; }
         .custom-scroll::-webkit-scrollbar-track { background: #292524; }
         .custom-scroll::-webkit-scrollbar-thumb { background-color: #57534e; border-radius: 4px; }
-        .active-line { background-color: #451a03; border-left: 4px solid #f59e0b; padding-left: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
-        .transcript-item { border-left: 4px solid transparent; border-bottom: 1px solid #44403c; }
+        .active-line { background-color: #451a03; border-left: 4px solid #f59e0b; padding-left: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; }
+        .transcript-item { border-left: 4px solid transparent; border-bottom: 1px solid #44403c; transition: all 0.2s ease; position: relative; }
         .transcript-item:hover { background-color: #292524; border-left-color: #57534e; }
         
-        .cn-text { font-family: "Noto Serif SC", serif; font-size: 1.6em; color: #e7e5e4; font-weight: 500; }
-        .pinyin-text { color: #a8a29e; font-size: 0.85em; font-style: italic; }
-        .viet-han-text { color: #fbbf24; font-size: 1.05em; font-weight: 700; font-family: 'Noto Serif', serif; }
-        .viet-trans-text { color: #86efac; font-size: 1.05em; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 500; }
+        .cn-text { font-family: "Noto Serif SC", serif; font-size: 1.6em; color: #e7e5e4; font-weight: 500; line-height: 1.4; margin-bottom: 0.2rem; }
+        .pinyin-text { color: #a8a29e; font-size: 0.85em; font-style: italic; margin-bottom: 0.35rem; }
+        .viet-han-text { color: #fbbf24; font-size: 1.05em; font-weight: 700; font-family: 'Noto Serif', serif; margin-bottom: 0.2rem; }
+        .viet-trans-text { color: #86efac; font-size: 1.05em; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 500; margin-bottom: 0.2rem; line-height: 1.6; }
         .en-text { color: #78716c; font-size: 0.9em; font-style: italic; opacity: 0.8; }
         
         .char-basic { color: #14532d; background-color: #86efac; border-radius: 2px; padding: 0 2px; font-weight: bold; }
@@ -54,6 +50,7 @@
         
         @keyframes pulse-ring { 0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); } 100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
         .speaking-active .audio-btn { color: #fbbf24; animation: pulse-ring 2s infinite; }
+        ::placeholder { color: #78716c; }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col">
@@ -74,12 +71,13 @@
             </div>
             
             <nav class="hidden md:flex gap-6 text-sm font-medium text-stone-400">
-                <a href="index.html" class="hover:text-amber-500 transition-colors flex items-center gap-1 text-amber-500/80"><span>📚</span> Mục Lục</a>
+                <a href="index.html" class="hover:text-amber-500 transition-colors">⬅ Mục Lục</a>
                 <a href="#dashboard" class="hover:text-amber-500 transition-colors">Tổng Quan</a>
                 <a href="#transcript" class="hover:text-amber-500 transition-colors">Nội Dung</a>
             </nav>
             <div class="flex gap-2">
                 <button id="tttToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-green-400 rounded-md text-sm font-medium transition-colors border border-stone-700">🌿 Soi Tam Thiên Tự</button>
+                <button id="modeToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-md text-sm font-medium transition-colors border border-stone-700">☀️ Chế độ Sáng</button>
             </div>
         </div>
     </header>
@@ -103,6 +101,7 @@
                         <div class="p-4 bg-green-900/20 rounded-lg border border-green-800/50"><div class="text-sm text-green-400 font-medium">Trong Tam Thiên Tự</div><div class="text-3xl font-bold text-green-500" id="inTTTCount">0</div><div class="text-xs text-green-400/70 mt-1" id="inTTTPerc">0%</div></div>
                         <div class="p-4 bg-amber-900/20 rounded-lg border border-amber-800/50"><div class="text-sm text-amber-400 font-medium">Ngoài danh sách</div><div class="text-3xl font-bold text-amber-500" id="outTTTCount">0</div><div class="text-xs text-amber-400/70 mt-1" id="outTTTPerc">0%</div></div>
                     </div>
+                    <div class="bg-stone-900/50 p-4 rounded-lg text-sm text-stone-400 border border-stone-700"><p id="analysisComment">Đang phân tích...</p></div>
                 </div>
             </div>
         </section>
@@ -117,21 +116,38 @@
                             <button id="btnPause" class="flex-1 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-amber-400 py-2.5 px-4 rounded hidden">⏸ Tạm dừng</button>
                             <button id="btnReset" class="px-3 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-stone-300 rounded">↺</button>
                         </div>
-                        <div class="flex justify-between items-center mt-3 px-1"><span class="text-xs text-amber-500 font-mono" id="currentTimeDisplay">00:00</span></div>
+                        <div class="flex justify-between items-center mt-3 px-1"><span class="text-xs text-amber-500 font-mono" id="currentTimeDisplay">00:00</span> <span class="text-xs text-amber-500/50">Tự động cuộn</span></div>
                         <div class="mt-3 flex items-center gap-2">
-                            <input type="checkbox" id="autoRead" class="rounded border-stone-600 bg-stone-900">
-                            <label for="autoRead" class="text-xs text-stone-400 select-none">Tự động đọc Pinyin</label>
+                            <input type="checkbox" id="autoRead" class="rounded border-stone-600 bg-stone-900 text-amber-600">
+                            <label for="autoRead" class="text-xs text-stone-400 select-none cursor-pointer">Tự động đọc Pinyin</label>
                         </div>
                     </div>
-                    <div><input type="text" id="searchInput" placeholder="Tìm kiếm..." class="w-full px-3 py-2 bg-stone-900 border border-stone-700 text-stone-300 rounded-lg text-sm"></div>
-                    <div><select id="jumpSelect" class="w-full px-3 py-2 border border-stone-700 rounded-lg bg-stone-900 text-stone-300 text-sm"><option value="0">00:00 - Khởi đầu</option></select></div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-stone-500 mb-1.5">Tìm kiếm</label>
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm..." class="w-full px-3 py-2 bg-stone-900 border border-stone-700 text-stone-300 rounded-lg text-sm focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-stone-500 mb-1.5">Chuyển nhanh</label>
+                        <select id="jumpSelect" class="w-full px-3 py-2 border border-stone-700 rounded-lg bg-stone-900 text-stone-300 text-sm focus:ring-amber-500"><option value="0">00:00 - Khởi đầu</option></select>
+                    </div>
+                    <div id="analysisLegend" class="hidden p-4 bg-stone-900/50 rounded-lg border border-stone-700">
+                        <p class="text-xs font-bold text-stone-500 uppercase mb-2">Chú giải</p>
+                        <div class="flex flex-col gap-2 text-sm">
+                            <div class="flex items-center gap-2"><span class="px-1 bg-green-300 text-green-900 rounded font-bold font-serif">天</span> <span class="text-stone-400">Có trong Tam Thiên Tự</span></div>
+                            <div class="flex items-center gap-2"><span class="px-1 text-amber-500 font-serif border-b border-dotted border-amber-500">忉</span> <span class="text-stone-400">Ngoài danh sách</span></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="lg:col-span-8">
                 <div class="bg-stone-800 rounded-xl shadow-lg border border-stone-700 overflow-hidden flex flex-col h-[700px]">
-                    <div class="p-4 border-b border-stone-700 bg-stone-800/80 sticky top-0 z-10 flex justify-between">
-                        <span class="font-bold text-stone-300 serif">Nội Dung</span>
+                    <div class="p-4 border-b border-stone-700 bg-stone-800/80 sticky top-0 z-10 flex justify-between items-center backdrop-blur-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-stone-300 serif">Nội Dung</span>
+                            <span class="px-2 py-0.5 text-xs bg-stone-700 text-stone-300 rounded">Hán</span>
+                            <span class="px-2 py-0.5 text-xs bg-green-900/40 text-green-400 rounded">Việt</span>
+                        </div>
                         <span class="text-xs text-stone-400 bg-stone-700 px-2.5 py-1 rounded-full" id="visibleCount">0 câu</span>
                     </div>
                     <div id="transcriptContainer" class="flex-1 overflow-y-auto custom-scroll p-2 space-y-1 relative scroll-smooth bg-stone-900">
@@ -142,7 +158,15 @@
         </section>
     </main>
 
+    <footer class="bg-stone-950 text-stone-500 py-10 mt-12 border-t border-stone-800">
+        <div class="container mx-auto px-4 text-center">
+            <div class="serif text-xl text-stone-400 mb-3">Nam Mô Đại Nguyện Địa Tạng Vương Bồ Tát</div>
+            <p class="text-xs opacity-40">Phân tích dựa trên danh sách Tam Thiên Tự</p>
+        </div>
+    </footer>
+
     <script>
+        // Dữ liệu Phẩm 1
         const rawSubtitleData = `
 [00:00:00] 地藏菩萨本愿经 | dì zàng pú sà běn yuàn jīng | Địa Tạng Bồ Tát Bổn Nguyện Kinh | Sutra of the Past Vows of Earth Store Bodhisattva | Kinh Địa Tạng Bồ Tát Bổn Nguyện.
 [00:00:07] 忉利天宫神通品第一 | dāo lì tiān gōng shén tōng pǐn dì yī | Đao Lợi Thiên Cung Thần Thông phẩm đệ nhất | Chapter 1: Spiritual Penetrations in the Palace of the Trayastrimsa Heaven | Phẩm thứ nhất: Thần thông trên cung trời Đao Lợi.
@@ -167,7 +191,7 @@
 [00:02:42] 复有他方国土。及娑婆世界。诸大鬼王。所谓恶目鬼王。啖血鬼王。啖精气鬼王。啖胎卵鬼王。行病鬼王。摄毒鬼王。慈心鬼王。福利鬼王。大爱敬鬼王。如是等鬼王。皆来集会。 | fù yǒu tā fāng guó tǔ 。 jí suō pó shì jiè 。 zhū dà guǐ wáng 。 suǒ wèi è mù guǐ wáng 。 dàn xuè guǐ wáng 。 dàn jīng qì guǐ wáng 。 dàn tāi luǎn guǐ wáng 。 xíng bìng guǐ wáng 。 shè dú guǐ wáng 。 cí xīn guǐ wáng 。 fú lì guǐ wáng 。 dà ài jìng guǐ wáng 。 rú shì děng guǐ wáng 。 jiē lái jí huì 。 | Phục hữu tha phương quốc độ. Cập Ta Bà thế giới. Chư đại quỷ vương. Sở vị Ác Mục Quỷ Vương. Đạm Huyết Quỷ Vương. Đạm Tinh Khí Quỷ Vương. Đạm Thai Noãn Quỷ Vương. Hành Bệnh Quỷ Vương. Nhiếp Độc Quỷ Vương. Từ Tâm Quỷ Vương. Phước Lợi Quỷ Vương. Đại Ái Kính Quỷ Vương. Như thị đẳng Quỷ Vương. Giai lai tập hội. | Moreover, there were great ghost kings from other lands and the Saha World: the Evil-Eyed Ghost King, the Blood-Eating Ghost King, the Essence-and-Energy-Eating Ghost King, the Fetus-and-Egg-Eating Ghost King, the Disease-Spreading Ghost King, the Poison-Gathering Ghost King, the Kindhearted Ghost King, the Blessings-and-Profit Ghost King, the Great Love-and-Respect Ghost King, and others. All such ghost kings gathered together. | Lại có những Đại Quỷ Vương ở cõi Ta bà cùng cõi nước phương khác, như: Ác Mục Quỷ Vương, Đạm Huyết Quỷ Vương, Đạm Tinh Khí Quỷ Vương, Đạm Thai Noãn Quỷ Vương, Hành Bệnh Quỷ Vương, Nhiếp Độc Quỷ Vương, Từ Tâm Quỷ Vương, Phước Lợi Quỷ Vương, Đại Ái Kính Quỷ Vương... Các Quỷ Vương như thế đều đến hội họp.
 [00:03:02] 尔时释迦牟尼佛。告文殊师利法王子菩萨摩诃萨。 | ěr shí shì jiā móu ní fó 。 gào wén shū shī lì fǎ wáng zǐ pú sà mó hē sà 。 | Nhĩ thời Thích Ca Mâu Ni Phật. Cáo Văn Thù Sư Lợi Pháp Vương Tử Bồ Tát Ma Ha Tát. | At that time, Shakyamuni Buddha said to the Dharma Prince Manjushri, Bodhisattva Mahasattva: | Bấy giờ đức Thích Ca Mâu Ni Phật bảo Ngài Văn Thù Sư Lợi Pháp Vương Tử Đại Bồ Tát rằng:
 [00:03:08] 汝观是一切诸佛菩萨。及天龙鬼神。此世界。他世界。此国土。他国土。 | rǔ guān shì yí qiè zhū fó pú sà 。 jí tiān lóng guǐ shén 。 cǐ shì jiè 。 tā shì jiè 。 cǐ guó tǔ 。 tā guó tǔ 。 | Như quan thị nhất thiết chư Phật Bồ Tát. Cập thiên long quỷ thần. Thử thế giới. Tha thế giới. Thử quốc độ. Tha quốc độ. | "Look at all these Buddhas, Bodhisattvas, and gods, dragons, ghosts, and spirits from this world and other worlds, this land and other lands." | "Ông xem coi tất cả chư Phật, Bồ tát và Trời, Rồng, Quỷ, Thần đó ở trong thế giới này cùng thế giới khác, ở trong quốc độ này cùng quốc độ khác..."
-[00:03:16] 如是今来集会到忉利天者。汝知数否。 | rú shì jīn lái jí huì dào dāo lì tiān zhě 。 rǔ zhī shù fǒu 。 | Như thị kim lai tập hội đáo Đao Lợi Thiên giả. Như tri số phủ. | "Who have now gathered here in the Trayastrimsa Heaven. Do you know their number?" | "Who have now gathered here in the Trayastrimsa Heaven. Do you know their number?" | "...nay đều đến hội họp tại cung Trời Đao Lợi như thế, ông có biết số bao nhiêu chăng?"
+[00:03:16] 如是今来集会到忉利天者。汝知数否。 | rú shì jīn lái jí huì dào dāo lì tiān zhě 。 rǔ zhī shù fǒu 。 | Như thị kim lai tập hội đáo Đao Lợi Thiên giả. Như tri số phủ. | "Who have now gathered here in the Trayastrimsa Heaven. Do you know their number?" | "...nay đều đến hội họp tại cung Trời Đao Lợi như thế, ông có biết số bao nhiêu chăng?"
 [00:03:20] 文殊师利白佛言。世尊。若以我神力千劫测度。不能得知。 | wén shū shī lì bái fó yán 。 shì zūn 。 ruò yǐ wǒ shén lì qiān jié cè dù 。 bù néng dé zhī 。 | Văn Thù Sư Lợi bạch Phật ngôn. Thế Tôn. Nhược dĩ ngã thần lực thiên kiếp trắc độ. Bất năng đắc tri. | Manjushri said to the Buddha, "World Honored One, even if I were to measure and calculate with my spiritual powers for a thousand aeons, I would not be able to know it." | Ngài Văn Thù Sư Lợi bạch Phật rằng: "Bạch Đức Thế Tôn! Nếu dùng thần lực của con để tính đếm trong nghìn kiếp cũng không biết là số bao nhiêu!"
 [00:03:27] 佛告文殊师利。吾以佛眼观故。犹不尽数。 | fó gào wén shū shī lì 。 wú yǐ fó yǎn guān gù 。 yóu bù jìn shù 。 | Phật cáo Văn Thù Sư Lợi. Ngô dĩ Phật nhãn quan cố. Do bất tận số. | The Buddha told Manjushri, "Even observing with my Buddha Eye, I cannot count them all." | Đức Phật bảo Ngài Văn Thù Sư Lợi rằng: "Đến Ta dùng Phật nhãn xem hãy còn không đếm xiết!"
 [00:03:32] 此皆是地藏菩萨久远劫来。已度。当度。未度。已成就。当成就。未成就。 | cǐ jiē shì dì zàng pú sà jiǔ yuǎn jié lái 。 yǐ dù 。 dāng dù 。 wèi dù 。 yǐ chéng jiù 。 dāng chéng jiù 。 wèi chéng jiù 。 | Thử giai thị Địa Tạng Bồ Tát cửu viễn kiếp lai. Dĩ độ. Đương độ. Vị độ. Dĩ thành tựu. Đương thành tựu. Vị thành tựu. | "These are all beings whom Earth Store Bodhisattva has crossed over, is crossing over, or will cross over; whom he has led to accomplishment, is leading to accomplishment, or will lead to accomplishment, throughout aeons long since past." | "Số Thánh, phàm này đều của Ngài Địa Tạng Bồ Tát từ thuở kiếp lâu xa đến nay, hoặc đã độ, đương độ, chưa độ, hoặc đã thành tựu, đương thành tựu, chưa thành tựu".
@@ -209,7 +233,7 @@
 [00:07:32] 愿佛慈愍。速说我母生界。我今身心将死不久。 | yuàn fó cí mǐn 。 sù shuō wǒ mǔ shēng jiè 。 wǒ jīn shēn xīn jiāng sǐ bù jiǔ 。 | Nguyện Phật từ mẫn. Tốc thuyết ngã mẫu sinh giới. Ngã kim thân tâm tương tử bất cửu. | "'I pray the Buddha will be compassionate and quickly tell me my mother's realm of rebirth. My own death is not far off.'" | "Cúi xin đức Phật xót thương bảo ngay cho rõ chỗ thác sanh của mẹ con, nay thân tâm của con sắp chết mất!"
 [00:07:38] 时觉华定自在王如来。告圣女曰。汝供养毕。但早返舍。 | shí jué huá dìng zì zài wáng rú lái 。 gào shèng nǚ yuē 。 rǔ gòng yàng bì 。 dàn zǎo fǎn shè 。 | Thời Giác Hoa Định Tự Tại Vương Như Lai. Cáo Thánh Nữ viết. Nhữ cúng dường tất. Đãn tảo phản xá. | "Flower of Enlightenment Samadhi Easeful King Tathagata told the Holy Woman, 'After you make your offering, return home early.'" | "Đức Giác Hoa Định Tự Tại Vương Như Lai bảo Thánh Nữ rằng: Cúng dường xong, ngươi mau mau trở về nhà..."
 [00:07:45] 端坐思维吾之名号。即当知母所生去处。 | duān zuò sī wéi wú zhī míng hào 。 jí dāng zhī mǔ suǒ shēng qù chù 。 | Đoan tọa tư duy ngô chi danh hiệu. Tức đương tri mẫu sở sinh khứ xứ. | "'Sit upright and contemplate my name. You will soon know where your mother has gone.'" | "...rồi ngồi ngay thẳng nghĩ tưởng danh hiệu của Ta, thời ngươi sẽ biết chỗ thác sanh của mẹ ngươi."
-[00:07:51] 时婆罗门女。寻礼佛已。即归其舍。以忆母故。端坐念。觉华定自在王如来。 | shí pó luó mén nǚ 。 xún lǐ fó yǐ 。 jí guī qí shè 。 yǐ yì mǔ gù 。 duān zuò niàn 。 jué huá dìng zì zài wáng rú lái 。 | Thời Bà La Môn Nữ. Tầm lễ Phật dĩ. Tức quy kỳ xá. Dĩ ức mẫu cố. Đoan tọa niệm. Giác Hoa Định Tự Tại Vương Như Lai. | "The Brahman woman bowed to the Buddha and returned home. Because she missed her mother, she sat upright and recited the name of Flower of Enlightenment Samadhi Easeful King Tathagata." | "Lễ Phật xong, Thánh Nữ liền trở về nhà. Vì thương nhớ mẹ, nên Thánh Nữ ngồi ngay thẳng niệm danh hiệu của Giác Hoa Định Tự Tại Vương Như Lai."
+[00:07:51] 时婆罗门女。寻礼佛已。即归其舍。以忆母故。端坐念。觉华定自在王如来。 | shí pó luó mén nǚ 。 xún lǐ fó yǐ 。 jí guī qí shè 。 yǐ yì mǔ gù 。 duān zuò niàn 。 jué huá dìng zì zài wáng rú lái 。 | Thời Bà La Môn Nữ. Tầm lễ Phật dĩ. Tức quy kỳ xá. Dĩ ức mẫu cố. Đoan tọa niệm. Giác Hoa Định Tự Tại Vương Như Lai. | "Lễ Phật xong, Thánh Nữ liền trở về nhà. Vì thương nhớ mẹ, nên Thánh Nữ ngồi ngay thẳng niệm danh hiệu của Giác Hoa Định Tự Tại Vương Như Lai."
 [00:07:59] 经一日一夜。忽见自身。到一海边。其水涌沸。多诸恶兽尽复铁身。飞走海上。东西驰逐。 | jīng yī rì yī yè 。 hū jiàn zì shēn 。 dào yī hǎi biān 。 qí shuǐ yǒng fèi 。 duō zhū è shòu jìn fù tiě shēn 。 fēi zǒu hǎi shàng 。 dōng xī chí zhú 。 | Kinh nhất nhật nhất dạ. Hốt kiến tự thân. Đáo nhất hải biên. Kỳ thủy dũng phế. Đa chư ác thú tận phục thiết thân. Phi tẩu hải thượng. Đông tây trì trục. | "After a day and a night, she suddenly saw herself by a sea. The water was boiling. Many evil beasts with iron bodies flew over the sea, rushing east and west." | "Trải suốt một ngày một đêm. Bỗng thấy thân mình đến một bờ biển kia. Nước trong biển đó sôi sùng sục, có rất nhiều thú dữ thân thể toàn bằng sắt bay nhảy trên mặt biển, chạy rảo bên này, xua đuổi bên kia."
 [00:08:08] 见诸男子女人。百千万数。出没海中。被诸恶兽。争取食啖。 | jiàn zhū nán zǐ nǚ rén 。 bǎi qiān wàn shù 。 chū mò hǎi zhōng 。 bèi zhū è shòu 。 zhēng qǔ shí dàn 。 | Kiến chư nam tử nữ nhân. Bách thiên vạn số. Xuất một hải trung. Bị chư ác thú. Tranh thủ thực đạm. | "She saw hundreds of thousands of millions of men and women rising and sinking in the water, being fought over and eaten by the evil beasts." | "Thấy những trai cùng gái số nhiều đến nghìn muôn thoạt chìm thoạt nổi ở trong biển, bị các thú dữ giành nhau ăn thịt."
 [00:08:14] 又见夜叉其形各异。或多手多眼。多足多头。口牙外出利刃如剑。驱诸罪人。 | yòu jiàn yè chā qí xíng gè yì 。 huò duō shǒu duō yǎn 。 duō zú duō tóu 。 kǒu yá wài chū lì rèn rú jiàn 。 qū zhū zuì rén 。 | Hựu kiến Dạ Xoa kỳ hình các dị. Hoặc đa thủ đa nhãn. Đa túc đa đầu. Khẩu nha ngoại xuất lợi nhận như kiếm. Khu chư tội nhân. | "She also saw Yakshas with different shapes - some with many hands and eyes, some with many feet and heads, and some with sharp teeth protruding like swords - herding the offenders." | "Lại thấy quỷ Dạ Xoa hình thù đều lạ lùng: hoặc nhiều tay, nhiều mắt, nhiều chân, nhiều đầu... răng nanh chia ra ngoài miệng bén nhọn dường gươm, lùa những người tội gần thú dữ."
@@ -248,14 +272,19 @@
         function loadVoices() { if ('speechSynthesis' in window) availableVoices = window.speechSynthesis.getVoices(); }
         if ('speechSynthesis' in window) { loadVoices(); window.speechSynthesis.onvoiceschanged = loadVoices; }
 
-        function speakText(text) {
+        function speakText(text, btnId) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
+                if(btnId) {
+                    document.querySelectorAll('.speaking-active').forEach(el => el.classList.remove('speaking-active'));
+                    const btn = document.getElementById(btnId); if(btn) btn.classList.add('speaking-active');
+                }
                 const utterance = new SpeechSynthesisUtterance(text);
                 if (availableVoices.length === 0) availableVoices = window.speechSynthesis.getVoices();
                 const zhVoice = availableVoices.find(v => v.lang === 'zh-CN') || availableVoices.find(v => v.lang.startsWith('zh'));
                 if (zhVoice) { utterance.voice = zhVoice; utterance.lang = zhVoice.lang; } else { utterance.lang = 'zh-CN'; }
                 utterance.rate = 0.8;
+                utterance.onend = function() { if(btnId) { const btn = document.getElementById(btnId); if(btn) btn.classList.remove('speaking-active'); } };
                 window.speechSynthesis.speak(utterance);
             }
         }
@@ -287,12 +316,20 @@
             document.getElementById('outTTTCount').textContent = outCount;
             document.getElementById('outTTTPerc').textContent = total ? Math.round((outCount/total)*100) + '%' : '0%';
             
+            // Comment logic
+            const commentEl = document.getElementById('analysisComment');
+            const perc = total ? Math.round((inCount/total)*100) : 0;
+            if (perc > 80) commentEl.textContent = `Văn bản sử dụng phần lớn là các chữ căn bản (${perc}%), dễ tiếp cận.`;
+            else if (perc > 50) commentEl.textContent = `Văn bản kết hợp cân bằng giữa từ căn bản và chuyên sâu (${perc}%).`;
+            else commentEl.textContent = `Văn bản chứa nhiều thuật ngữ chuyên môn, cần tra cứu kỹ (${perc}%).`;
+
             const ctx = document.getElementById('vocabChart').getContext('2d');
             if(vocabChartInstance) vocabChartInstance.destroy();
+            const isDark = getComputedStyle(document.body).backgroundColor === 'rgb(28, 25, 23)';
             vocabChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: { labels: ['Trong Tam Thiên Tự', 'Ngoài danh sách'], datasets: [{ data: [inCount, outCount], backgroundColor: ['#22c55e', '#f59e0b'], borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#e7e5e4' } } }, cutout: '70%' }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: isDark ? '#e7e5e4' : '#44403c' } } }, cutout: '70%' }
             });
         }
 
@@ -310,7 +347,7 @@
                 }
                 div.innerHTML = `
                     <div class="flex gap-4 items-start relative pr-8">
-                        <span class="text-xs font-mono text-amber-500 bg-amber-900/30 px-2 py-1 rounded h-fit shrink-0 mt-2">${item.timeFormatted}</span>
+                        <span class="text-xs font-mono text-amber-500 bg-amber-900/30 px-2 py-1 rounded h-fit shrink-0 mt-2 border border-amber-800/50">${item.timeFormatted}</span>
                         <div class="flex-1 space-y-1">
                             <div class="cn-text">${processedCn}</div>
                             <div class="pinyin-text">${item.pinyin}</div>
@@ -318,31 +355,47 @@
                             <div class="viet-trans-text">${item.vietTrans}</div>
                             <div class="en-text">${item.en}</div>
                         </div>
-                        <button onclick="event.stopPropagation(); speakText('${item.cn.replace(/'/g, "\\'")}')" class="absolute right-0 top-2 text-stone-600 hover:text-amber-500 p-2 rounded-full hover:bg-stone-700/50 audio-btn">🔊</button>
+                        <button id="audio-btn-${item.id}" onclick="event.stopPropagation(); speakText('${item.cn.replace(/'/g, "\\'")}', 'audio-btn-${item.id}')" class="absolute right-0 top-2 text-stone-600 hover:text-amber-500 p-2 rounded-full hover:bg-stone-700/50 audio-btn transition-all">🔊</button>
                     </div>`;
                 container.appendChild(div);
             });
             document.getElementById('visibleCount').textContent = `${items.length} câu`;
         }
 
-        function jumpToTime(s) { currentSimulationTime = s; updateTimeDisplay(s); highlightCurrentLine(); }
+        function jumpToTime(s) { currentSimulationTime = s; updateTimeDisplay(s); highlightCurrentLine(); scrollToActive(); }
         function updateTimeDisplay(s) { const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60; document.getElementById('currentTimeDisplay').textContent = `${h>0?h+':':''}${m<10?'0'+m:m}:${sec<10?'0'+sec:sec}`; }
+        
         function highlightCurrentLine() {
-            let active = null;
-            for(let i=transcripts.length-1; i>=0; i--) { if(transcripts[i].seconds <= currentSimulationTime) { active = transcripts[i]; break; } }
-            document.querySelectorAll('.active-line').forEach(el => el.classList.remove('active-line'));
-            if(active) {
-                const el = document.getElementById(`line-${active.id}`);
-                if(el) { 
+            let activeItem = null;
+            for(let i=transcripts.length-1; i>=0; i--) { if(transcripts[i].seconds <= currentSimulationTime) { activeItem = transcripts[i]; break; } }
+            
+            const currentActive = document.querySelector('.active-line');
+            const newActiveId = activeItem ? `line-${activeItem.id}` : null;
+            
+            if (currentActive && currentActive.id !== newActiveId) currentActive.classList.remove('active-line');
+            
+            if (activeItem && (!currentActive || currentActive.id !== newActiveId)) {
+                const el = document.getElementById(newActiveId);
+                if (el) {
                     el.classList.add('active-line');
-                    // TỰ ĐỘNG LĂN CHUỘT
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    
-                    if(isPlaying && document.getElementById('autoRead').checked) speakText(active.cn); 
+                    if(isPlaying && document.getElementById('autoRead').checked) speakText(activeItem.cn, `audio-btn-${activeItem.id}`);
                 }
             }
         }
         function scrollToActive() { const active = document.querySelector('.active-line'); if(active) active.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+
+        function togglePlay() {
+            const btnPlay = document.getElementById('btnPlay'), btnPause = document.getElementById('btnPause');
+            if (isPlaying) {
+                clearInterval(simulationInterval); window.speechSynthesis.cancel(); isPlaying = false;
+                btnPlay.classList.remove('hidden'); btnPause.classList.add('hidden');
+            } else {
+                isPlaying = true; btnPlay.classList.add('hidden'); btnPause.classList.remove('hidden');
+                highlightCurrentLine();
+                simulationInterval = setInterval(() => { currentSimulationTime++; updateTimeDisplay(currentSimulationTime); highlightCurrentLine(); }, 1000);
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             transcripts = parseSubtitles(rawSubtitleData);
@@ -359,20 +412,43 @@
                 renderList(transcripts.filter(t => t.searchText.includes(term)));
             });
 
-            document.getElementById('btnPlay').addEventListener('click', () => {
-                isPlaying = true; document.getElementById('btnPlay').classList.add('hidden'); document.getElementById('btnPause').classList.remove('hidden');
-                simulationInterval = setInterval(() => { currentSimulationTime++; updateTimeDisplay(currentSimulationTime); highlightCurrentLine(); }, 1000);
-            });
-            document.getElementById('btnPause').addEventListener('click', () => {
-                isPlaying = false; clearInterval(simulationInterval); window.speechSynthesis.cancel();
-                document.getElementById('btnPlay').classList.remove('hidden'); document.getElementById('btnPause').classList.add('hidden');
-            });
-            document.getElementById('btnReset').addEventListener('click', () => { if(isPlaying) document.getElementById('btnPause').click(); jumpToTime(0); });
+            document.getElementById('btnPlay').addEventListener('click', togglePlay);
+            document.getElementById('btnPause').addEventListener('click', togglePlay);
+            document.getElementById('btnReset').addEventListener('click', () => { if(isPlaying) togglePlay(); jumpToTime(0); });
             
-            document.getElementById('tttToggle').addEventListener('click', (e) => {
+            const tttBtn = document.getElementById('tttToggle');
+            tttBtn.addEventListener('click', () => {
                 analysisMode = !analysisMode;
-                e.target.classList.toggle('bg-green-900'); e.target.classList.toggle('text-white');
-                renderList(transcripts); highlightCurrentLine();
+                if(analysisMode) {
+                    tttBtn.classList.add('bg-green-900', 'border-green-700', 'ring-2', 'ring-green-500'); tttBtn.classList.remove('bg-stone-800');
+                    document.getElementById('analysisLegend').classList.remove('hidden');
+                } else {
+                    tttBtn.classList.remove('bg-green-900', 'border-green-700', 'ring-2', 'ring-green-500'); tttBtn.classList.add('bg-stone-800');
+                    document.getElementById('analysisLegend').classList.add('hidden');
+                }
+                const term = document.getElementById('searchInput').value.toLowerCase();
+                renderList(transcripts.filter(t => t.searchText.includes(term))); highlightCurrentLine();
+            });
+
+            const modeBtn = document.getElementById('modeToggle');
+            let isLightMode = false;
+            modeBtn.addEventListener('click', () => {
+                isLightMode = !isLightMode;
+                const body = document.body;
+                if(isLightMode) {
+                    body.style.backgroundColor = '#fdfbf7'; body.style.color = '#44403c';
+                    modeBtn.textContent = "🌙 Chế độ Tối"; modeBtn.classList.replace('text-stone-300', 'text-stone-700'); modeBtn.classList.add('bg-stone-100');
+                    document.querySelectorAll('.bg-stone-900').forEach(el => el.classList.replace('bg-stone-900', 'bg-white'));
+                    document.querySelectorAll('.bg-stone-800').forEach(el => el.classList.replace('bg-stone-800', 'bg-white'));
+                    document.querySelectorAll('.text-stone-200').forEach(el => el.classList.replace('text-stone-200', 'text-stone-800'));
+                    document.querySelectorAll('.text-stone-400').forEach(el => el.classList.replace('text-stone-400', 'text-stone-500'));
+                    document.querySelectorAll('.cn-text').forEach(el => el.style.color = '#292524');
+                    document.querySelectorAll('.viet-han-text').forEach(el => el.style.color = '#b45309');
+                    document.querySelectorAll('.viet-trans-text').forEach(el => el.style.color = '#15803d');
+                    document.querySelectorAll('.en-text').forEach(el => el.style.color = '#57534e');
+                } else {
+                    location.reload();
+                }
             });
         });
     </script>
