@@ -313,7 +313,7 @@
                     utterance.lang = 'zh-CN'; 
                 }
                 
-                utterance.rate = 0.8; 
+                utterance.rate = currentPlaybackRate; 
                 window.currentUtterance = utterance;
 
                 utterance.onend = function() {
