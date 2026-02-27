@@ -38,11 +38,12 @@
         .transcript-item { border-left: 4px solid transparent; border-bottom: 1px solid #44403c; transition: all 0.2s ease; position: relative; }
         .transcript-item:hover { background-color: #292524; border-left-color: #57534e; }
         
-        .cn-text { font-family: "Noto Serif SC", serif; font-size: 1.6em; color: #e7e5e4; font-weight: 500; line-height: 1.4; margin-bottom: 0.2rem; }
-        .pinyin-text { color: #a8a29e; font-size: 0.85em; font-style: italic; margin-bottom: 0.35rem; }
-        .viet-han-text { color: #fbbf24; font-size: 1.05em; font-weight: 700; font-family: 'Noto Serif', serif; margin-bottom: 0.2rem; }
-        .viet-trans-text { color: #86efac; font-size: 1.05em; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 500; margin-bottom: 0.2rem; line-height: 1.6; }
-        .en-text { color: #78716c; font-size: 0.9em; font-style: italic; opacity: 0.8; }
+        /* Cập nhật các class text để dùng đơn vị em giúp việc zoom dễ dàng hơn */
+        .cn-text { font-family: "Noto Serif SC", serif; font-size: 1.6em; color: #e7e5e4; font-weight: 500; line-height: 1.4; margin-bottom: 0.2rem; transition: font-size 0.2s ease; }
+        .pinyin-text { color: #a8a29e; font-size: 0.85em; font-style: italic; margin-bottom: 0.35rem; transition: font-size 0.2s ease; }
+        .viet-han-text { color: #fbbf24; font-size: 1.05em; font-weight: 700; font-family: 'Noto Serif', serif; margin-bottom: 0.2rem; transition: font-size 0.2s ease; }
+        .viet-trans-text { color: #86efac; font-size: 1.05em; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 500; margin-bottom: 0.2rem; line-height: 1.6; transition: font-size 0.2s ease; }
+        .en-text { color: #78716c; font-size: 0.9em; font-style: italic; opacity: 0.8; transition: font-size 0.2s ease; }
         
         .char-basic { color: #14532d; background-color: #86efac; border-radius: 2px; padding: 0 2px; font-weight: bold; }
         .char-advanced { color: #f59e0b; border-bottom: 1px dotted #f59e0b; }
@@ -51,6 +52,9 @@
         @keyframes pulse-ring { 0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); } 100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
         .speaking-active .audio-btn { color: #fbbf24; animation: pulse-ring 2s infinite; }
         ::placeholder { color: #78716c; }
+        
+        /* Container bọc kinh văn để quản lý base font-size */
+        #transcriptContainer { font-size: 16px; transition: font-size 0.2s ease; }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col">
@@ -59,25 +63,30 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <a href="index.html" class="flex items-center gap-3 group decoration-0" title="Quay về Mục Lục">
-                    <div class="w-9 h-9 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold serif shadow-sm shadow-amber-900 group-hover:bg-amber-600 transition-colors">
+                    <div class="w-9 h-9 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold serif shadow-sm shadow-amber-900 group-hover:bg-amber-600 transition-colors shrink-0">
                         <span class="block group-hover:hidden">Đ</span>
                         <span class="hidden group-hover:block">⬅</span>
                     </div>
-                    <div>
+                    <div class="hidden sm:block">
                         <h1 class="text-lg md:text-xl font-bold text-stone-200 tracking-wide serif leading-tight group-hover:text-amber-500 transition-colors">Kinh Địa Tạng</h1>
-                        <p class="text-xs text-stone-500 font-medium">Phẩm 1: Thần Thông Trên Cung Trời Đao Lợi</p>
+                        <p class="text-xs text-stone-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px] md:max-w-none">Phẩm 1: Thần Thông Trên Cung Trời Đao Lợi</p>
                     </div>
                 </a>
             </div>
             
             <nav class="hidden md:flex gap-6 text-sm font-medium text-stone-400">
-                <a href="index.html" class="hover:text-amber-500 transition-colors">⬅ Mục Lục</a>
                 <a href="#dashboard" class="hover:text-amber-500 transition-colors">Tổng Quan</a>
                 <a href="#transcript" class="hover:text-amber-500 transition-colors">Nội Dung</a>
             </nav>
-            <div class="flex gap-2">
-                <button id="tttToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-green-400 rounded-md text-sm font-medium transition-colors border border-stone-700">🌿 Soi Tam Thiên Tự</button>
-                <button id="modeToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-md text-sm font-medium transition-colors border border-stone-700">☀️ Chế độ Sáng</button>
+            
+            <div class="flex items-center gap-2">
+                <div class="flex bg-stone-800 rounded-md border border-stone-700 overflow-hidden mr-1 md:mr-2 shadow-sm">
+                    <button id="btnZoomOut" class="px-2.5 py-1.5 hover:bg-stone-700 text-stone-300 transition-colors border-r border-stone-700 font-bold" title="Thu nhỏ chữ (A-)">A-</button>
+                    <button id="btnZoomIn" class="px-2.5 py-1.5 hover:bg-stone-700 text-stone-300 transition-colors font-bold text-lg leading-none" title="Phóng to chữ (A+)">A+</button>
+                </div>
+                
+                <button id="tttToggle" class="hidden sm:block px-3 py-2 bg-stone-800 hover:bg-stone-700 text-green-400 rounded-md text-sm font-medium transition-colors border border-stone-700 whitespace-nowrap" title="Tô màu chữ Tam Thiên Tự">🌿 Tam Thiên Tự</button>
+                <button id="modeToggle" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-md text-sm font-medium transition-colors border border-stone-700 whitespace-nowrap" title="Chuyển chế độ Sáng/Tối">☀️ Sáng</button>
             </div>
         </div>
     </header>
@@ -98,8 +107,8 @@
                 <div class="col-span-1 h-64 chart-container flex items-center justify-center"><canvas id="vocabChart"></canvas></div>
                 <div class="col-span-2 space-y-6">
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="p-4 bg-green-900/20 rounded-lg border border-green-800/50"><div class="text-sm text-green-400 font-medium">Trong Tam Thiên Tự</div><div class="text-3xl font-bold text-green-500" id="inTTTCount">0</div><div class="text-xs text-green-400/70 mt-1" id="inTTTPerc">0%</div></div>
-                        <div class="p-4 bg-amber-900/20 rounded-lg border border-amber-800/50"><div class="text-sm text-amber-400 font-medium">Ngoài danh sách</div><div class="text-3xl font-bold text-amber-500" id="outTTTCount">0</div><div class="text-xs text-amber-400/70 mt-1" id="outTTTPerc">0%</div></div>
+                        <div class="p-4 bg-green-900/20 rounded-lg border border-green-800/50"><div class="text-sm text-green-400 font-medium mb-1">Trong Tam Thiên Tự</div><div class="text-3xl font-bold text-green-500" id="inTTTCount">0</div><div class="text-xs text-green-400/70 mt-1" id="inTTTPerc">0%</div></div>
+                        <div class="p-4 bg-amber-900/20 rounded-lg border border-amber-800/50"><div class="text-sm text-amber-400 font-medium mb-1">Ngoài danh sách</div><div class="text-3xl font-bold text-amber-500" id="outTTTCount">0</div><div class="text-xs text-amber-400/70 mt-1" id="outTTTPerc">0%</div></div>
                     </div>
                     <div class="bg-stone-900/50 p-4 rounded-lg text-sm text-stone-400 border border-stone-700"><p id="analysisComment">Đang phân tích...</p></div>
                 </div>
@@ -107,51 +116,63 @@
         </section>
 
         <section id="transcript" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div class="lg:col-span-4 bg-stone-800 p-6 rounded-xl shadow-lg border border-stone-700 sticky top-24">
-                <h3 class="text-lg font-bold text-stone-200 mb-4 serif border-b pb-2 border-stone-700">Điều Khiển</h3>
+            <div class="lg:col-span-4 bg-stone-800 p-6 rounded-xl shadow-lg border border-stone-700 lg:sticky lg:top-24">
+                <h3 class="text-lg font-bold text-stone-200 mb-4 serif border-b pb-2 border-stone-700">Điều Khiển Đọc Tụng</h3>
                 <div class="space-y-6">
                     <div class="p-4 bg-amber-900/20 rounded-lg border border-amber-800/30">
                         <div class="flex gap-2">
-                            <button id="btnPlay" class="flex-1 bg-amber-700 hover:bg-amber-600 text-white py-2.5 px-4 rounded shadow-sm text-sm font-medium">▶ Bắt đầu</button>
-                            <button id="btnPause" class="flex-1 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-amber-400 py-2.5 px-4 rounded hidden">⏸ Tạm dừng</button>
-                            <button id="btnReset" class="px-3 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-stone-300 rounded">↺</button>
+                            <button id="btnPlay" class="flex-1 bg-amber-700 hover:bg-amber-600 text-white py-2.5 px-4 rounded shadow-sm text-sm font-medium transition-colors flex justify-center items-center gap-2"><span>▶</span> Bắt đầu</button>
+                            <button id="btnPause" class="flex-1 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-amber-400 py-2.5 px-4 rounded shadow-sm text-sm font-medium transition-colors hidden justify-center items-center gap-2"><span>⏸</span> Tạm dừng</button>
+                            <button id="btnReset" class="px-3 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-stone-300 rounded transition-colors" title="Quay lại từ đầu">↺</button>
                         </div>
-                        <div class="flex justify-between items-center mt-3 px-1"><span class="text-xs text-amber-500 font-mono" id="currentTimeDisplay">00:00</span> <span class="text-xs text-amber-500/50">Tự động cuộn</span></div>
-                        <div class="mt-3 flex items-center gap-2">
-                            <input type="checkbox" id="autoRead" class="rounded border-stone-600 bg-stone-900 text-amber-600">
-                            <label for="autoRead" class="text-xs text-stone-400 select-none cursor-pointer">Tự động đọc Pinyin</label>
+                        <div class="flex justify-between items-center mt-3 px-1"><span class="text-xs text-amber-500 font-mono font-bold" id="currentTimeDisplay">00:00</span> <span class="text-xs text-amber-500/60 font-medium">Tự động cuộn theo câu</span></div>
+                        <div class="mt-3 flex items-center gap-2 pt-2 border-t border-amber-800/30">
+                            <input type="checkbox" id="autoRead" class="w-4 h-4 rounded border-stone-600 bg-stone-900 text-amber-600 focus:ring-amber-500">
+                            <label for="autoRead" class="text-sm text-stone-300 select-none cursor-pointer">Tự động đọc Pinyin khi chạy</label>
                         </div>
                     </div>
+                    
                     <div>
                         <label class="block text-xs font-semibold uppercase text-stone-500 mb-1.5">Tìm kiếm</label>
-                        <input type="text" id="searchInput" placeholder="Tìm kiếm..." class="w-full px-3 py-2 bg-stone-900 border border-stone-700 text-stone-300 rounded-lg text-sm focus:ring-amber-500">
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="Gõ từ khóa..." class="w-full pl-9 pr-3 py-2 bg-stone-900 border border-stone-700 text-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-stone-600 transition-shadow">
+                            <span class="absolute left-3 top-2.5 text-stone-500">🔍</span>
+                        </div>
                     </div>
+                    
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-stone-500 mb-1.5">Chuyển nhanh</label>
-                        <select id="jumpSelect" class="w-full px-3 py-2 border border-stone-700 rounded-lg bg-stone-900 text-stone-300 text-sm focus:ring-amber-500"><option value="0">00:00 - Khởi đầu</option></select>
+                        <label class="block text-xs font-semibold uppercase text-stone-500 mb-1.5">Chuyển nhanh thời gian</label>
+                        <select id="jumpSelect" class="w-full px-3 py-2 border border-stone-700 rounded-lg bg-stone-900 text-stone-300 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 cursor-pointer transition-shadow"><option value="0">00:00 - Khởi đầu</option></select>
                     </div>
+                    
                     <div id="analysisLegend" class="hidden p-4 bg-stone-900/50 rounded-lg border border-stone-700">
-                        <p class="text-xs font-bold text-stone-500 uppercase mb-2">Chú giải</p>
-                        <div class="flex flex-col gap-2 text-sm">
-                            <div class="flex items-center gap-2"><span class="px-1 bg-green-300 text-green-900 rounded font-bold font-serif">天</span> <span class="text-stone-400">Có trong Tam Thiên Tự</span></div>
-                            <div class="flex items-center gap-2"><span class="px-1 text-amber-500 font-serif border-b border-dotted border-amber-500">忉</span> <span class="text-stone-400">Ngoài danh sách</span></div>
+                        <p class="text-xs font-bold text-stone-500 uppercase mb-3">Chú giải Tam Thiên Tự</p>
+                        <div class="flex flex-col gap-3 text-sm">
+                            <div class="flex items-center gap-3"><span class="px-2 py-0.5 bg-green-300 text-green-900 rounded font-bold font-serif text-lg">天</span> <span class="text-stone-300">Từ vựng thông dụng<br/><span class="text-xs text-stone-500">(Có trong danh sách 3000 chữ)</span></span></div>
+                            <div class="flex items-center gap-3"><span class="px-2 py-0.5 text-amber-500 font-serif border-b-2 border-dotted border-amber-500 text-lg font-bold">忉</span> <span class="text-stone-300">Từ vựng chuyên sâu/hiếm<br/><span class="text-xs text-stone-500">(Ngoài danh sách)</span></span></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="lg:col-span-8">
-                <div class="bg-stone-800 rounded-xl shadow-lg border border-stone-700 overflow-hidden flex flex-col h-[700px]">
-                    <div class="p-4 border-b border-stone-700 bg-stone-800/80 sticky top-0 z-10 flex justify-between items-center backdrop-blur-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold text-stone-300 serif">Nội Dung</span>
-                            <span class="px-2 py-0.5 text-xs bg-stone-700 text-stone-300 rounded">Hán</span>
-                            <span class="px-2 py-0.5 text-xs bg-green-900/40 text-green-400 rounded">Việt</span>
+                <div class="bg-stone-800 rounded-xl shadow-lg border border-stone-700 overflow-hidden flex flex-col h-[65vh] md:h-[750px]">
+                    <div class="p-3 md:p-4 border-b border-stone-700 bg-stone-800/90 sticky top-0 z-10 flex flex-wrap gap-2 justify-between items-center backdrop-blur-sm">
+                        <div class="flex items-center gap-1.5 md:gap-2">
+                            <span class="font-bold text-stone-300 serif hidden sm:inline mr-2">Nội Dung:</span>
+                            <span class="px-2 py-0.5 text-[10px] md:text-xs bg-stone-700 text-stone-300 rounded border border-stone-600 font-medium">Hán</span>
+                            <span class="px-2 py-0.5 text-[10px] md:text-xs bg-amber-900/40 text-amber-400 rounded border border-amber-800/50 font-medium">Âm</span>
+                            <span class="px-2 py-0.5 text-[10px] md:text-xs bg-green-900/40 text-green-400 rounded border border-green-800/50 font-medium">Việt Hán</span>
+                            <span class="px-2 py-0.5 text-[10px] md:text-xs bg-emerald-900/30 text-emerald-400 rounded border border-emerald-800/50 font-medium hidden md:inline">Việt Dịch</span>
                         </div>
-                        <span class="text-xs text-stone-400 bg-stone-700 px-2.5 py-1 rounded-full" id="visibleCount">0 câu</span>
+                        <span class="text-[11px] md:text-xs text-stone-400 bg-stone-700 px-2.5 py-1 rounded-full font-medium shadow-inner" id="visibleCount">0 câu</span>
                     </div>
-                    <div id="transcriptContainer" class="flex-1 overflow-y-auto custom-scroll p-2 space-y-1 relative scroll-smooth bg-stone-900">
-                        <div class="flex flex-col items-center justify-center h-full text-stone-600">Đang tải dữ liệu...</div>
+                    
+                    <div id="transcriptContainer" class="flex-1 overflow-y-auto custom-scroll p-2 space-y-1 relative scroll-smooth bg-stone-900/80 pb-32">
+                        <div class="flex flex-col items-center justify-center h-full text-stone-500 gap-3">
+                            <svg class="animate-spin h-8 w-8 text-amber-600/50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span class="font-medium animate-pulse">Đang nạp kinh văn...</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -160,8 +181,9 @@
 
     <footer class="bg-stone-950 text-stone-500 py-10 mt-12 border-t border-stone-800">
         <div class="container mx-auto px-4 text-center">
-            <div class="serif text-xl text-stone-400 mb-3">Nam Mô Đại Nguyện Địa Tạng Vương Bồ Tát</div>
-            <p class="text-xs opacity-40">Phân tích dựa trên danh sách Tam Thiên Tự</p>
+            <div class="serif text-xl md:text-2xl text-stone-400 mb-3 font-semibold">Nam Mô Đại Nguyện Địa Tạng Vương Bồ Tát</div>
+            <p class="text-sm opacity-60">Dữ liệu được biên soạn và tối ưu hiển thị đa ngôn ngữ</p>
+            <p class="text-xs opacity-40 mt-1">Tính năng phân tích chữ Hán dựa trên danh sách Tam Thiên Tự căn bản</p>
         </div>
     </footer>
 
@@ -233,7 +255,7 @@
 [00:07:32] 愿佛慈愍。速说我母生界。我今身心将死不久。 | yuàn fó cí mǐn 。 sù shuō wǒ mǔ shēng jiè 。 wǒ jīn shēn xīn jiāng sǐ bù jiǔ 。 | Nguyện Phật từ mẫn. Tốc thuyết ngã mẫu sinh giới. Ngã kim thân tâm tương tử bất cửu. | "'I pray the Buddha will be compassionate and quickly tell me my mother's realm of rebirth. My own death is not far off.'" | "Cúi xin đức Phật xót thương bảo ngay cho rõ chỗ thác sanh của mẹ con, nay thân tâm của con sắp chết mất!"
 [00:07:38] 时觉华定自在王如来。告圣女曰。汝供养毕。但早返舍。 | shí jué huá dìng zì zài wáng rú lái 。 gào shèng nǚ yuē 。 rǔ gòng yàng bì 。 dàn zǎo fǎn shè 。 | Thời Giác Hoa Định Tự Tại Vương Như Lai. Cáo Thánh Nữ viết. Nhữ cúng dường tất. Đãn tảo phản xá. | "Flower of Enlightenment Samadhi Easeful King Tathagata told the Holy Woman, 'After you make your offering, return home early.'" | "Đức Giác Hoa Định Tự Tại Vương Như Lai bảo Thánh Nữ rằng: Cúng dường xong, ngươi mau mau trở về nhà..."
 [00:07:45] 端坐思维吾之名号。即当知母所生去处。 | duān zuò sī wéi wú zhī míng hào 。 jí dāng zhī mǔ suǒ shēng qù chù 。 | Đoan tọa tư duy ngô chi danh hiệu. Tức đương tri mẫu sở sinh khứ xứ. | "'Sit upright and contemplate my name. You will soon know where your mother has gone.'" | "...rồi ngồi ngay thẳng nghĩ tưởng danh hiệu của Ta, thời ngươi sẽ biết chỗ thác sanh của mẹ ngươi."
-[00:07:51] 时婆罗门女。寻礼佛已。即归其舍。以忆母故。端坐念。觉华定自在王如来。 | shí pó luó mén nǚ 。 xún lǐ fó yǐ 。 jí guī qí shè 。 yǐ yì mǔ gù 。 duān zuò niàn 。 jué huá dìng zì zài wáng rú lái 。 | Thời Bà La Môn Nữ. Tầm lễ Phật dĩ. Tức quy kỳ xá. Dĩ ức mẫu cố. Đoan tọa niệm. Giác Hoa Định Tự Tại Vương Như Lai. | "Lễ Phật xong, Thánh Nữ liền trở về nhà. Vì thương nhớ mẹ, nên Thánh Nữ ngồi ngay thẳng niệm danh hiệu của Giác Hoa Định Tự Tại Vương Như Lai."
+[00:07:51] 时婆罗门女。寻礼佛已。即归其舍。以忆母故。端坐念。觉华定自在王如来。 | shí pó luó mén nǚ 。 xún lǐ fó yǐ 。 jí guī qí shè 。 yǐ yì mǔ gù 。 duān zuò niàn 。 jué huá dìng zì zài wáng rú lái 。 | Thời Bà La Môn Nữ. Tầm lễ Phật dĩ. Tức quy kỳ xá. Dĩ ức mẫu cố. Đoan tọa niệm. Giác Hoa Định Tự Tại Vương Như Lai. | "The Brahman woman bowed to the Buddha and returned home. Because she missed her mother, she sat upright and recited the name of Flower of Enlightenment Samadhi Easeful King Tathagata." | "Lễ Phật xong, Thánh Nữ liền trở về nhà. Vì thương nhớ mẹ, nên Thánh Nữ ngồi ngay thẳng niệm danh hiệu của Giác Hoa Định Tự Tại Vương Như Lai."
 [00:07:59] 经一日一夜。忽见自身。到一海边。其水涌沸。多诸恶兽尽复铁身。飞走海上。东西驰逐。 | jīng yī rì yī yè 。 hū jiàn zì shēn 。 dào yī hǎi biān 。 qí shuǐ yǒng fèi 。 duō zhū è shòu jìn fù tiě shēn 。 fēi zǒu hǎi shàng 。 dōng xī chí zhú 。 | Kinh nhất nhật nhất dạ. Hốt kiến tự thân. Đáo nhất hải biên. Kỳ thủy dũng phế. Đa chư ác thú tận phục thiết thân. Phi tẩu hải thượng. Đông tây trì trục. | "After a day and a night, she suddenly saw herself by a sea. The water was boiling. Many evil beasts with iron bodies flew over the sea, rushing east and west." | "Trải suốt một ngày một đêm. Bỗng thấy thân mình đến một bờ biển kia. Nước trong biển đó sôi sùng sục, có rất nhiều thú dữ thân thể toàn bằng sắt bay nhảy trên mặt biển, chạy rảo bên này, xua đuổi bên kia."
 [00:08:08] 见诸男子女人。百千万数。出没海中。被诸恶兽。争取食啖。 | jiàn zhū nán zǐ nǚ rén 。 bǎi qiān wàn shù 。 chū mò hǎi zhōng 。 bèi zhū è shòu 。 zhēng qǔ shí dàn 。 | Kiến chư nam tử nữ nhân. Bách thiên vạn số. Xuất một hải trung. Bị chư ác thú. Tranh thủ thực đạm. | "She saw hundreds of thousands of millions of men and women rising and sinking in the water, being fought over and eaten by the evil beasts." | "Thấy những trai cùng gái số nhiều đến nghìn muôn thoạt chìm thoạt nổi ở trong biển, bị các thú dữ giành nhau ăn thịt."
 [00:08:14] 又见夜叉其形各异。或多手多眼。多足多头。口牙外出利刃如剑。驱诸罪人。 | yòu jiàn yè chā qí xíng gè yì 。 huò duō shǒu duō yǎn 。 duō zú duō tóu 。 kǒu yá wài chū lì rèn rú jiàn 。 qū zhū zuì rén 。 | Hựu kiến Dạ Xoa kỳ hình các dị. Hoặc đa thủ đa nhãn. Đa túc đa đầu. Khẩu nha ngoại xuất lợi nhận như kiếm. Khu chư tội nhân. | "She also saw Yakshas with different shapes - some with many hands and eyes, some with many feet and heads, and some with sharp teeth protruding like swords - herding the offenders." | "Lại thấy quỷ Dạ Xoa hình thù đều lạ lùng: hoặc nhiều tay, nhiều mắt, nhiều chân, nhiều đầu... răng nanh chia ra ngoài miệng bén nhọn dường gươm, lùa những người tội gần thú dữ."
@@ -268,6 +290,8 @@
         const tamThienTuSet = new Set(tamThienTuStr);
         let transcripts = [], simulationInterval = null, isPlaying = false, currentSimulationTime = 0, analysisMode = false, vocabChartInstance = null;
         let availableVoices = [];
+        // Biến lưu kích thước font hiện tại
+        let currentFontSize = 16; 
 
         function loadVoices() { if ('speechSynthesis' in window) availableVoices = window.speechSynthesis.getVoices(); }
         if ('speechSynthesis' in window) { loadVoices(); window.speechSynthesis.onvoiceschanged = loadVoices; }
@@ -289,15 +313,16 @@
             }
         }
 
+        // --- HÀM PHÂN TÍCH DATA ĐÃ FIX LỖI ---
         function parseSubtitles(raw) {
             return raw.trim().split('\n').map((line, index) => {
                 const match = line.match(/\[(\d{2}):(\d{2}):(\d{2})\]\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*)/);
                 if (match) {
                     return {
-                        id: index, timeFormatted: `${match[1]}:${match[2]}:${match[3]}`,
+                        id: index, timeFormatted: `${parseInt(match[1])>0 ? match[1]+':' : ''}${match[2]}:${match[3]}`,
                         seconds: parseInt(match[1])*3600 + parseInt(match[2])*60 + parseInt(match[3]),
                         cn: match[4].trim(), pinyin: match[5].trim(), vietHan: match[6].trim(), en: match[7].trim(), vietTrans: match[8].trim(),
-                        searchText: (match[4]+match[5]+match[6]+match[7]+match[8]).toLowerCase()
+                        searchText: (match[4]+' '+match[5]+' '+match[6]+' '+match[7]+' '+match[8]).toLowerCase()
                     };
                 }
                 return null;
@@ -316,12 +341,11 @@
             document.getElementById('outTTTCount').textContent = outCount;
             document.getElementById('outTTTPerc').textContent = total ? Math.round((outCount/total)*100) + '%' : '0%';
             
-            // Comment logic
             const commentEl = document.getElementById('analysisComment');
             const perc = total ? Math.round((inCount/total)*100) : 0;
-            if (perc > 80) commentEl.textContent = `Văn bản sử dụng phần lớn là các chữ căn bản (${perc}%), dễ tiếp cận.`;
-            else if (perc > 50) commentEl.textContent = `Văn bản kết hợp cân bằng giữa từ căn bản và chuyên sâu (${perc}%).`;
-            else commentEl.textContent = `Văn bản chứa nhiều thuật ngữ chuyên môn, cần tra cứu kỹ (${perc}%).`;
+            if (perc > 80) commentEl.textContent = `Văn bản sử dụng phần lớn là các chữ căn bản (${perc}%), rất phù hợp để luyện đọc.`;
+            else if (perc > 50) commentEl.textContent = `Văn bản kết hợp cân bằng giữa từ căn bản và thuật ngữ Phật giáo (${perc}%).`;
+            else commentEl.textContent = `Văn bản chứa nhiều thuật ngữ chuyên môn hoặc chữ hiếm gặp (${perc}%).`;
 
             const ctx = document.getElementById('vocabChart').getContext('2d');
             if(vocabChartInstance) vocabChartInstance.destroy();
@@ -336,26 +360,39 @@
         function renderList(items) {
             const container = document.getElementById('transcriptContainer');
             container.innerHTML = '';
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-stone-500 gap-2 mt-10"><span class="text-3xl">🔍</span><span>Không tìm thấy nội dung phù hợp.</span></div>';
+                document.getElementById('visibleCount').textContent = '0 câu';
+                return;
+            }
+
             items.forEach(item => {
                 const div = document.createElement('div');
                 div.id = `line-${item.id}`;
-                div.className = 'transcript-item p-4 rounded-lg cursor-pointer mb-2';
+                div.className = 'transcript-item p-3 md:p-4 rounded-lg cursor-pointer mb-2';
                 div.onclick = () => jumpToTime(item.seconds);
+                
                 let processedCn = item.cn;
                 if (analysisMode) {
-                    processedCn = item.cn.split('').map(char => /[\u4e00-\u9fa5]/.test(char) ? (tamThienTuSet.has(char) ? `<span class="char-basic">${char}</span>` : `<span class="char-advanced">${char}</span>`) : char).join('');
+                    processedCn = item.cn.split('').map(char => /[\u4e00-\u9fa5]/.test(char) ? (tamThienTuSet.has(char) ? `<span class="char-basic" title="Có trong Tam Thiên Tự">${char}</span>` : `<span class="char-advanced" title="Ngoài danh sách">${char}</span>`) : char).join('');
                 }
+                
                 div.innerHTML = `
-                    <div class="flex gap-4 items-start relative pr-8">
-                        <span class="text-xs font-mono text-amber-500 bg-amber-900/30 px-2 py-1 rounded h-fit shrink-0 mt-2 border border-amber-800/50">${item.timeFormatted}</span>
-                        <div class="flex-1 space-y-1">
+                    <div class="flex flex-col md:flex-row gap-2 md:gap-4 items-start relative pr-8">
+                        <span class="text-[10px] md:text-xs font-mono text-amber-500 bg-amber-900/30 px-2 py-1 rounded h-fit shrink-0 mt-1 md:mt-2 border border-amber-800/50">${item.timeFormatted}</span>
+                        <div class="flex-1 space-y-1 w-full">
                             <div class="cn-text">${processedCn}</div>
                             <div class="pinyin-text">${item.pinyin}</div>
                             <div class="viet-han-text">${item.vietHan}</div>
-                            <div class="viet-trans-text">${item.vietTrans}</div>
-                            <div class="en-text">${item.en}</div>
+                            <div class="viet-trans-text hidden md:block">${item.vietTrans}</div>
+                            <div class="en-text hidden md:block">${item.en}</div>
+                            
+                            <div class="md:hidden mt-2 pt-2 border-t border-stone-700/50">
+                                <p class="text-[0.9em] text-emerald-400 font-medium mb-1"><span class="text-stone-500 mr-1">Dịch:</span> ${item.vietTrans}</p>
+                            </div>
                         </div>
-                        <button id="audio-btn-${item.id}" onclick="event.stopPropagation(); speakText('${item.cn.replace(/'/g, "\\'")}', 'audio-btn-${item.id}')" class="absolute right-0 top-2 text-stone-600 hover:text-amber-500 p-2 rounded-full hover:bg-stone-700/50 audio-btn transition-all">🔊</button>
+                        <button id="audio-btn-${item.id}" onclick="event.stopPropagation(); speakText('${item.cn.replace(/'/g, "\\'")}', 'audio-btn-${item.id}')" class="absolute right-0 top-1 text-stone-500 hover:text-amber-500 p-2 rounded-full hover:bg-stone-700/50 audio-btn transition-all" title="Nghe đọc Pinyin">🔊</button>
                     </div>`;
                 container.appendChild(div);
             });
@@ -378,38 +415,63 @@
                 const el = document.getElementById(newActiveId);
                 if (el) {
                     el.classList.add('active-line');
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Logic cuộn mượt mà
+                    const container = document.getElementById('transcriptContainer');
+                    const offsetTop = el.offsetTop;
+                    const elHeight = el.offsetHeight;
+                    const containerHeight = container.offsetHeight;
+                    container.scrollTo({ top: offsetTop - (containerHeight / 2) + (elHeight / 2), behavior: 'smooth' });
+                    
+                    // Logic tự đọc
                     if(isPlaying && document.getElementById('autoRead').checked) speakText(activeItem.cn, `audio-btn-${activeItem.id}`);
                 }
             }
         }
-        function scrollToActive() { const active = document.querySelector('.active-line'); if(active) active.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        function scrollToActive() { highlightCurrentLine(); }
 
         function togglePlay() {
             const btnPlay = document.getElementById('btnPlay'), btnPause = document.getElementById('btnPause');
             if (isPlaying) {
                 clearInterval(simulationInterval); window.speechSynthesis.cancel(); isPlaying = false;
-                btnPlay.classList.remove('hidden'); btnPause.classList.add('hidden');
+                btnPlay.classList.remove('hidden'); btnPlay.classList.add('flex');
+                btnPause.classList.add('hidden'); btnPause.classList.remove('flex');
             } else {
-                isPlaying = true; btnPlay.classList.add('hidden'); btnPause.classList.remove('hidden');
+                isPlaying = true; 
+                btnPlay.classList.add('hidden'); btnPlay.classList.remove('flex');
+                btnPause.classList.remove('hidden'); btnPause.classList.add('flex');
                 highlightCurrentLine();
                 simulationInterval = setInterval(() => { currentSimulationTime++; updateTimeDisplay(currentSimulationTime); highlightCurrentLine(); }, 1000);
             }
+        }
+        
+        // --- HÀM ZOOM CHỮ ---
+        function changeFontSize(step) {
+            currentFontSize += step;
+            // Giới hạn kích thước từ 12px đến 32px
+            if (currentFontSize < 12) currentFontSize = 12;
+            if (currentFontSize > 32) currentFontSize = 32;
+            document.getElementById('transcriptContainer').style.fontSize = currentFontSize + 'px';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             transcripts = parseSubtitles(rawSubtitleData);
             analyzeVocabulary(transcripts);
             renderList(transcripts);
+            
+            // Khởi tạo Zoom
+            document.getElementById('btnZoomIn').addEventListener('click', () => changeFontSize(2));
+            document.getElementById('btnZoomOut').addEventListener('click', () => changeFontSize(-2));
+
             const select = document.getElementById('jumpSelect');
             for(let i=1; i<=Math.ceil(transcripts[transcripts.length-1].seconds/60); i++) {
-                const opt = document.createElement('option'); opt.value = i*60; opt.textContent = `${i}:00`; select.appendChild(opt);
+                const opt = document.createElement('option'); opt.value = i*60; opt.textContent = `${i < 10 ? '0'+i : i}:00`; select.appendChild(opt);
             }
             select.addEventListener('change', e => jumpToTime(parseInt(e.target.value)));
             
             document.getElementById('searchInput').addEventListener('input', e => {
                 const term = e.target.value.toLowerCase();
-                renderList(transcripts.filter(t => t.searchText.includes(term)));
+                renderList(transcripts.filter(t => t.searchText.includes(term) || t.timeFormatted.includes(term)));
             });
 
             document.getElementById('btnPlay').addEventListener('click', togglePlay);
@@ -420,10 +482,10 @@
             tttBtn.addEventListener('click', () => {
                 analysisMode = !analysisMode;
                 if(analysisMode) {
-                    tttBtn.classList.add('bg-green-900', 'border-green-700', 'ring-2', 'ring-green-500'); tttBtn.classList.remove('bg-stone-800');
+                    tttBtn.classList.add('bg-green-900', 'border-green-700', 'ring-2', 'ring-green-500', 'text-white'); tttBtn.classList.remove('bg-stone-800', 'text-green-400');
                     document.getElementById('analysisLegend').classList.remove('hidden');
                 } else {
-                    tttBtn.classList.remove('bg-green-900', 'border-green-700', 'ring-2', 'ring-green-500'); tttBtn.classList.add('bg-stone-800');
+                    tttBtn.classList.remove('bg-green-900', 'border-green-700', 'ring-2', 'ring-green-500', 'text-white'); tttBtn.classList.add('bg-stone-800', 'text-green-400');
                     document.getElementById('analysisLegend').classList.add('hidden');
                 }
                 const term = document.getElementById('searchInput').value.toLowerCase();
@@ -437,15 +499,16 @@
                 const body = document.body;
                 if(isLightMode) {
                     body.style.backgroundColor = '#fdfbf7'; body.style.color = '#44403c';
-                    modeBtn.textContent = "🌙 Chế độ Tối"; modeBtn.classList.replace('text-stone-300', 'text-stone-700'); modeBtn.classList.add('bg-stone-100');
-                    document.querySelectorAll('.bg-stone-900').forEach(el => el.classList.replace('bg-stone-900', 'bg-white'));
-                    document.querySelectorAll('.bg-stone-800').forEach(el => el.classList.replace('bg-stone-800', 'bg-white'));
+                    modeBtn.textContent = "🌙 Tối"; modeBtn.classList.replace('text-stone-300', 'text-stone-700'); modeBtn.classList.add('bg-stone-100');
+                    document.querySelectorAll('.bg-stone-900, .bg-stone-950').forEach(el => el.classList.replace(el.classList.contains('bg-stone-900') ? 'bg-stone-900' : 'bg-stone-950', 'bg-white'));
+                    document.querySelectorAll('.bg-stone-800').forEach(el => el.classList.replace('bg-stone-800', 'bg-stone-50'));
                     document.querySelectorAll('.text-stone-200').forEach(el => el.classList.replace('text-stone-200', 'text-stone-800'));
                     document.querySelectorAll('.text-stone-400').forEach(el => el.classList.replace('text-stone-400', 'text-stone-500'));
                     document.querySelectorAll('.cn-text').forEach(el => el.style.color = '#292524');
                     document.querySelectorAll('.viet-han-text').forEach(el => el.style.color = '#b45309');
                     document.querySelectorAll('.viet-trans-text').forEach(el => el.style.color = '#15803d');
                     document.querySelectorAll('.en-text').forEach(el => el.style.color = '#57534e');
+                    document.querySelectorAll('.border-stone-700').forEach(el => el.classList.replace('border-stone-700', 'border-stone-200'));
                 } else {
                     location.reload();
                 }
