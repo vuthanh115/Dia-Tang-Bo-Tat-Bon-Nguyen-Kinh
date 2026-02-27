@@ -38,7 +38,6 @@
         .transcript-item { border-left: 4px solid transparent; border-bottom: 1px solid #44403c; transition: all 0.2s ease; position: relative; }
         .transcript-item:hover { background-color: #292524; border-left-color: #57534e; }
         
-        /* Cập nhật các class text để dùng đơn vị em giúp việc zoom dễ dàng hơn */
         .cn-text { font-family: "Noto Serif SC", serif; font-size: 1.6em; color: #e7e5e4; font-weight: 500; line-height: 1.4; margin-bottom: 0.2rem; transition: font-size 0.2s ease; }
         .pinyin-text { color: #a8a29e; font-size: 0.85em; font-style: italic; margin-bottom: 0.35rem; transition: font-size 0.2s ease; }
         .viet-han-text { color: #fbbf24; font-size: 1.05em; font-weight: 700; font-family: 'Noto Serif', serif; margin-bottom: 0.2rem; transition: font-size 0.2s ease; }
@@ -53,8 +52,14 @@
         .speaking-active .audio-btn { color: #fbbf24; animation: pulse-ring 2s infinite; }
         ::placeholder { color: #78716c; }
         
-        /* Container bọc kinh văn để quản lý base font-size */
         #transcriptContainer { font-size: 16px; transition: font-size 0.2s ease; }
+
+        /* Các class ẩn ngôn ngữ */
+        .hide-cn .cn-text { display: none !important; }
+        .hide-pinyin .pinyin-text { display: none !important; }
+        .hide-viethan .viet-han-text { display: none !important; }
+        .hide-viet .viet-trans-text, .hide-viet .viet-trans-mobile { display: none !important; }
+        .hide-en .en-text { display: none !important; }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col">
@@ -133,6 +138,27 @@
                     </div>
                     
                     <div>
+                        <label class="block text-xs font-semibold uppercase text-stone-500 mb-2">Hiển thị ngôn ngữ</label>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="flex items-center gap-1.5 text-sm text-stone-300 bg-stone-900 px-2 py-1.5 rounded border border-stone-700 cursor-pointer hover:bg-stone-800 transition-colors">
+                                <input type="checkbox" id="toggle-cn" checked class="rounded border-stone-600 text-amber-600 bg-stone-800"> Hán
+                            </label>
+                            <label class="flex items-center gap-1.5 text-sm text-stone-300 bg-stone-900 px-2 py-1.5 rounded border border-stone-700 cursor-pointer hover:bg-stone-800 transition-colors">
+                                <input type="checkbox" id="toggle-pinyin" checked class="rounded border-stone-600 text-amber-600 bg-stone-800"> Pinyin
+                            </label>
+                            <label class="flex items-center gap-1.5 text-sm text-stone-300 bg-stone-900 px-2 py-1.5 rounded border border-stone-700 cursor-pointer hover:bg-stone-800 transition-colors">
+                                <input type="checkbox" id="toggle-viethan" checked class="rounded border-stone-600 text-amber-600 bg-stone-800"> Hán Việt
+                            </label>
+                            <label class="flex items-center gap-1.5 text-sm text-stone-300 bg-stone-900 px-2 py-1.5 rounded border border-stone-700 cursor-pointer hover:bg-stone-800 transition-colors">
+                                <input type="checkbox" id="toggle-viet" checked class="rounded border-stone-600 text-amber-600 bg-stone-800"> Việt Dịch
+                            </label>
+                            <label class="flex items-center gap-1.5 text-sm text-stone-300 bg-stone-900 px-2 py-1.5 rounded border border-stone-700 cursor-pointer hover:bg-stone-800 transition-colors">
+                                <input type="checkbox" id="toggle-en" checked class="rounded border-stone-600 text-amber-600 bg-stone-800"> Anh
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
                         <label class="block text-xs font-semibold uppercase text-stone-500 mb-1.5">Tìm kiếm</label>
                         <div class="relative">
                             <input type="text" id="searchInput" placeholder="Gõ từ khóa..." class="w-full pl-9 pr-3 py-2 bg-stone-900 border border-stone-700 text-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-stone-600 transition-shadow">
@@ -159,11 +185,7 @@
                 <div class="bg-stone-800 rounded-xl shadow-lg border border-stone-700 overflow-hidden flex flex-col h-[65vh] md:h-[750px]">
                     <div class="p-3 md:p-4 border-b border-stone-700 bg-stone-800/90 sticky top-0 z-10 flex flex-wrap gap-2 justify-between items-center backdrop-blur-sm">
                         <div class="flex items-center gap-1.5 md:gap-2">
-                            <span class="font-bold text-stone-300 serif hidden sm:inline mr-2">Nội Dung:</span>
-                            <span class="px-2 py-0.5 text-[10px] md:text-xs bg-stone-700 text-stone-300 rounded border border-stone-600 font-medium">Hán</span>
-                            <span class="px-2 py-0.5 text-[10px] md:text-xs bg-amber-900/40 text-amber-400 rounded border border-amber-800/50 font-medium">Âm</span>
-                            <span class="px-2 py-0.5 text-[10px] md:text-xs bg-green-900/40 text-green-400 rounded border border-green-800/50 font-medium">Việt Hán</span>
-                            <span class="px-2 py-0.5 text-[10px] md:text-xs bg-emerald-900/30 text-emerald-400 rounded border border-emerald-800/50 font-medium hidden md:inline">Việt Dịch</span>
+                            <span class="font-bold text-stone-300 serif hidden sm:inline mr-2">Nội Dung Kinh Văn</span>
                         </div>
                         <span class="text-[11px] md:text-xs text-stone-400 bg-stone-700 px-2.5 py-1 rounded-full font-medium shadow-inner" id="visibleCount">0 câu</span>
                     </div>
@@ -188,7 +210,6 @@
     </footer>
 
     <script>
-        // Dữ liệu Phẩm 1
         const rawSubtitleData = `
 [00:00:00] 地藏菩萨本愿经 | dì zàng pú sà běn yuàn jīng | Địa Tạng Bồ Tát Bổn Nguyện Kinh | Sutra of the Past Vows of Earth Store Bodhisattva | Kinh Địa Tạng Bồ Tát Bổn Nguyện.
 [00:00:07] 忉利天宫神通品第一 | dāo lì tiān gōng shén tōng pǐn dì yī | Đao Lợi Thiên Cung Thần Thông phẩm đệ nhất | Chapter 1: Spiritual Penetrations in the Palace of the Trayastrimsa Heaven | Phẩm thứ nhất: Thần thông trên cung trời Đao Lợi.
@@ -290,7 +311,6 @@
         const tamThienTuSet = new Set(tamThienTuStr);
         let transcripts = [], simulationInterval = null, isPlaying = false, currentSimulationTime = 0, analysisMode = false, vocabChartInstance = null;
         let availableVoices = [];
-        // Biến lưu kích thước font hiện tại
         let currentFontSize = 16; 
 
         function loadVoices() { if ('speechSynthesis' in window) availableVoices = window.speechSynthesis.getVoices(); }
@@ -313,7 +333,6 @@
             }
         }
 
-        // --- HÀM PHÂN TÍCH DATA ĐÃ FIX LỖI ---
         function parseSubtitles(raw) {
             return raw.trim().split('\n').map((line, index) => {
                 const match = line.match(/\[(\d{2}):(\d{2}):(\d{2})\]\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*)/);
@@ -388,7 +407,7 @@
                             <div class="viet-trans-text hidden md:block">${item.vietTrans}</div>
                             <div class="en-text hidden md:block">${item.en}</div>
                             
-                            <div class="md:hidden mt-2 pt-2 border-t border-stone-700/50">
+                            <div class="md:hidden mt-2 pt-2 border-t border-stone-700/50 viet-trans-mobile">
                                 <p class="text-[0.9em] text-emerald-400 font-medium mb-1"><span class="text-stone-500 mr-1">Dịch:</span> ${item.vietTrans}</p>
                             </div>
                         </div>
@@ -416,14 +435,12 @@
                 if (el) {
                     el.classList.add('active-line');
                     
-                    // Logic cuộn mượt mà
                     const container = document.getElementById('transcriptContainer');
                     const offsetTop = el.offsetTop;
                     const elHeight = el.offsetHeight;
                     const containerHeight = container.offsetHeight;
                     container.scrollTo({ top: offsetTop - (containerHeight / 2) + (elHeight / 2), behavior: 'smooth' });
                     
-                    // Logic tự đọc
                     if(isPlaying && document.getElementById('autoRead').checked) speakText(activeItem.cn, `audio-btn-${activeItem.id}`);
                 }
             }
@@ -445,10 +462,8 @@
             }
         }
         
-        // --- HÀM ZOOM CHỮ ---
         function changeFontSize(step) {
             currentFontSize += step;
-            // Giới hạn kích thước từ 12px đến 32px
             if (currentFontSize < 12) currentFontSize = 12;
             if (currentFontSize > 32) currentFontSize = 32;
             document.getElementById('transcriptContainer').style.fontSize = currentFontSize + 'px';
@@ -459,7 +474,6 @@
             analyzeVocabulary(transcripts);
             renderList(transcripts);
             
-            // Khởi tạo Zoom
             document.getElementById('btnZoomIn').addEventListener('click', () => changeFontSize(2));
             document.getElementById('btnZoomOut').addEventListener('click', () => changeFontSize(-2));
 
@@ -478,6 +492,30 @@
             document.getElementById('btnPause').addEventListener('click', togglePlay);
             document.getElementById('btnReset').addEventListener('click', () => { if(isPlaying) togglePlay(); jumpToTime(0); });
             
+            // Xử lý bật tắt hiển thị ngôn ngữ
+            const toggles = [
+                { id: 'toggle-cn', class: 'hide-cn' },
+                { id: 'toggle-pinyin', class: 'hide-pinyin' },
+                { id: 'toggle-viethan', class: 'hide-viethan' },
+                { id: 'toggle-viet', class: 'hide-viet' },
+                { id: 'toggle-en', class: 'hide-en' }
+            ];
+            toggles.forEach(t => {
+                document.getElementById(t.id).addEventListener('change', (e) => {
+                    if (e.target.checked) document.body.classList.remove(t.class);
+                    else document.body.classList.add(t.class);
+                    
+                    // Cập nhật lại UI checkbox khi bật chế độ sáng (nếu đang ở chế độ sáng)
+                    if(document.body.style.backgroundColor === 'rgb(253, 251, 247)') {
+                        if(e.target.checked) {
+                            e.target.parentElement.classList.replace('bg-stone-200', 'bg-stone-300');
+                        } else {
+                            e.target.parentElement.classList.replace('bg-stone-300', 'bg-stone-200');
+                        }
+                    }
+                });
+            });
+
             const tttBtn = document.getElementById('tttToggle');
             tttBtn.addEventListener('click', () => {
                 analysisMode = !analysisMode;
@@ -502,15 +540,25 @@
                     modeBtn.textContent = "🌙 Tối"; modeBtn.classList.replace('text-stone-300', 'text-stone-700'); modeBtn.classList.add('bg-stone-100');
                     document.querySelectorAll('.bg-stone-900, .bg-stone-950').forEach(el => el.classList.replace(el.classList.contains('bg-stone-900') ? 'bg-stone-900' : 'bg-stone-950', 'bg-white'));
                     document.querySelectorAll('.bg-stone-800').forEach(el => el.classList.replace('bg-stone-800', 'bg-stone-50'));
-                    document.querySelectorAll('.text-stone-200').forEach(el => el.classList.replace('text-stone-200', 'text-stone-800'));
+                    document.querySelectorAll('.text-stone-200, .text-stone-300').forEach(el => {
+                        el.classList.remove('text-stone-200', 'text-stone-300');
+                        el.classList.add('text-stone-800');
+                    });
                     document.querySelectorAll('.text-stone-400').forEach(el => el.classList.replace('text-stone-400', 'text-stone-500'));
+                    
+                    // Xử lý background của các nhãn checkbox khi ở chế độ sáng
+                    document.querySelectorAll('label.bg-stone-900').forEach(el => {
+                        el.classList.replace('bg-stone-900', 'bg-stone-300');
+                        el.classList.replace('border-stone-700', 'border-stone-400');
+                    });
+
                     document.querySelectorAll('.cn-text').forEach(el => el.style.color = '#292524');
                     document.querySelectorAll('.viet-han-text').forEach(el => el.style.color = '#b45309');
                     document.querySelectorAll('.viet-trans-text').forEach(el => el.style.color = '#15803d');
                     document.querySelectorAll('.en-text').forEach(el => el.style.color = '#57534e');
                     document.querySelectorAll('.border-stone-700').forEach(el => el.classList.replace('border-stone-700', 'border-stone-200'));
                 } else {
-                    location.reload();
+                    location.reload(); // Cách nhanh nhất để reset lại Dark mode
                 }
             });
         });
