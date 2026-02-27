@@ -129,7 +129,21 @@
                             <button id="btnReset" class="px-3 bg-stone-700 border border-stone-600 hover:bg-stone-600 text-stone-300 rounded shadow-sm transition-colors" title="Quay lại từ đầu">↺</button>
                         </div>
                         <div class="flex justify-between items-center mt-3 px-1"><span class="text-xs text-amber-500 font-mono font-bold" id="currentTimeDisplay">00:00</span><span class="text-xs text-amber-500/60 font-medium">Tự động cuộn theo câu</span></div>
-                        <div class="mt-3 flex items-center gap-2 pt-2 border-t border-amber-800/30"><input type="checkbox" id="autoRead" class="w-4 h-4 rounded border-stone-600 text-amber-600 focus:ring-amber-500 bg-stone-900"><label for="autoRead" class="text-sm text-stone-300 cursor-pointer select-none">Tự động đọc Pinyin khi chạy</label></div>
+                        <div class="mt-3 flex flex-col gap-3 pt-3 border-t border-amber-800/30">
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm text-stone-300 font-medium">Tốc độ đọc:</label>
+                                <select id="speedSelect" class="rounded border-stone-600 bg-stone-900 text-amber-500 text-sm py-1 px-2 focus:ring-amber-500 outline-none">
+                                    <option value="0.5">0.5x (Rất chậm)</option>
+                                    <option value="0.8" selected>0.8x (Bình thường)</option>
+                                    <option value="1.0">1.0x (Nhanh)</option>
+                                    <option value="1.2">1.2x (Rất nhanh)</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="autoRead" class="w-4 h-4 rounded border-stone-600 text-amber-600 focus:ring-amber-500 bg-stone-900">
+                                <label for="autoRead" class="text-sm text-stone-300 cursor-pointer select-none">Tự động đọc Pinyin khi chạy</label>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
@@ -634,6 +648,23 @@
                 if(isPlaying) togglePlay();
                 jumpToTime(0);
             });
+            
+            if (document.getElementById('speedSelect')) {
+                document.getElementById('speedSelect').addEventListener('change', (e) => {
+                    const speed = parseFloat(e.target.value);
+                    currentPlaybackRate = speed;
+                    simulationSpeed = speed / 0.8;
+                    
+                    if (isPlaying) {
+                        clearInterval(simulationInterval);
+                        simulationInterval = setInterval(() => { 
+                            currentSimulationTime++; 
+                            updateTimeDisplay(currentSimulationTime); 
+                            highlightCurrentLine(); 
+                        }, 1000 / simulationSpeed);
+                    }
+                });
+            }
 
             // Ngôn ngữ toggles
             const toggles = [

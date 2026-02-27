@@ -906,6 +906,23 @@
                 if(isPlaying) togglePlay();
                 jumpToTime(0);
             });
+            
+            if (document.getElementById('speedSelect')) {
+                document.getElementById('speedSelect').addEventListener('change', (e) => {
+                    const speed = parseFloat(e.target.value);
+                    currentPlaybackRate = speed;
+                    simulationSpeed = speed / 0.8;
+                    
+                    if (isPlaying) {
+                        clearInterval(simulationInterval);
+                        simulationInterval = setInterval(() => { 
+                            currentSimulationTime++; 
+                            updateTimeDisplay(currentSimulationTime); 
+                            highlightCurrentLine(); 
+                        }, 1000 / simulationSpeed);
+                    }
+                });
+            }
 
             // Ngôn ngữ toggles
             const toggles = [
